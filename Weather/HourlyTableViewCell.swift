@@ -1,8 +1,9 @@
-//
-//  HourlyTableViewCell.swift
-//  Weather
-//
-//  Created by Konstantin Tarasov on 07.10.2023.
-//
 
-import Foundation
+
+import UIKit
+
+final class HourlyTableViewCell: UITableViewCell {
+    
+    static let id = "HourlyTableViewCell"
+    
+}
