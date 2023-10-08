@@ -23,7 +23,7 @@ final class DailyTableViewCell: UITableViewCell {
         let leftStackView = UIStackView()
         leftStackView.translatesAutoresizingMaskIntoConstraints = false
         leftStackView.axis = .vertical
-        leftStackView.spacing = 1
+        leftStackView.spacing = 0
         leftStackView.alignment = .center
         leftStackView.distribution = .fillEqually
         leftStackView.addArrangedSubview(dateLabel)
@@ -53,6 +53,7 @@ final class DailyTableViewCell: UITableViewCell {
     private lazy var precipitationIcon: UIImageView = {
         let precipitationIcon = UIImageView(image: UIImage(systemName: "cloud.rain"))
         precipitationIcon.translatesAutoresizingMaskIntoConstraints = false
+        precipitationIcon.contentMode = .scaleAspectFit
         return precipitationIcon
     }()
     
@@ -60,7 +61,7 @@ final class DailyTableViewCell: UITableViewCell {
         let precipitationAmountLabel = UILabel()
         precipitationAmountLabel.translatesAutoresizingMaskIntoConstraints = false
         precipitationAmountLabel.font = .systemFont(ofSize: 12, weight: .regular)
-        precipitationAmountLabel.textColor = .white
+        precipitationAmountLabel.textColor = .black
         precipitationAmountLabel.text = "50%"
         return precipitationAmountLabel
     }()
@@ -106,7 +107,7 @@ final class DailyTableViewCell: UITableViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 8, left: 5, bottom: 8, right: 0))
+        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0))
     }
     
     required init?(coder: NSCoder) {
@@ -130,13 +131,13 @@ final class DailyTableViewCell: UITableViewCell {
             
             leftStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
             leftStackView.widthAnchor.constraint(equalToConstant: 55),
-            leftStackView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            leftStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            leftStackView.topAnchor.constraint(equalTo: infoView.topAnchor, constant: 5),
+            leftStackView.bottomAnchor.constraint(equalTo: infoView.bottomAnchor, constant: -5),
             
             rightStackView.leadingAnchor.constraint(equalTo: leftStackView.trailingAnchor, constant: 5),
             rightStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30),
-            rightStackView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            rightStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            rightStackView.topAnchor.constraint(equalTo: infoView.topAnchor),
+            rightStackView.bottomAnchor.constraint(equalTo: infoView.bottomAnchor),
         ])
     }
     

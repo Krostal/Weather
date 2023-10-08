@@ -32,7 +32,7 @@ final class HeaderForHourlyCell: UIView {
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             hourlyForecastButton.trailingAnchor.constraint(equalTo: trailingAnchor),
-            hourlyForecastButton.topAnchor.constraint(equalTo: topAnchor, constant: 28),
+            hourlyForecastButton.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             hourlyForecastButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
         ])
     }

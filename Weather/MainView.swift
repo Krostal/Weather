@@ -4,6 +4,8 @@ import UIKit
 final class MainView: UIView {
     
     private enum Constants {
+        static let heightHeaderOfCurrentCellSection: CGFloat = 212
+        static let heightHeaderOfDailyCellSection: CGFloat = 56
         static let spacing: CGFloat = 16
     }
     
@@ -94,6 +96,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             dailyCell.accessoryType = .disclosureIndicator
+
             return dailyCell
         }
         
@@ -101,9 +104,9 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.section == 0 {
-            return 212
+            return Constants.heightHeaderOfCurrentCellSection
         } else if indexPath.section == 2 {
-            return 60 + Constants.spacing
+            return Constants.heightHeaderOfDailyCellSection + Constants.spacing
         }
         return UITableView.automaticDimension
     }

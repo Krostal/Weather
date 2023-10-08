@@ -34,8 +34,6 @@ final class HeaderForDailyCell: UIView {
         return titleLabel
     }()
     
-    
-    
     init() {
         super.init(frame: .zero)
         setupView()
@@ -54,7 +52,7 @@ final class HeaderForDailyCell: UIView {
         NSLayoutConstraint.activate([
             headerStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             headerStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            headerStackView.topAnchor.constraint(equalTo: topAnchor, constant: 28),
+            headerStackView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             headerStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
         ])
     }
