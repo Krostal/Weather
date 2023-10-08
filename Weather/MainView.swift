@@ -10,6 +10,8 @@ final class MainView: UIView {
     lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.showsVerticalScrollIndicator = false
+        tableView.separatorStyle = .none
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(CurrentTableViewCell.self, forCellReuseIdentifier: CurrentTableViewCell.id)
@@ -71,7 +73,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
         if section == 0 {
             return 1
         } else if section == 1 {
-            return 5
+            return 1
         } else {
             return 5
         }
@@ -107,6 +109,14 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             return 212
         }
         return UITableView.automaticDimension
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        if section == 1 {
+            return HeaderForHourlyCell()
+        }
+        
+        return nil
     }
     
 }
