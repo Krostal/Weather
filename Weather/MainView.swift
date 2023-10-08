@@ -8,10 +8,9 @@ final class MainView: UIView {
     }
     
     lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .plain)
+        let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.showsVerticalScrollIndicator = false
-        tableView.separatorStyle = .none
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(CurrentTableViewCell.self, forCellReuseIdentifier: CurrentTableViewCell.id)
@@ -43,12 +42,8 @@ final class MainView: UIView {
     
     private func setupTableView() {
         tableView.backgroundColor = .clear
-        tableView.separatorInset = UIEdgeInsets(
-            top: Constants.spacing,
-            left: Constants.spacing,
-            bottom: Constants.spacing,
-            right: Constants.spacing
-        )
+        tableView.separatorStyle = .none
+        tableView.sectionHeaderTopPadding = 0
     }
     
     private func setupLayout() {
@@ -75,7 +70,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
         } else if section == 1 {
             return 1
         } else {
-            return 5
+            return 7
         }
     }
     
@@ -98,7 +93,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let dailyCell = tableView.dequeueReusableCell(withIdentifier: DailyTableViewCell.id, for: indexPath) as? DailyTableViewCell else {
                 return UITableViewCell()
             }
-           
+            dailyCell.accessoryType = .disclosureIndicator
             return dailyCell
         }
         
@@ -107,6 +102,8 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.section == 0 {
             return 212
+        } else if indexPath.section == 2 {
+            return 60 + Constants.spacing
         }
         return UITableView.automaticDimension
     }
@@ -114,9 +111,19 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if section == 1 {
             return HeaderForHourlyCell()
+        } else if section == 2 {
+            return HeaderForDailyCell()
         }
-        
         return nil
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        if section == 1 {
+            return HeaderForHourlyCell().intrinsicContentSize.height
+        } else if section == 2 {
+            return HeaderForDailyCell().intrinsicContentSize.height
+        }
+        return 0
     }
     
 }

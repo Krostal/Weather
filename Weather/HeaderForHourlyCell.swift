@@ -3,20 +3,22 @@ import UIKit
 
 final class HeaderForHourlyCell: UIView {
     
-    private lazy var hourlyForecastLabel: UILabel = {
-        let hourlyForecastLabel = UILabel()
-        hourlyForecastLabel.text = "Подробнее на 24 часа"
-        hourlyForecastLabel.textColor = .blue
-        hourlyForecastLabel.font = .systemFont(ofSize: 16, weight: .regular)
-        hourlyForecastLabel.translatesAutoresizingMaskIntoConstraints = false
-        return hourlyForecastLabel
+    private lazy var hourlyForecastButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Подробнее на 24 часа", for: .normal)
+        button.setTitleColor(.blue, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(hourlyForecastButtonTapped), for: .touchUpInside)
+        return button
     }()
+    
+    
     
     init() {
         super.init(frame: .zero)
         setupView()
         setupConstraints()
-        addTarget()
     }
     
     required init?(coder: NSCoder) {
@@ -24,24 +26,18 @@ final class HeaderForHourlyCell: UIView {
     }
     
     private func setupView() {
-        addSubview(hourlyForecastLabel)
+        addSubview(hourlyForecastButton)
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            hourlyForecastLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            hourlyForecastLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            hourlyForecastLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
+            hourlyForecastButton.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hourlyForecastButton.topAnchor.constraint(equalTo: topAnchor, constant: 28),
+            hourlyForecastButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
         ])
     }
         
-    private func addTarget() {
-        let gesture = UITapGestureRecognizer(target: self, action: #selector(tapOnLabel))
-        hourlyForecastLabel.isUserInteractionEnabled = true
-        hourlyForecastLabel.addGestureRecognizer(gesture)
-    }
-        
-    @objc private func tapOnLabel() {
+    @objc private func hourlyForecastButtonTapped() {
         print("Лейбл был нажат")
     }
     
