@@ -1,7 +1,13 @@
 
 import UIKit
 
+protocol HeaderForHourlyCellDelegate: AnyObject {
+    func buttonTapped()
+}
+
 final class HeaderForHourlyCell: UIView {
+    
+    weak var delegate: HeaderForHourlyCellDelegate?
     
     private lazy var hourlyForecastButton: UIButton = {
         let button = UIButton(type: .system)
@@ -38,7 +44,7 @@ final class HeaderForHourlyCell: UIView {
     }
         
     @objc private func hourlyForecastButtonTapped() {
-        print("Лейбл был нажат")
+        delegate?.buttonTapped()
     }
     
 }
