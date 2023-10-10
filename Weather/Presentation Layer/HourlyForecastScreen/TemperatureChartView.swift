@@ -10,14 +10,14 @@ final class TemperatureChartView: UIView {
     }
     
     let tempData: [ChartDataEntry] = [
-        ChartDataEntry(x: 0, y: 10),
-        ChartDataEntry(x: 3, y: 13),
+        ChartDataEntry(x: 0, y: 20),
+        ChartDataEntry(x: 3, y: 18),
         ChartDataEntry(x: 6, y: 14),
         ChartDataEntry(x: 9, y: 11),
-        ChartDataEntry(x: 12, y: 11),
-        ChartDataEntry(x: 15, y: 14),
-        ChartDataEntry(x: 18, y: 13),
-        ChartDataEntry(x: 21, y: 10)
+        ChartDataEntry(x: 12, y: 15),
+        ChartDataEntry(x: 15, y: 16),
+        ChartDataEntry(x: 18, y: 17),
+        ChartDataEntry(x: 21, y: 18)
     ]
     
     let emptyData: [ChartDataEntry] = [
@@ -124,16 +124,19 @@ final class TemperatureChartView: UIView {
     private func setupChartView() {
         
         let dataSet = LineChartDataSet(entries: tempData, label: "")
-        dataSet.circleRadius = 2
-        dataSet.setCircleColors(.white)
-        dataSet.mode = .cubicBezier
-        dataSet.setColor(.blue)
-        dataSet.fillColor = .blue
-        dataSet.fillAlpha = 0.5
-        dataSet.drawFilledEnabled = true
         
+        dataSet.circleRadius = 2
         dataSet.drawVerticalHighlightIndicatorEnabled = false
         dataSet.drawHorizontalHighlightIndicatorEnabled = false
+        dataSet.mode = .cubicBezier
+        
+        let gradientColors = [UIColor.blue.cgColor, UIColor.clear.cgColor] as CFArray
+        let colorLocations:[CGFloat] = [1.0, 0.0]
+        guard let gradient = CGGradient.init(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: gradientColors, locations: colorLocations) else { return }
+        dataSet.fill = LinearGradientFill(gradient: gradient, angle: 90)
+        dataSet.drawFilledEnabled = true
+        dataSet.setCircleColors(.white)
+        dataSet.setColor(.blue)
         
         let data = LineChartData(dataSet: dataSet)
         data.setValueFormatter(self)
