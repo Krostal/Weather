@@ -3,9 +3,12 @@
 import UIKit
 
 final class HourlyForecastView: UIView {
+    
+    var headerTitle: String?
         
     private enum Constants {
         static let spacing: CGFloat = 0
+        static let separatorInsets: CGFloat = 16
     }
     
     lazy var tableView: UITableView = {
@@ -41,7 +44,14 @@ final class HourlyForecastView: UIView {
     
     private func setupTableView() {
         tableView.backgroundColor = .clear
-        tableView.sectionHeaderTopPadding = 0
+        tableView.sectionFooterHeight = 0
+        tableView.separatorColor = .black
+        tableView.separatorInset = UIEdgeInsets(
+            top: 0,
+            left: Constants.separatorInsets,
+            bottom: 0,
+            right: Constants.separatorInsets
+        )
     }
     
     private func setupLayout() {
@@ -92,6 +102,14 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == 0 {
+            return headerTitle
+        } else {
+            return nil
+        }
     }
     
 }

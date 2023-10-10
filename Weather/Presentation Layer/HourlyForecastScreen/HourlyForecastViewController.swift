@@ -15,9 +15,8 @@ final class HourlyForecastViewController: UIViewController {
     }
     
     private func setupView() {
-
         view = hourlyForecastView
-        
+        hourlyForecastView.headerTitle = headerTitle
     }
     
     private func setupNavigationBar() {
