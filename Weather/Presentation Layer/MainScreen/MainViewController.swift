@@ -49,10 +49,17 @@ final class MainViewController: UIViewController {
 }
 
 extension MainViewController: MainViewDelegate {
+
     func showHourlyForecast() {
         let hourlyForecastViewController = HourlyForecastViewController()
         hourlyForecastViewController.headerTitle = navigationItem.title
         navigationController?.pushViewController(hourlyForecastViewController, animated: true)
-       
+    }
+    
+    func showDailyForecast(forDate date: String) {
+        let dailyForecastViewController = DailyForecastViewController()
+        dailyForecastViewController.navigationItem.title = "Погода \(date)"
+        dailyForecastViewController.headerTitle = navigationItem.title
+        navigationController?.pushViewController(dailyForecastViewController, animated: true)
     }
 }

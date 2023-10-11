@@ -31,7 +31,7 @@ final class DailyTableViewCell: UITableViewCell {
         return leftStackView
     }()
     
-    private lazy var dateLabel: UILabel = {
+    private(set) lazy var dateLabel: UILabel = {
         let dateLabel = UILabel()
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         dateLabel.font = .systemFont(ofSize: 16, weight: .regular)

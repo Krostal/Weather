@@ -3,11 +3,14 @@ import UIKit
 
 protocol MainViewDelegate: AnyObject {
     func showHourlyForecast()
+    func showDailyForecast(forDate date: String)
 }
 
 final class MainView: UIView {
     
     weak var delegate: MainViewDelegate?
+    
+    private var selectedDate: String?
     
     private enum Constants {
         static let heightHeaderOfCurrentCellSection: CGFloat = 212
@@ -62,7 +65,10 @@ final class MainView: UIView {
             tableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: Constants.spacing),
             tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -Constants.spacing)
         ])
-        
+    }
+    
+    @objc private func dailyCellTapped() {
+        delegate?.showDailyForecast(forDate: selectedDate ?? "???")
     }
 }
 
@@ -102,6 +108,17 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             dailyCell.accessoryType = .disclosureIndicator
+            
+            let doubleTapGesture = UITapGestureRecognizer(target: self, action: #selector(dailyCellTapped))
+            doubleTapGesture.numberOfTapsRequired = 2
+            dailyCell.isUserInteractionEnabled = true
+            dailyCell.addGestureRecognizer(doubleTapGesture)
+            
+            if let dateLabel = dailyCell.dateLabel.text {
+                selectedDate = dateLabel
+            } else {
+                selectedDate = nil
+            }
 
             return dailyCell
         }
