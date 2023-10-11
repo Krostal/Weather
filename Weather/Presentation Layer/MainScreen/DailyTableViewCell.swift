@@ -31,7 +31,7 @@ final class DailyTableViewCell: UITableViewCell {
         return leftStackView
     }()
     
-    private lazy var dateLabel: UILabel = {
+    private(set) lazy var dateLabel: UILabel = {
         let dateLabel = UILabel()
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         dateLabel.font = .systemFont(ofSize: 16, weight: .regular)
@@ -140,13 +140,5 @@ final class DailyTableViewCell: UITableViewCell {
             rightStackView.bottomAnchor.constraint(equalTo: infoView.bottomAnchor),
         ])
     }
-    
-    private func formattedCurrentDate() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM"
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        let currentDate = Date()
-        let formattedDate = dateFormatter.string(from: currentDate)
-        return formattedDate
-    }
+
 }

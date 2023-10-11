@@ -2,7 +2,9 @@
 
 import UIKit
 
-final class HeaderForDailyCell: UIView {
+final class HeaderForDailyCell: UITableViewHeaderFooterView {
+    
+    static let id = "HeaderForDailyCell"
     
     private lazy var headerStackView: UIStackView = {
         let headerStackView = UIStackView()
@@ -34,8 +36,8 @@ final class HeaderForDailyCell: UIView {
         return titleLabel
     }()
     
-    init() {
-        super.init(frame: .zero)
+    override init(reuseIdentifier: String?) {
+        super.init(reuseIdentifier: reuseIdentifier)
         setupView()
         setupConstraints()
     }

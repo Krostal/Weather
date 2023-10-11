@@ -97,7 +97,6 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
 
             return hourlyForecastCell
         }
-        
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
