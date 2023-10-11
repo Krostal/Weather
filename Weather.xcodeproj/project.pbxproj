@@ -70,7 +70,6 @@
 			children = (
 				0985D3762AD3AE3A00063E87 /* MainScreen */,
 				0985D3772AD3AEBB00063E87 /* HourlyForecastScreen */,
-				0985D3782AD3AEE400063E87 /* DailyForecastScreen */,
 				09FB5B8B2AD1323000B46781 /* LaunchScreen.storyboard */,
 			);
 			path = "Presentation Layer";
@@ -102,13 +101,6 @@
 				0985D3882AD42B4900063E87 /* InfoCollectionViewCell.swift */,
 			);
 			path = HourlyForecastScreen;
-			sourceTree = "<group>";
-		};
-		0985D3782AD3AEE400063E87 /* DailyForecastScreen */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = DailyForecastScreen;
 			sourceTree = "<group>";
 		};
 		09FB5B742AD1322E00B46781 = {
