@@ -4,7 +4,7 @@ import UIKit
 
 final class PartOfTheDayTableViewCell: UITableViewCell {
     
-    static let id = "PartOfTheDayTableViewCell.swift"
+    static let id = "PartOfTheDayTableViewCell"
     
     private enum Constants {
         static let viewSpacing: CGFloat = 16.0

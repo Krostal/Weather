@@ -140,13 +140,5 @@ final class DailyTableViewCell: UITableViewCell {
             rightStackView.bottomAnchor.constraint(equalTo: infoView.bottomAnchor),
         ])
     }
-    
-    private func formattedCurrentDate() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM"
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        let currentDate = Date()
-        let formattedDate = dateFormatter.string(from: currentDate)
-        return formattedDate
-    }
+
 }

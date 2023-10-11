@@ -21,6 +21,7 @@ final class DailyForecastView: UIView {
         tableView.register(PartOfTheDayTableViewCell.self, forCellReuseIdentifier: PartOfTheDayTableViewCell.id)
         tableView.register(WeatherInfoTableViewCell.self, forCellReuseIdentifier: WeatherInfoTableViewCell.id)
         tableView.register(SunAndMoonTableViewCell.self, forCellReuseIdentifier: SunAndMoonTableViewCell.id)
+        tableView.register(AirQualityTableViewCell.self, forCellReuseIdentifier: AirQualityTableViewCell.id)
         return tableView
     }()
     
@@ -66,7 +67,7 @@ final class DailyForecastView: UIView {
 extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        4
+        5
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -126,15 +127,19 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             return sunAndMoonCell
+        } else if indexPath.section == 4 {
+            guard let airQualityCell = tableView.dequeueReusableCell(withIdentifier: AirQualityTableViewCell.id, for: indexPath) as? AirQualityTableViewCell else {
+                return UITableViewCell()
+            }
+            return airQualityCell
         }
-        
         return UITableViewCell()
     }
     
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.section == 3 {
-            return 150
+            return 180
         }
         return UITableView.automaticDimension
     }

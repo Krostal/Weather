@@ -56,11 +56,6 @@ final class WeatherInfoTableViewCell: UITableViewCell {
         backgroundColor = .systemBlue.withAlphaComponent(0.1)
     }
     
-//    override func layoutSubviews() {
-//        super.layoutSubviews()
-//        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0))
-//    }
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -82,15 +77,6 @@ final class WeatherInfoTableViewCell: UITableViewCell {
             categorylabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 10),
             valueLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 10)
         ])
-    }
-    
-    private func formattedCurrentDate() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEEE, d MMMM yyyy"
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        let currentDate = Date()
-        let formattedDate = dateFormatter.string(from: currentDate)
-        return formattedDate
     }
     
     func configureRow1() {
