@@ -20,6 +20,7 @@ final class DailyForecastView: UIView {
         tableView.register(DatesTableViewCell.self, forCellReuseIdentifier: DatesTableViewCell.id)
         tableView.register(PartOfTheDayTableViewCell.self, forCellReuseIdentifier: PartOfTheDayTableViewCell.id)
         tableView.register(WeatherInfoTableViewCell.self, forCellReuseIdentifier: WeatherInfoTableViewCell.id)
+        tableView.register(SunAndMoonTableViewCell.self, forCellReuseIdentifier: SunAndMoonTableViewCell.id)
         return tableView
     }()
     
@@ -48,12 +49,6 @@ final class DailyForecastView: UIView {
         tableView.sectionFooterHeight = 0
         tableView.separatorStyle = .singleLine
         tableView.separatorColor = .black
-        tableView.separatorInset = UIEdgeInsets(
-            top: 0,
-            left: Constants.separatorInsets,
-            bottom: 0,
-            right: Constants.separatorInsets
-        )
     }
     
     private func setupLayout() {
@@ -75,10 +70,10 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0 {
-            return 1
-        } else {
+        if section == 1 || section == 2 {
             return 6
+        } else {
+            return 1
         }
     }
     
@@ -91,20 +86,25 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
             
             return datesCell
             
-        } else if indexPath.section == 1 {
+        } else if indexPath.section == 1 || indexPath.section == 2 {
             
             if indexPath.row == 0 {
                 guard let partOfTheDayCell = tableView.dequeueReusableCell(withIdentifier: PartOfTheDayTableViewCell.id, for: indexPath) as? PartOfTheDayTableViewCell else {
                     return UITableViewCell()
                 }
-                partOfTheDayCell.selectionStyle = .none
                 
+                if indexPath.section == 1 {
+                    partOfTheDayCell.configuresection1()
+                } else {
+                    partOfTheDayCell.configuresection2()
+                }
+                
+                partOfTheDayCell.selectionStyle = .none
                 return partOfTheDayCell
             } else {
                 guard let weatherInfoCell = tableView.dequeueReusableCell(withIdentifier: WeatherInfoTableViewCell.id, for: indexPath) as? WeatherInfoTableViewCell else {
                     return UITableViewCell()
                 }
-                weatherInfoCell.selectionStyle = .none
                 
                 if indexPath.row == 1 {
                     weatherInfoCell.configureRow1()
@@ -118,14 +118,24 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
                     weatherInfoCell.configureRow5()
                 }
                 
+                weatherInfoCell.selectionStyle = .none
                 return weatherInfoCell
             }
+        } else if indexPath.section == 3 {
+            guard let sunAndMoonCell = tableView.dequeueReusableCell(withIdentifier: SunAndMoonTableViewCell.id, for: indexPath) as? SunAndMoonTableViewCell else {
+                return UITableViewCell()
+            }
+            return sunAndMoonCell
         }
+        
         return UITableViewCell()
     }
     
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if indexPath.section == 3 {
+            return 150
+        }
         return UITableView.automaticDimension
     }
     
@@ -138,8 +148,7 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // Скрываем разделитель для первой и второй строки
-        if indexPath.section == 1 && indexPath.row == 0 {
+        if indexPath.section == 1 && indexPath.row == 0 || indexPath.section == 2 && indexPath.row == 0 {
             cell.separatorInset = UIEdgeInsets(top: 0, left: tableView.frame.size.width, bottom: 0, right: 0)
         } else {
             cell.separatorInset = UIEdgeInsets(top: 0, left: Constants.separatorInsets, bottom: 0, right: Constants.separatorInsets)

@@ -15,7 +15,7 @@ final class CurrentTableViewCell: UITableViewCell {
     private lazy var containerView: UIView = {
         let containerView = UIView()
         containerView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.backgroundColor = .blue
+        containerView.backgroundColor = .systemBlue
         containerView.layer.cornerRadius = 10
         return containerView
     }()

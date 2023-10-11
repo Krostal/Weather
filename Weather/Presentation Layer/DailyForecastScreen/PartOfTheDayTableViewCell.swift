@@ -14,7 +14,7 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
     private lazy var partOfTheDayLabel: UILabel = {
         let partOfTheDayLabel = UILabel()
         partOfTheDayLabel.translatesAutoresizingMaskIntoConstraints = false
-        partOfTheDayLabel.font = .systemFont(ofSize: 18, weight: .regular)
+        partOfTheDayLabel.font = .systemFont(ofSize: 18, weight: .semibold)
         partOfTheDayLabel.textColor = .black
         partOfTheDayLabel.text = "День"
         return partOfTheDayLabel
@@ -55,17 +55,16 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
         tempLabel.translatesAutoresizingMaskIntoConstraints = false
         tempLabel.font = .systemFont(ofSize: 30, weight: .semibold)
         tempLabel.textColor = .systemGray
-        tempLabel.text = "13°"
         return tempLabel
     }()
     
     private lazy var weatherLabel: UILabel = {
-        let timeLabel = UILabel()
-        timeLabel.translatesAutoresizingMaskIntoConstraints = false
-        timeLabel.font = .systemFont(ofSize: 18, weight: .semibold)
-        timeLabel.textColor = .black
-        timeLabel.text = "Ливни"
-        return timeLabel
+        let weatherLabel = UILabel()
+        weatherLabel.translatesAutoresizingMaskIntoConstraints = false
+        weatherLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        weatherLabel.textColor = .black
+        weatherLabel.numberOfLines = 0
+        return weatherLabel
     }()
     
     
@@ -98,6 +97,20 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
             stackView.leadingAnchor.constraint(greaterThanOrEqualTo: partOfTheDayLabel.leadingAnchor),
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
+    }
+    
+    func configuresection1() {
+        partOfTheDayLabel.text = "День"
+        weatherIcon.image = UIImage(systemName: "cloud.sun.rain")
+        tempLabel.text = "15°"
+        weatherLabel.text = "Кратковременный дождь"
+    }
+    
+    func configuresection2() {
+        partOfTheDayLabel.text = "Ночь"
+        weatherIcon.image = UIImage(systemName: "moon.stars")
+        tempLabel.text = "10°"
+        weatherLabel.text = "Ясно"
     }
     
 }

@@ -40,9 +40,7 @@ final class TemperatureChartView: UIView {
         chartView.rightAxis.enabled = false
         chartView.xAxis.enabled = false
         chartView.xAxis.drawGridLinesEnabled = false
-        
-        
-        
+
         chartView.animate(xAxisDuration: 2.5)
         
         return chartView
@@ -193,7 +191,7 @@ extension TemperatureChartView: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         let availableWidth = lineChartView.frame.width
         let numberOfItems = emptyData.count
-        let totalItemWidth = CGFloat(numberOfItems) * xAxisView.xAxis.labelWidth // 30 is the fixed height of items
+        let totalItemWidth = CGFloat(numberOfItems) * xAxisView.xAxis.labelWidth
         let totalSpacing = availableWidth - totalItemWidth
         let minimumSpacing = totalSpacing / CGFloat(numberOfItems - 1)
         return minimumSpacing

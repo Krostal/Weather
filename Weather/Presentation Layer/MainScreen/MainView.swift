@@ -27,6 +27,8 @@ final class MainView: UIView {
         tableView.register(CurrentTableViewCell.self, forCellReuseIdentifier: CurrentTableViewCell.id)
         tableView.register(HourlyTableViewCell.self, forCellReuseIdentifier: HourlyTableViewCell.id)
         tableView.register(DailyTableViewCell.self, forCellReuseIdentifier: DailyTableViewCell.id)
+        tableView.register(HeaderForHourlyCell.self, forHeaderFooterViewReuseIdentifier: HeaderForHourlyCell.id)
+        tableView.register(HeaderForDailyCell.self, forHeaderFooterViewReuseIdentifier: HeaderForDailyCell.id)
         return tableView
     }()
     
@@ -136,15 +138,20 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if section == 1 {
-            let headerForHourlyCell = HeaderForHourlyCell()
+            guard let headerForHourlyCell = tableView.dequeueReusableHeaderFooterView(withIdentifier: HeaderForHourlyCell.id) as? HeaderForHourlyCell else {
+                return UITableViewHeaderFooterView()
+            }
             headerForHourlyCell.delegate = self
             return headerForHourlyCell
         } else if section == 2 {
-            return HeaderForDailyCell()
+            guard let headerForDailyCell = tableView.dequeueReusableHeaderFooterView(withIdentifier: HeaderForDailyCell.id) as? HeaderForDailyCell else {
+                return UITableViewHeaderFooterView()
+            }
+            return headerForDailyCell
         }
         return nil
     }
-    
+
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         if section == 1 {
             return HeaderForHourlyCell().intrinsicContentSize.height

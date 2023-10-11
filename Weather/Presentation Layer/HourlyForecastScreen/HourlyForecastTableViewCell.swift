@@ -274,11 +274,6 @@ final class HourlyForecastTableViewCell: UITableViewCell {
         backgroundColor = .systemBlue.withAlphaComponent(0.1)
     }
     
-//    override func layoutSubviews() {
-//        super.layoutSubviews()
-//        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0))
-//    }
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

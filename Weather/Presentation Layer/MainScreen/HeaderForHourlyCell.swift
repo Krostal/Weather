@@ -5,7 +5,9 @@ protocol HeaderForHourlyCellDelegate: AnyObject {
     func buttonTapped()
 }
 
-final class HeaderForHourlyCell: UIView {
+final class HeaderForHourlyCell: UITableViewHeaderFooterView {
+    
+    static let id = "HeaderForHourlyCell"
     
     weak var delegate: HeaderForHourlyCellDelegate?
     
@@ -21,8 +23,8 @@ final class HeaderForHourlyCell: UIView {
     
     
     
-    init() {
-        super.init(frame: .zero)
+    override init(reuseIdentifier: String?) {
+        super.init(reuseIdentifier: reuseIdentifier)
         setupView()
         setupConstraints()
     }
