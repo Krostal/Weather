@@ -43,7 +43,10 @@ final class MainViewController: UIViewController {
     }
     
     @objc private func showLocation(_ sender: UIBarButtonItem) {
-        
+        let onboardingViewController = OnboardingViewController()
+        navigationController?.modalPresentationStyle = .automatic
+        navigationController?.modalTransitionStyle = .coverVertical
+        navigationController?.present(onboardingViewController, animated: true)
     }
     
 }
