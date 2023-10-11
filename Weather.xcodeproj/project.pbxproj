@@ -88,7 +88,6 @@
 			children = (
 				0985D3762AD3AE3A00063E87 /* MainScreen */,
 				0985D3772AD3AEBB00063E87 /* HourlyForecastScreen */,
-				0985D3782AD3AEE400063E87 /* DailyForecastScreen */,
 				09FB5B8B2AD1323000B46781 /* LaunchScreen.storyboard */,
 			);
 			path = "Presentation Layer";
@@ -120,22 +119,6 @@
 				0985D3882AD42B4900063E87 /* InfoCollectionViewCell.swift */,
 			);
 			path = HourlyForecastScreen;
-			sourceTree = "<group>";
-		};
-		0985D3782AD3AEE400063E87 /* DailyForecastScreen */ = {
-			isa = PBXGroup;
-			children = (
-				09A554552AD586BD00BC4321 /* DailyForecastViewController.swift */,
-				09A554572AD5870400BC4321 /* DailyForecastView.swift */,
-				09A554592AD5954400BC4321 /* DatesTableViewCell.swift */,
-				09A5545B2AD5954B00BC4321 /* PartOfTheDayTableViewCell.swift */,
-				09A554632AD5AB8400BC4321 /* WeatherInfoTableViewCell.swift */,
-				09A5545D2AD5955300BC4321 /* SunAndMoonTableViewCell.swift */,
-				09A5545F2AD5955A00BC4321 /* AirQualityTableViewCell.swift */,
-				09A554612AD5964D00BC4321 /* DatesCollectionViewCell.swift */,
-				0957A7E22AD6766000B1DC36 /* SunAndMoonCollectionViewCell.swift */,
-			);
-			path = DailyForecastScreen;
 			sourceTree = "<group>";
 		};
 		09FB5B742AD1322E00B46781 = {
