@@ -11,8 +11,18 @@ final class MainViewController: UIViewController {
         setupNavigationBar()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        let backButton = UIBarButtonItem()
+        backButton.title = "Назад"
+        navigationItem.backBarButtonItem = backButton
+    }
+    
     private func setupView() {
+        mainView.delegate = self
         view = mainView
+        
     }
     
     private func setupNavigationBar() {
@@ -36,4 +46,13 @@ final class MainViewController: UIViewController {
         
     }
     
+}
+
+extension MainViewController: MainViewDelegate {
+    func showHourlyForecast() {
+        let hourlyForecastViewController = HourlyForecastViewController()
+        hourlyForecastViewController.headerTitle = navigationItem.title
+        navigationController?.pushViewController(hourlyForecastViewController, animated: true)
+       
+    }
 }

@@ -1,7 +1,13 @@
 
 import UIKit
 
+protocol MainViewDelegate: AnyObject {
+    func showHourlyForecast()
+}
+
 final class MainView: UIView {
+    
+    weak var delegate: MainViewDelegate?
     
     private enum Constants {
         static let heightHeaderOfCurrentCellSection: CGFloat = 212
@@ -113,7 +119,9 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if section == 1 {
-            return HeaderForHourlyCell()
+            let headerForHourlyCell = HeaderForHourlyCell()
+            headerForHourlyCell.delegate = self
+            return headerForHourlyCell
         } else if section == 2 {
             return HeaderForDailyCell()
         }
@@ -128,5 +136,13 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
         }
         return 0
     }
+    
+}
+
+extension MainView: HeaderForHourlyCellDelegate {
+    func buttonTapped() {
+        delegate?.showHourlyForecast()
+    }
+    
     
 }
