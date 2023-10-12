@@ -2,9 +2,15 @@
 
 import UIKit
 
+protocol HeaderForDailyCellDelegate: AnyObject {
+    func updateDaysCount(_ daysCount: Int)
+}
+
 final class HeaderForDailyCell: UITableViewHeaderFooterView {
     
     static let id = "HeaderForDailyCell"
+    
+    weak var delegate: HeaderForDailyCellDelegate?
     
     private lazy var headerStackView: UIStackView = {
         let headerStackView = UIStackView()
@@ -19,7 +25,7 @@ final class HeaderForDailyCell: UITableViewHeaderFooterView {
     
     private lazy var dailyForecastButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("25 дней", for: .normal)
+        button.setTitle("7 дней", for: .normal)
         button.setTitleColor(.blue, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -58,9 +64,20 @@ final class HeaderForDailyCell: UITableViewHeaderFooterView {
             headerStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
         ])
     }
+    
+    func updateButtonText(_ title: String) {
+        dailyForecastButton.setTitle(title, for: .normal)
+    }
         
     @objc private func dailyForecastButtonTapped() {
-        print("Лейбл был нажат")
+        if let currentText = dailyForecastButton.titleLabel?.text {
+            let strippedText = currentText.replacingOccurrences(of: " дней", with: "")
+            if let daysCount = Int(strippedText) {
+                let newDaysCount = daysCount == 7 ? 10 : 7
+                dailyForecastButton.setTitle("\(newDaysCount) дней", for: .normal)
+                delegate?.updateDaysCount(newDaysCount)
+            }
+        }
     }
     
 }

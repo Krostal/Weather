@@ -10,6 +10,8 @@ final class MainView: UIView {
     
     weak var delegate: MainViewDelegate?
     
+    private var numberOfDays: Int = 7
+    
     private var selectedDate: String?
     
     private enum Constants {
@@ -86,7 +88,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
         } else if section == 1 {
             return 1
         } else {
-            return 7
+            return numberOfDays
         }
     }
     
@@ -147,6 +149,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let headerForDailyCell = tableView.dequeueReusableHeaderFooterView(withIdentifier: HeaderForDailyCell.id) as? HeaderForDailyCell else {
                 return UITableViewHeaderFooterView()
             }
+            headerForDailyCell.delegate = self
             return headerForDailyCell
         }
         return nil
@@ -167,6 +170,15 @@ extension MainView: HeaderForHourlyCellDelegate {
     func buttonTapped() {
         delegate?.showHourlyForecast()
     }
-    
-    
+}
+
+extension MainView: HeaderForDailyCellDelegate {
+    func updateDaysCount(_ daysCount: Int) {
+        self.numberOfDays = daysCount
+        tableView.reloadSections(IndexSet(integer: 2), with: .fade)
+        
+        if let headerForDailyCell = tableView.headerView(forSection: 2) as? HeaderForDailyCell {
+            headerForDailyCell.updateButtonText("\(numberOfDays) дней")
+        }
+    }
 }

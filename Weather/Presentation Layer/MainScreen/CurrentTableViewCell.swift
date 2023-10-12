@@ -17,6 +17,7 @@ final class CurrentTableViewCell: UITableViewCell {
         containerView.translatesAutoresizingMaskIntoConstraints = false
         containerView.backgroundColor = .systemBlue
         containerView.layer.cornerRadius = 10
+        containerView.clipsToBounds = true
         return containerView
     }()
     
