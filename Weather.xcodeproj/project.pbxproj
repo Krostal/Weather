@@ -10,6 +10,8 @@
 		0957A7E32AD6766000B1DC36 /* SunAndMoonCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7E22AD6766000B1DC36 /* SunAndMoonCollectionViewCell.swift */; };
 		0957A7E62AD6EE8900B1DC36 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7E52AD6EE8900B1DC36 /* OnboardingViewController.swift */; };
 		0957A7E82AD6EFA100B1DC36 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7E72AD6EFA100B1DC36 /* OnboardingView.swift */; };
+		0957A7EF2AD70A8A00B1DC36 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7EE2AD70A8A00B1DC36 /* SettingsViewController.swift */; };
+		0957A7F12AD70A9700B1DC36 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7F02AD70A9700B1DC36 /* SettingsView.swift */; };
 		0967D3BD2AD25A300060156B /* HourlyCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0967D3BC2AD25A300060156B /* HourlyCollectionViewCell.swift */; };
 		0967D3BF2AD26C2B0060156B /* HeaderForHourlyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0967D3BE2AD26C2B0060156B /* HeaderForHourlyCell.swift */; };
 		0967D3C12AD277FC0060156B /* HeaderForDailyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0967D3C02AD277FC0060156B /* HeaderForDailyCell.swift */; };
@@ -44,6 +46,8 @@
 		0957A7E22AD6766000B1DC36 /* SunAndMoonCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SunAndMoonCollectionViewCell.swift; sourceTree = "<group>"; };
 		0957A7E52AD6EE8900B1DC36 /* OnboardingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewController.swift; sourceTree = "<group>"; };
 		0957A7E72AD6EFA100B1DC36 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		0957A7EE2AD70A8A00B1DC36 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		0957A7F02AD70A9700B1DC36 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0967D3BC2AD25A300060156B /* HourlyCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyCollectionViewCell.swift; sourceTree = "<group>"; };
 		0967D3BE2AD26C2B0060156B /* HeaderForHourlyCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderForHourlyCell.swift; sourceTree = "<group>"; };
 		0967D3C02AD277FC0060156B /* HeaderForDailyCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderForDailyCell.swift; sourceTree = "<group>"; };
@@ -96,9 +100,19 @@
 			path = OnboardingScreen;
 			sourceTree = "<group>";
 		};
+		0957A7ED2AD70A7100B1DC36 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				0957A7EE2AD70A8A00B1DC36 /* SettingsViewController.swift */,
+				0957A7F02AD70A9700B1DC36 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		0985D3752AD3AE1F00063E87 /* Presentation Layer */ = {
 			isa = PBXGroup;
 			children = (
+				0957A7ED2AD70A7100B1DC36 /* Settings */,
 				0957A7E42AD6EE3400B1DC36 /* OnboardingScreen */,
 				0985D3762AD3AE3A00063E87 /* MainScreen */,
 				0985D3772AD3AEBB00063E87 /* HourlyForecastScreen */,
@@ -258,11 +272,13 @@
 				09FB5B9B2AD139AE00B46781 /* HourlyTableViewCell.swift in Sources */,
 				0985D3822AD3BF7200063E87 /* TemperatureChartView.swift in Sources */,
 				0985D3892AD42B4900063E87 /* InfoCollectionViewCell.swift in Sources */,
+				0957A7F12AD70A9700B1DC36 /* SettingsView.swift in Sources */,
 				0967D3BF2AD26C2B0060156B /* HeaderForHourlyCell.swift in Sources */,
 				0985D37C2AD3B3BD00063E87 /* HourlyForecastView.swift in Sources */,
 				0985D37A2AD3AFE000063E87 /* HourlyForecastViewController.swift in Sources */,
 				09A5545C2AD5954B00BC4321 /* PartOfTheDayTableViewCell.swift in Sources */,
 				09A554602AD5955A00BC4321 /* AirQualityTableViewCell.swift in Sources */,
+				0957A7EF2AD70A8A00B1DC36 /* SettingsViewController.swift in Sources */,
 				0967D3C12AD277FC0060156B /* HeaderForDailyCell.swift in Sources */,
 				0957A7E32AD6766000B1DC36 /* SunAndMoonCollectionViewCell.swift in Sources */,
 				09A5545A2AD5954400BC4321 /* DatesTableViewCell.swift in Sources */,

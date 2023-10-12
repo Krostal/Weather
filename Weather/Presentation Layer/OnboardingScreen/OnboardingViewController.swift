@@ -10,8 +10,4 @@ final class OnboardingViewController: UIViewController {
         super.viewDidLoad()
         view = onboardingView
     }
-    
-    
-    
-    
 }
