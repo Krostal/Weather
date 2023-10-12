@@ -128,8 +128,8 @@
 		0985D3752AD3AE1F00063E87 /* Presentation Layer */ = {
 			isa = PBXGroup;
 			children = (
-				0957A7ED2AD70A7100B1DC36 /* Settings */,
 				0957A7E42AD6EE3400B1DC36 /* OnboardingScreen */,
+				0957A7ED2AD70A7100B1DC36 /* Settings */,
 				0985D3762AD3AE3A00063E87 /* MainScreen */,
 				0985D3772AD3AEBB00063E87 /* HourlyForecastScreen */,
 				0957A7F52AD7B7CE00B1DC36 /* DailyForecastScreen */,
