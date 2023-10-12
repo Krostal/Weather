@@ -74,6 +74,7 @@ final class CurrentTableViewCell: UITableViewCell {
     private lazy var precipitationIcon: UIImageView = {
         let precipitationIcon = UIImageView(image: UIImage(systemName: "cloud"))
         precipitationIcon.translatesAutoresizingMaskIntoConstraints = false
+        precipitationIcon.tintColor = .black
         return precipitationIcon
     }()
     
@@ -99,6 +100,7 @@ final class CurrentTableViewCell: UITableViewCell {
     private lazy var windIcon: UIImageView = {
         let windIcon = UIImageView(image: UIImage(systemName: "wind"))
         windIcon.translatesAutoresizingMaskIntoConstraints = false
+        windIcon.tintColor = .black
         return windIcon
     }()
     
@@ -125,6 +127,7 @@ final class CurrentTableViewCell: UITableViewCell {
     private lazy var humidityIcon: UIImageView = {
         let humidityIcon = UIImageView(image: UIImage(systemName: "humidity"))
         humidityIcon.translatesAutoresizingMaskIntoConstraints = false
+        humidityIcon.tintColor = .black
         return humidityIcon
     }()
     

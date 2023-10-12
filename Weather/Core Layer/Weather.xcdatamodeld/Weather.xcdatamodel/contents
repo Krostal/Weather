@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22222" systemVersion="22G120" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="CurrentData" representedClassName="CurrentData" syncable="YES" codeGenerationType="class">
+        <attribute name="airPressureAtSeaLevel" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="airTemperature" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="airTemperaturePercentile10" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="airTemperaturePercentile90" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="cloudAreaFraction" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="cloudAreaFractionHigh" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="cloudAreaFractionLow" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="cloudAreaFractionMedium" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="dewPointTemperature" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="fogAreaFraction" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="relativeHumidity" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="ultravioletIndexClearSky" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="windFromDirection" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="windSpeed" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="windSpeedOfGust" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="windSpeedPercentile00" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="windSpeedPercentile10" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="timePeriod" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="currentData" inverseEntity="TimePeriod"/>
+    </entity>
+    <entity name="Location" representedClassName="Location" syncable="YES" codeGenerationType="class">
+        <attribute name="altitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="timeSeries" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="location" inverseEntity="TimePeriod"/>
+    </entity>
+    <entity name="Next1HoursForecast" representedClassName="Next1HoursForecast" syncable="YES" codeGenerationType="class">
+        <attribute name="precipitationAmount" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="precipitationAmountMax" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="precipitationAmountMin" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="probabilityOfThunder" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="symbolCode" optional="YES" attributeType="String"/>
+        <relationship name="timeSeries" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="next1Hours" inverseEntity="TimePeriod"/>
+    </entity>
+    <entity name="Next6HoursForecast" representedClassName="Next6HoursForecast" syncable="YES" codeGenerationType="class">
+        <attribute name="airTemperatureMax" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="airTemperatureMin" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="precipitationAmount" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="precipitationAmountMax" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="precipitationAmountMin" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="symbolCode" optional="YES" attributeType="String"/>
+        <relationship name="timeSeries" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="next6Hours" inverseEntity="TimePeriod"/>
+    </entity>
+    <entity name="Next12HoursForecast" representedClassName="Next12HoursForecast" syncable="YES" codeGenerationType="class">
+        <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="symbolCode" optional="YES" attributeType="String"/>
+        <attribute name="symbolConfidence" optional="YES" attributeType="String"/>
+        <relationship name="timeSeries" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="next12Hours" inverseEntity="TimePeriod"/>
+    </entity>
+    <entity name="TimePeriod" representedClassName="TimePeriod" syncable="YES" codeGenerationType="class">
+        <attribute name="time" optional="YES" attributeType="String"/>
+        <relationship name="currentData" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CurrentData" inverseName="timePeriod" inverseEntity="CurrentData"/>
+        <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Location" inverseName="timeSeries" inverseEntity="Location"/>
+        <relationship name="next1Hours" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Next1HoursForecast" inverseName="timeSeries" inverseEntity="Next1HoursForecast"/>
+        <relationship name="next6Hours" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Next6HoursForecast" inverseName="timeSeries" inverseEntity="Next6HoursForecast"/>
+        <relationship name="next12Hours" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Next12HoursForecast" inverseName="timeSeries" inverseEntity="Next12HoursForecast"/>
+    </entity>
+    <entity name="Unit" representedClassName="Unit" syncable="YES" codeGenerationType="class">
+        <attribute name="airPressureAtSeaLevel" optional="YES" attributeType="String"/>
+        <attribute name="airTemperature" optional="YES" attributeType="String"/>
+        <attribute name="airTemperaturePercentile" optional="YES" attributeType="String"/>
+        <attribute name="cloudAreaFraction" optional="YES" attributeType="String"/>
+        <attribute name="dewPointTemperature" optional="YES" attributeType="String"/>
+        <attribute name="fogAreaFraction" optional="YES" attributeType="String"/>
+        <attribute name="precipitationAmount" optional="YES" attributeType="String"/>
+        <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="String"/>
+        <attribute name="probabilityOfThunder" optional="YES" attributeType="String"/>
+        <attribute name="relativeHumidity" optional="YES" attributeType="String"/>
+        <attribute name="ultravioletIndexClearSky" optional="YES" attributeType="String"/>
+        <attribute name="windFromDirection" optional="YES" attributeType="String"/>
+        <attribute name="windSpeed" optional="YES" attributeType="String"/>
+    </entity>
+</model>
