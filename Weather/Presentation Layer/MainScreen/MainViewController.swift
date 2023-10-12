@@ -39,7 +39,10 @@ final class MainViewController: UIViewController {
     }
     
     @objc private func showSettings(_ sender: UIBarButtonItem) {
-        
+        let settingsViewController = SettingsViewController()
+        navigationController?.modalPresentationStyle = .formSheet
+        navigationController?.modalTransitionStyle = .flipHorizontal
+        navigationController?.present(settingsViewController, animated: true)
     }
     
     @objc private func showLocation(_ sender: UIBarButtonItem) {
