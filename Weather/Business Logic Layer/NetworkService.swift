@@ -33,10 +33,6 @@ final class NetworkService<T: Decodable> {
                 return
             }
             
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print(jsonString)
-            }
-            
             do {
             
                 let decoder = JSONDecoder()
@@ -45,7 +41,7 @@ final class NetworkService<T: Decodable> {
                 let result = try decoder.decode(T.self, from: data)
                 completion(.success(result))
             } catch {
-                completion(.failure(.decodingError))
+                completion(.failure(.decodingError(error: error)))
             }
         }
         

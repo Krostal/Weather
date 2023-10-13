@@ -6,7 +6,7 @@ enum FetchDataError: Error {
     case invalidURL
     case invalidResponse(statusCode: Int)
     case noData
-    case decodingError
+    case decodingError(error: Error)
     case networkError(error: Error)
     
     var description: String {
@@ -17,8 +17,8 @@ enum FetchDataError: Error {
             return "❌ Error: Invalid Response - Status Code: \(statusCode)"
         case .noData:
             return "❌ Error: No Data"
-        case .decodingError:
-            return "❌ Error: Decoding Error"
+        case .decodingError(let error):
+            return "❌ Ошибка при декодировании данных: \(error)"
         case .networkError(let error):
             return "❌ Network Error: \(error.localizedDescription)"
         }

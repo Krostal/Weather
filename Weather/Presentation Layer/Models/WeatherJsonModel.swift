@@ -3,14 +3,14 @@
 import Foundation
 
 struct WeatherJsonModel: Codable {
-    let type: String
+    let type: String?
     let geometry: Geometry
     let properties: Properties
 }
 
 struct Geometry: Codable {
-    let type: String
-    let coordinates: [Double]
+    let type: String?
+    let coordinates: [Double]?
 }
 
 struct Properties: Codable {
@@ -19,35 +19,35 @@ struct Properties: Codable {
 }
 
 struct Meta: Codable {
-    let updatedAt: String
+    let updatedAt: String?
     let units: Units
 }
 
 struct Units: Codable {
-    let airPressureAtSeaLevel: String
-    let airTemperature: String
-    let airTemperatureMax: String
-    let airTemperatureMin: String
-    let airTemperaturePercentile10: String
-    let airTemperaturePercentile90: String
-    let cloudAreaFraction: String
-    let cloudAreaFractionHigh: String
-    let cloudAreaFractionLow: String
-    let cloudAreaFractionMedium: String
-    let dewPointTemperature: String
-    let fogAreaFraction: String
-    let precipitationAmount: String
-    let precipitationAmountMax: String
-    let precipitationAmountMin: String
-    let probabilityOfPrecipitation: String
-    let probabilityOfThunder: String
-    let relativeHumidity: String
-    let ultravioletIndexClearSky: String
-    let windFromDirection: String
-    let windSpeed: String
-    let windSpeedOfGust: String
-    let windSpeedPercentile10: String
-    let windSpeedPercentile00: String
+    let airPressureAtSeaLevel: String?
+    let airTemperature: String?
+    let airTemperatureMax: String?
+    let airTemperatureMin: String?
+    let airTemperaturePercentile10: String?
+    let airTemperaturePercentile90: String?
+    let cloudAreaFraction: String?
+    let cloudAreaFractionHigh: String?
+    let cloudAreaFractionLow: String?
+    let cloudAreaFractionMedium: String?
+    let dewPointTemperature: String?
+    let fogAreaFraction: String?
+    let precipitationAmount: String?
+    let precipitationAmountMax: String?
+    let precipitationAmountMin: String?
+    let probabilityOfPrecipitation: String?
+    let probabilityOfThunder: String?
+    let relativeHumidity: String?
+    let ultravioletIndexClearSky: String?
+    let windFromDirection: String?
+    let windSpeed: String?
+    let windSpeedOfGust: String?
+    let windSpeedPercentile10: String?
+    let windSpeedPercentile90: String?
 }
 
 struct TimeSeries: Codable {
@@ -63,7 +63,7 @@ struct TimeSeriesData: Codable {
 }
 
 struct Instant: Codable {
-    let details: InstantDetails
+    let details: InstantDetails?
 }
 
 struct InstantDetails: Codable {
@@ -87,31 +87,31 @@ struct InstantDetails: Codable {
 }
 
 struct Next12Hours: Codable {
-    let summary: Next12HoursSummary
-    let details: Next12HoursDetails
+    let summary: Next12HoursSummary?
+    let details: Next12HoursDetails?
 }
 
 struct Next1Hours: Codable {
-    let summary: Next1HoursSummary
-    let details: Next1HoursDetails
+    let summary: Next1HoursSummary?
+    let details: Next1HoursDetails?
 }
 
 struct Next6Hours: Codable {
-    let summary: Next6HoursSummary
-    let details: Next6HoursDetails
+    let summary: Next6HoursSummary?
+    let details: Next6HoursDetails?
 }
 
 struct Next12HoursSummary: Codable {
-    let symbolCode: String
-    let symbolConfidence: String
+    let symbolCode: String?
+    let symbolConfidence: String?
 }
 
 struct Next1HoursSummary: Codable {
-    let symbolCode: String
+    let symbolCode: String?
 }
 
 struct Next6HoursSummary: Codable {
-    let symbolCode: String
+    let symbolCode: String?
 }
 
 struct Next12HoursDetails: Codable {

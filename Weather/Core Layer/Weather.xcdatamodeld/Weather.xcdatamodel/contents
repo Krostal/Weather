@@ -24,6 +24,7 @@
         <attribute name="altitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="place" optional="YES" attributeType="String"/>
         <relationship name="timeSeries" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="location" inverseEntity="TimePeriod"/>
     </entity>
     <entity name="Next1HoursForecast" representedClassName="Next1HoursForecast" syncable="YES" codeGenerationType="class">
