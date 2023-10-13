@@ -7,7 +7,7 @@ final class MainViewController: UIViewController {
     
     private var forecastData: [WeatherJsonModel] = []
     
-    let networkService = NetworkService<WeatherJsonModel>()
+    let networkService = FetchDataService<WeatherJsonModel>(lat: 10, long: 10)
     
     var currentLattitude: Double?
     
@@ -48,7 +48,7 @@ final class MainViewController: UIViewController {
     }
     
     private func fetchWeatherData() {
-        networkService.fetchData(coordinates: (lattitude: currentLattitude, longittude: currentLongittude)) { result in
+        networkService.fetchData(coordinates: (long: currentLongittude, lat: currentLattitude)) { result in
             switch result {
             case .success(let forecastData):
                 self.forecastData.append(forecastData)

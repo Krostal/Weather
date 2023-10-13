@@ -10,7 +10,7 @@ struct WeatherJsonModel: Codable {
 
 struct Geometry: Codable {
     let type: String?
-    let coordinates: [Double]?
+    let coordinates: [Double]
 }
 
 struct Properties: Codable {
@@ -83,7 +83,7 @@ struct InstantDetails: Codable {
     let windSpeed: Float?
     let windSpeedOfGust: Float?
     let windSpeedPercentile10: Float?
-    let windSpeedPercentile00: Float?
+    let windSpeedPercentile90: Float?
 }
 
 struct Next12Hours: Codable {

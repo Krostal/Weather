@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22222" systemVersion="22G120" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
-    <entity name="CurrentData" representedClassName="CurrentData" syncable="YES" codeGenerationType="class">
+    <entity name="InstantData" representedClassName="InstantData" syncable="YES" codeGenerationType="class">
         <attribute name="airPressureAtSeaLevel" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="airTemperature" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="airTemperaturePercentile10" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -16,16 +16,16 @@
         <attribute name="windFromDirection" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="windSpeed" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="windSpeedOfGust" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="windSpeedPercentile00" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="windSpeedPercentile10" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <relationship name="timePeriod" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="currentData" inverseEntity="TimePeriod"/>
+        <attribute name="windSpeedPercentile90" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="instantData" inverseEntity="TimePeriodData"/>
     </entity>
     <entity name="Location" representedClassName="Location" syncable="YES" codeGenerationType="class">
         <attribute name="altitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="place" optional="YES" attributeType="String"/>
-        <relationship name="timeSeries" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="location" inverseEntity="TimePeriod"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="location" inverseEntity="Weather"/>
     </entity>
     <entity name="Next1HoursForecast" representedClassName="Next1HoursForecast" syncable="YES" codeGenerationType="class">
         <attribute name="precipitationAmount" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -34,7 +34,7 @@
         <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="probabilityOfThunder" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="symbolCode" optional="YES" attributeType="String"/>
-        <relationship name="timeSeries" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="next1Hours" inverseEntity="TimePeriod"/>
+        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next1Hours" inverseEntity="TimePeriodData"/>
     </entity>
     <entity name="Next6HoursForecast" representedClassName="Next6HoursForecast" syncable="YES" codeGenerationType="class">
         <attribute name="airTemperatureMax" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -44,21 +44,25 @@
         <attribute name="precipitationAmountMin" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="symbolCode" optional="YES" attributeType="String"/>
-        <relationship name="timeSeries" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="next6Hours" inverseEntity="TimePeriod"/>
+        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next6Hours" inverseEntity="TimePeriodData"/>
     </entity>
     <entity name="Next12HoursForecast" representedClassName="Next12HoursForecast" syncable="YES" codeGenerationType="class">
         <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="symbolCode" optional="YES" attributeType="String"/>
         <attribute name="symbolConfidence" optional="YES" attributeType="String"/>
-        <relationship name="timeSeries" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="next12Hours" inverseEntity="TimePeriod"/>
+        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next12Hours" inverseEntity="TimePeriodData"/>
     </entity>
     <entity name="TimePeriod" representedClassName="TimePeriod" syncable="YES" codeGenerationType="class">
         <attribute name="time" optional="YES" attributeType="String"/>
-        <relationship name="currentData" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CurrentData" inverseName="timePeriod" inverseEntity="CurrentData"/>
-        <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Location" inverseName="timeSeries" inverseEntity="Location"/>
-        <relationship name="next1Hours" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Next1HoursForecast" inverseName="timeSeries" inverseEntity="Next1HoursForecast"/>
-        <relationship name="next6Hours" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Next6HoursForecast" inverseName="timeSeries" inverseEntity="Next6HoursForecast"/>
-        <relationship name="next12Hours" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Next12HoursForecast" inverseName="timeSeries" inverseEntity="Next12HoursForecast"/>
+        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="timePeriod" inverseEntity="TimePeriodData"/>
+        <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="timePeriod" inverseEntity="Weather"/>
+    </entity>
+    <entity name="TimePeriodData" representedClassName="TimePeriodData" syncable="YES" codeGenerationType="class">
+        <relationship name="instantData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="InstantData" inverseName="timePeriodData" inverseEntity="InstantData"/>
+        <relationship name="next1Hours" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next1HoursForecast" inverseName="timePeriodData" inverseEntity="Next1HoursForecast"/>
+        <relationship name="next6Hours" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next6HoursForecast" inverseName="timePeriodData" inverseEntity="Next6HoursForecast"/>
+        <relationship name="next12Hours" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next12HoursForecast" inverseName="timePeriodData" inverseEntity="Next12HoursForecast"/>
+        <relationship name="timePeriod" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="timePeriodData" inverseEntity="TimePeriod"/>
     </entity>
     <entity name="Unit" representedClassName="Unit" syncable="YES" codeGenerationType="class">
         <attribute name="airPressureAtSeaLevel" optional="YES" attributeType="String"/>
@@ -74,5 +78,12 @@
         <attribute name="ultravioletIndexClearSky" optional="YES" attributeType="String"/>
         <attribute name="windFromDirection" optional="YES" attributeType="String"/>
         <attribute name="windSpeed" optional="YES" attributeType="String"/>
+        <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="unit" inverseEntity="Weather"/>
+    </entity>
+    <entity name="Weather" representedClassName="Weather" syncable="YES" codeGenerationType="class">
+        <attribute name="updatedAt" optional="YES" attributeType="String"/>
+        <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Location" inverseName="weather" inverseEntity="Location"/>
+        <relationship name="timePeriod" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="weather" inverseEntity="TimePeriod"/>
+        <relationship name="unit" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Unit" inverseName="weather" inverseEntity="Unit"/>
     </entity>
 </model>
