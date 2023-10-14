@@ -273,3 +273,15 @@ final class CurrentTableViewCell: UITableViewCell {
         return formattedDate
     }
 }
+
+extension CurrentTableViewCell: Configurable {
+    func configure(with model: Weather) {
+//        guard let timePeriod = model.timePeriod?.allObjects as? [TimePeriod],
+//              let currentData = timePeriod.first?.timePeriodData?.instantData else {
+//            return
+//        }
+//        currentTemp.text = String(currentData.airTemperature)
+        
+    }
+}
+

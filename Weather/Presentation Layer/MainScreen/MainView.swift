@@ -98,7 +98,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let currentCell = tableView.dequeueReusableCell(withIdentifier: CurrentTableViewCell.id, for: indexPath) as? CurrentTableViewCell else {
                 return UITableViewCell()
             }
-
+            
             return currentCell
             
         } else if indexPath.section == 1 {

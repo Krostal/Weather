@@ -26,11 +26,12 @@ final class CoreDataService {
         persistentContainer.viewContext
     }
     
-    func fetchWeatherData() -> [Location] {
-        let request = Location.fetchRequest()
+    func fetchWeatherData() -> [Weather] {
+        let request = Weather.fetchRequest()
         
         do {
             let weatherData = try setContext().fetch(request)
+            print(weatherData)
             return weatherData
         } catch {
             print("Error fetching favorite posts: \(error.localizedDescription)")

@@ -2,7 +2,13 @@
 
 import UIKit
 
+protocol OnboardingViewDelegate: AnyObject {
+    func startFetchingWeatherData()
+}
+
 final class OnboardingView: UIView {
+    
+    weak var delegate: OnboardingViewDelegate?
     
     private enum Constants {
         static let horizontalSpacing: CGFloat = 16
@@ -128,7 +134,7 @@ final class OnboardingView: UIView {
     }
     
     @objc func agreeButtonTapped() {
-        
+        delegate?.startFetchingWeatherData()
     }
     
     @objc func denyButtonTapped() {

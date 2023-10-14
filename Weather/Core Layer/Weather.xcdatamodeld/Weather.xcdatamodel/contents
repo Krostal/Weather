@@ -34,7 +34,7 @@
         <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="probabilityOfThunder" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="symbolCode" optional="YES" attributeType="String"/>
-        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next1Hours" inverseEntity="TimePeriodData"/>
+        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next1HoursForecast" inverseEntity="TimePeriodData"/>
     </entity>
     <entity name="Next6HoursForecast" representedClassName="Next6HoursForecast" syncable="YES" codeGenerationType="class">
         <attribute name="airTemperatureMax" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -44,13 +44,12 @@
         <attribute name="precipitationAmountMin" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="symbolCode" optional="YES" attributeType="String"/>
-        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next6Hours" inverseEntity="TimePeriodData"/>
+        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next6HoursForecast" inverseEntity="TimePeriodData"/>
     </entity>
     <entity name="Next12HoursForecast" representedClassName="Next12HoursForecast" syncable="YES" codeGenerationType="class">
         <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="symbolCode" optional="YES" attributeType="String"/>
-        <attribute name="symbolConfidence" optional="YES" attributeType="String"/>
-        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next12Hours" inverseEntity="TimePeriodData"/>
+        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next12HoursForecast" inverseEntity="TimePeriodData"/>
     </entity>
     <entity name="TimePeriod" representedClassName="TimePeriod" syncable="YES" codeGenerationType="class">
         <attribute name="time" optional="YES" attributeType="String"/>
@@ -59,25 +58,36 @@
     </entity>
     <entity name="TimePeriodData" representedClassName="TimePeriodData" syncable="YES" codeGenerationType="class">
         <relationship name="instantData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="InstantData" inverseName="timePeriodData" inverseEntity="InstantData"/>
-        <relationship name="next1Hours" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next1HoursForecast" inverseName="timePeriodData" inverseEntity="Next1HoursForecast"/>
-        <relationship name="next6Hours" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next6HoursForecast" inverseName="timePeriodData" inverseEntity="Next6HoursForecast"/>
-        <relationship name="next12Hours" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next12HoursForecast" inverseName="timePeriodData" inverseEntity="Next12HoursForecast"/>
+        <relationship name="next1HoursForecast" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next1HoursForecast" inverseName="timePeriodData" inverseEntity="Next1HoursForecast"/>
+        <relationship name="next6HoursForecast" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next6HoursForecast" inverseName="timePeriodData" inverseEntity="Next6HoursForecast"/>
+        <relationship name="next12HoursForecast" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next12HoursForecast" inverseName="timePeriodData" inverseEntity="Next12HoursForecast"/>
         <relationship name="timePeriod" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="timePeriodData" inverseEntity="TimePeriod"/>
     </entity>
     <entity name="Unit" representedClassName="Unit" syncable="YES" codeGenerationType="class">
         <attribute name="airPressureAtSeaLevel" optional="YES" attributeType="String"/>
         <attribute name="airTemperature" optional="YES" attributeType="String"/>
-        <attribute name="airTemperaturePercentile" optional="YES" attributeType="String"/>
+        <attribute name="airTemperatureMax" optional="YES" attributeType="String"/>
+        <attribute name="airTemperatureMin" optional="YES" attributeType="String"/>
+        <attribute name="airTemperaturePercentile10" optional="YES" attributeType="String"/>
+        <attribute name="airTemperaturePercentile90" optional="YES" attributeType="String"/>
         <attribute name="cloudAreaFraction" optional="YES" attributeType="String"/>
+        <attribute name="cloudAreaFractionHigh" optional="YES" attributeType="String"/>
+        <attribute name="cloudAreaFractionLow" optional="YES" attributeType="String"/>
+        <attribute name="cloudAreaFractionMedium" optional="YES" attributeType="String"/>
         <attribute name="dewPointTemperature" optional="YES" attributeType="String"/>
         <attribute name="fogAreaFraction" optional="YES" attributeType="String"/>
         <attribute name="precipitationAmount" optional="YES" attributeType="String"/>
+        <attribute name="precipitationAmountMax" optional="YES" attributeType="String"/>
+        <attribute name="precipitationAmountMin" optional="YES" attributeType="String"/>
         <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="String"/>
         <attribute name="probabilityOfThunder" optional="YES" attributeType="String"/>
         <attribute name="relativeHumidity" optional="YES" attributeType="String"/>
         <attribute name="ultravioletIndexClearSky" optional="YES" attributeType="String"/>
         <attribute name="windFromDirection" optional="YES" attributeType="String"/>
         <attribute name="windSpeed" optional="YES" attributeType="String"/>
+        <attribute name="windSpeedOfGust" optional="YES" attributeType="String"/>
+        <attribute name="windSpeedPercentile10" optional="YES" attributeType="String"/>
+        <attribute name="windSpeedPercentile90" optional="YES" attributeType="String"/>
         <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="unit" inverseEntity="Weather"/>
     </entity>
     <entity name="Weather" representedClassName="Weather" syncable="YES" codeGenerationType="class">
