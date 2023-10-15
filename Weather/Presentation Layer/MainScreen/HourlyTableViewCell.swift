@@ -2,11 +2,17 @@
 
 import UIKit
 
+protocol HourlyTableViewCellDelegate: AnyObject {
+    func updateHourlyCollectionCell(at index: Int)
+}
+
 final class HourlyTableViewCell: UITableViewCell {
+    
+    weak var delegate: HourlyTableViewCellDelegate?
     
     static let id = "HourlyTableViewCell"
     
-    private lazy var collectionView: UICollectionView = {
+    lazy var collectionView: UICollectionView = {
         let viewLayout = UICollectionViewFlowLayout()
         viewLayout.scrollDirection = .horizontal
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: viewLayout)
@@ -56,6 +62,8 @@ extension HourlyTableViewCell: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HourlyCollectionViewCell.id, for: indexPath) as? HourlyCollectionViewCell else {
             return UICollectionViewCell()
         }
+        
+        delegate?.updateHourlyCollectionCell(at: indexPath.item)
 
         return cell
     }

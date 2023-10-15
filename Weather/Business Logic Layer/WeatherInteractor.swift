@@ -5,44 +5,23 @@ protocol WeatherInteractorProtocol {
     func fetchFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void)
 }
 
-class WeatherInteractor: WeatherInteractorProtocol {
+final class WeatherInteractor: WeatherInteractorProtocol {
     
     private let defaultValue: Float = 3.33
     private let fetchDataService: FetchDataService<WeatherJsonModel>
     private let coreDataService: CoreDataService
+    private let locationService: LocationService
     private let context = CoreDataService.shared.setContext()
+    private var locationName: String?
     
-    init(fetchDataService: FetchDataService<WeatherJsonModel>, coreDataService: CoreDataService) {
+    init(fetchDataService: FetchDataService<WeatherJsonModel>, coreDataService: CoreDataService, locationService: LocationService) {
         self.fetchDataService = fetchDataService
         self.coreDataService = CoreDataService.shared
+        self.locationService = locationService
     }
     
-    func fetchFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void) {
-        self.fetchDataService.fetchData(coordinates: (longitude: 112, latitude: 63)) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let weatherJsonModel):
-                print("Data from the network: \(weatherJsonModel.geometry)")
-                self.saveToCoreData(weatherJsonModel) { result in
-                    switch result {
-                    case .success:
-                        print("Data saved to Core Data successfully.")
-                        completion(.success(weatherJsonModel))
-                    case .failure(let error):
-                        print("Error saving data to Core Data: \(error.localizedDescription)")
-                        completion(.failure(error))
-                    }
-                }
-            case .failure(let error):
-                print("Error fetching data from the network: \(error)")
-                completion(.failure(error))
-            }
-        }
-        
-    }
-
     private func saveToCoreData(_ weather: WeatherJsonModel, completion: @escaping (Result<Void, Error>) -> Void) {
-        print("Starting saveToCoreData")
+        
         let weatherCoreDataModel = Weather(context: context)
         let location = Location(context: context)
         let unit = Unit(context: context)
@@ -53,9 +32,9 @@ class WeatherInteractor: WeatherInteractorProtocol {
         location.longitude = coordinates[0]
         location.latitude = coordinates[1]
         location.altitude = coordinates[2]
-        //        location.name = "Chernyshevskiy, Russia"
+        location.name = locationName
         weatherCoreDataModel.location = location
-        
+    
         // Units
         let units = weather.properties.meta.units
         unit.airPressureAtSeaLevel = units.airPressureAtSeaLevel
@@ -97,8 +76,7 @@ class WeatherInteractor: WeatherInteractorProtocol {
             let next12HoursForecast = Next12HoursForecast(context: context)
             
             guard let instantDetails = timeSeries.data.instant.details else {
-                print("❌ instantDetails is nil")
-                return
+                continue
             }
             instantData.airPressureAtSeaLevel = instantDetails.airPressureAtSeaLevel ?? defaultValue
             instantData.airTemperature = instantDetails.airTemperature ?? defaultValue
@@ -120,13 +98,6 @@ class WeatherInteractor: WeatherInteractorProtocol {
             
             
             guard let next1Hours = timeSeries.data.next1Hours else {
-//                next1HoursForecast.precipitationAmount = defaultValue
-//                next1HoursForecast.precipitationAmountMax = defaultValue
-//                next1HoursForecast.precipitationAmountMin = defaultValue
-//                next1HoursForecast.probabilityOfPrecipitation = defaultValue
-//                next1HoursForecast.probabilityOfThunder = defaultValue
-//                next1HoursForecast.symbolCode = ""
-//                print("❌ next1Hours is nil")
                 continue
             }
             if let details = next1Hours.details {
@@ -141,14 +112,6 @@ class WeatherInteractor: WeatherInteractorProtocol {
             }
             
             guard let next6Hours = timeSeries.data.next6Hours else {
-//                next6HoursForecast.airTemperatureMax = nil
-//                next6HoursForecast.airTemperatureMin = defaultValue
-//                next6HoursForecast.precipitationAmount = defaultValue
-//                next6HoursForecast.precipitationAmountMax = defaultValue
-//                next6HoursForecast.precipitationAmountMin = defaultValue
-//                next6HoursForecast.probabilityOfPrecipitation = defaultValue
-//                next6HoursForecast.symbolCode = ""
-//                print("❌ next6Hours is nil")
                 continue
             }
             if let details = next6Hours.details {
@@ -165,12 +128,9 @@ class WeatherInteractor: WeatherInteractorProtocol {
             
             
             guard let next12Hours = timeSeries.data.next12Hours else {
-//                    next12HoursForecast.probabilityOfPrecipitation = defaultValue
-//                    next12HoursForecast.symbolCode = ""
-//                    print("❌ next12Hours is nil")
-                    continue
-                }
-
+                continue
+            }
+            
             if let details = next12Hours.details {
                 next12HoursForecast.probabilityOfPrecipitation = details.probabilityOfPrecipitation ?? defaultValue
             }
@@ -190,16 +150,40 @@ class WeatherInteractor: WeatherInteractorProtocol {
         
         do {
             try context.save()
-            print("✅ context saved successfully")
-            
-            let weatherIDURI = weatherCoreDataModel.objectID.uriRepresentation().absoluteString
-            print("✅ Weather saved with ID: \(weatherIDURI)")
-       
             completion(.success(()))
         } catch {
-            print("Ошибка при сохранении данных в CoreData: \(error.localizedDescription)")
             completion(.failure(error))
         }
     }
-
+    
+    func fetchFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void) {
+        guard let coordinates = locationService.currentCoordinates else {
+            return
+        }
+        
+        locationService.getLocationName { [weak self] name in
+            guard let self else { return }
+            self.locationName = name
+            self.fetchDataService.fetchData(coordinates: (coordinates.latitude, coordinates.longitude)) { result in
+                switch result {
+                case .success(let weatherJsonModel):
+                    self.saveToCoreData(weatherJsonModel) { result in
+                        switch result {
+                        case .success:
+                            print("Data saved to Core Data successfully.")
+                            completion(.success(weatherJsonModel))
+                        case .failure(let error):
+                            print("Error saving data to Core Data: \(error.localizedDescription)")
+                            completion(.failure(error))
+                        }
+                    }
+                case .failure(let error):
+                    print("Error fetching data from the network: \(error)")
+                    completion(.failure(error))
+                }
+                
+            }
+        }
+    }
+    
 }

@@ -31,7 +31,6 @@ final class CoreDataService {
         
         do {
             let weatherData = try setContext().fetch(request)
-            print(weatherData)
             return weatherData
         } catch {
             print("Error fetching favorite posts: \(error.localizedDescription)")

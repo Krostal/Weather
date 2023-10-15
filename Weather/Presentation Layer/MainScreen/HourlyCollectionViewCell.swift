@@ -29,9 +29,8 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
     }()
     
     private lazy var weatherIcon: UIImageView = {
-        let weatherIcon = UIImageView(image: UIImage(systemName: "cloud.sun"))
+        let weatherIcon = UIImageView()
         weatherIcon.translatesAutoresizingMaskIntoConstraints = false
-        weatherIcon.tintColor = .systemYellow
         return weatherIcon
     }()
     
@@ -73,9 +72,37 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
             hourlyForecastView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             hourlyForecastView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 15),
             hourlyForecastView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -15),
+            
+            weatherIcon.heightAnchor.constraint(equalToConstant: 16),
+            weatherIcon.widthAnchor.constraint(equalToConstant: 16)
         ])
     }
     
+    private func formattedCurrentDate() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm, E d MMMM"
+        dateFormatter.locale = Locale(identifier: "ru_RU")
+        let currentDate = Date()
+        let formattedDate = dateFormatter.string(from: currentDate)
+        return formattedDate
+    }
+    
+}
+
+extension HourlyCollectionViewCell: Configurable {
+    func configure(with model: Weather, at index: Int) {
+        guard let timePeriod = model.timePeriod?.allObjects as? [TimePeriod],
+              let currentData = timePeriod[index].timePeriodData?.instantData,
+              let next1Hoursforecast = timePeriod[index].timePeriodData?.next1HoursForecast,
+              index < timePeriod.count else {
+            return
+        }
+        hourLabel.text = timePeriod[index].time
+        print(hourLabel.text)
+        weatherIcon.image = UIImage(named: next1Hoursforecast.symbolCode ?? "")
+        tempLabel.text = "\(currentData.airTemperature)°"
+        
+    }
 }
 
 

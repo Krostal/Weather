@@ -8,35 +8,34 @@ class LocationService: NSObject {
     private let geocoder = CLGeocoder()
     private var currentLocation: CLLocation?
     var currentCoordinates: (latitude: Double, longitude: Double)?
-    var locationName: String?
+    
     
     override init() {
         super.init()
+        updateLocation()
+    }
+    
+    private func updateLocation() {
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
     }
     
-    private func getLocationName(completion: @escaping (String?) -> Void) {
+    func getLocationName(completion: @escaping (String?) -> Void) {
         if let location = currentLocation {
-            geocoder.reverseGeocodeLocation(location) { [weak self] (placemarks, error) in
-                guard let self else { return }
+            geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+                guard let placemark = placemarks?.first
+                else {
+                    return
+                }
                 if let error = error {
-                    print("Ошибка при обратном геокодировании: \(error.localizedDescription)")
+                    print("Geocoding error \(error.localizedDescription)")
                     completion(nil)
                     return
                 }
                 
-                if let city = placemarks?.first?.locality {
-                    self.locationName = city
-                }
-                
-                if let country = placemarks?.first?.country {
-                    if let name = self.locationName {
-                        self.locationName = name + ", \(country)"
-                    }
-                }
-                completion(self.locationName)
+                let placeName = "\(placemark.locality ?? ""), \(placemark.country ?? "")"
+                completion(placeName)
             }
         }
     }
@@ -52,18 +51,13 @@ extension LocationService: CLLocationManagerDelegate {
             if let currentPlace = currentLocation {
                 self.currentCoordinates = (currentPlace.coordinate.latitude, currentPlace.coordinate.longitude)
             }
-            
-//            для проверки
-//            let currentLattitude = 63.0160100
-//            let currentLongittude = 112.4690100
-//            currentLocation = CLLocation(latitude: currentLattitude, longitude: currentLongittude)
-//            self.currentCoordinates = (currentLattitude, currentLongittude)
-            
-            getLocationName { name in
-                self.locationName = name
-            }
-            
-            
         }
     }
 }
+            
+//                        для проверки
+//                        let currentLattitude = 63.0160100
+//                        let currentLongittude = 112.4690100
+//                        currentLocation = CLLocation(latitude: currentLattitude, longitude: currentLongittude)
+//                        self.currentCoordinates = (currentLattitude, currentLongittude)
+            

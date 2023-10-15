@@ -6,7 +6,7 @@ final class MainViewController: UIViewController {
     
     private lazy var mainView = MainView()
         
-    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService<WeatherJsonModel>(), coreDataService: CoreDataService.shared)
+    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService<WeatherJsonModel>(), coreDataService: CoreDataService.shared, locationService: LocationService())
     
     private var fetchedResultsController: NSFetchedResultsController<Weather>?
     
@@ -15,7 +15,6 @@ final class MainViewController: UIViewController {
         setupView()
         setupNavigationBar()
         fetchWeather()
-        configureFetchedResultController()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -34,7 +33,6 @@ final class MainViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = "Current location"
                 
         let settingsBarButton = UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: #selector(showSettings))
         let locationBarButton = UIBarButtonItem(image: UIImage(systemName: "location"), style: .plain, target: self, action: #selector(showLocation))
@@ -46,6 +44,11 @@ final class MainViewController: UIViewController {
         navigationItem.rightBarButtonItem?.tintColor = .black
     }
     
+    private func updateNavigationBarTitle() {
+        guard let locationName = fetchedResultsController?.fetchedObjects?.last?.location?.name else { return }
+        navigationItem.title = locationName
+    }
+    
     private func fetchWeather() {
         self.mainView.tableView.refreshControl?.beginRefreshing()
         interactor.fetchFromNetwork { [weak self] result in
@@ -53,11 +56,12 @@ final class MainViewController: UIViewController {
             
             DispatchQueue.main.async {
                 switch result {
-                case .success(let weather):
-                    print("получены \(weather.geometry.coordinates)")
+                case .success(_ ):
                     self.mainView.tableView.refreshControl?.endRefreshing()
+                    self.updateNavigationBarTitle()
+                    self.updateCurrentCell()
                 case .failure(let error):
-                    print("Ошибка при получении данных: \(error.localizedDescription)")
+                    print("FetchWeather error \(error.localizedDescription)")
                     self.mainView.tableView.refreshControl?.endRefreshing()
                 }
             }
@@ -69,7 +73,6 @@ final class MainViewController: UIViewController {
         let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: true)
         let request = Weather.fetchRequest()
         request.sortDescriptors = [sortDescriptor]
-        request.fetchLimit = 1
         
         fetchedResultsController = NSFetchedResultsController(
             fetchRequest: request,
@@ -89,7 +92,7 @@ final class MainViewController: UIViewController {
     }
     
     @objc private func refreshWeatherData() {
-        fetchWeather()
+        
     }
     
     @objc private func showSettings(_ sender: UIBarButtonItem) {
@@ -122,6 +125,28 @@ extension MainViewController: MainViewDelegate {
         dailyForecastViewController.headerTitle = navigationItem.title
         navigationController?.pushViewController(dailyForecastViewController, animated: true)
     }
+    
+    func updateCurrentCell() {
+        guard let weatherModel = fetchedResultsController?.fetchedObjects?.last else { return }
+        if let currentCell = mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? CurrentTableViewCell {
+            currentCell.configure(with: weatherModel, at: 0)
+        }
+    }
+    
+    func updateHourlyCell(at index: Int) {
+        guard let weatherModel = fetchedResultsController?.fetchedObjects?.last else { return }
+
+        let indexPath = IndexPath(item: index, section: 0)
+        
+        DispatchQueue.main.async {
+            if let hourlyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 1)) as? HourlyTableViewCell {
+                if let hourlyCollectionCell = hourlyCell.collectionView.cellForItem(at: indexPath) as? HourlyCollectionViewCell {
+                    hourlyCollectionCell.configure(with: weatherModel, at: index)
+                }
+            }
+        }
+    }
+    
 }
 
 extension MainViewController: NSFetchedResultsControllerDelegate {
@@ -155,15 +180,6 @@ extension MainViewController: NSFetchedResultsControllerDelegate {
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         mainView.tableView.endUpdates()
-        if let latestWeather = fetchedResultsController?.fetchedObjects?.first {
-            // Извлечение данных из объекта latestWeather, чтобы установить их как заголовок
-            // Например:
-            let location = latestWeather.location
-            let latitude = location?.latitude
-            let longitude = location?.longitude
-            let title = "Location: Lat \(latitude), Lon \(longitude)"
-            self.navigationItem.title = title
-        }
     }
 }
 

@@ -1,9 +1,12 @@
 
 import UIKit
+import CoreData
 
 protocol MainViewDelegate: AnyObject {
     func showHourlyForecast()
     func showDailyForecast(forDate date: String)
+    func updateCurrentCell()
+    func updateHourlyCell(at index: Int)
 }
 
 final class MainView: UIView {
@@ -13,6 +16,8 @@ final class MainView: UIView {
     private var numberOfDays: Int = 7
     
     private var selectedDate: String?
+    
+    private var fetchedResultsController: NSFetchedResultsController<Weather>?
     
     private enum Constants {
         static let heightHeaderOfCurrentCellSection: CGFloat = 212
@@ -98,6 +103,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let currentCell = tableView.dequeueReusableCell(withIdentifier: CurrentTableViewCell.id, for: indexPath) as? CurrentTableViewCell else {
                 return UITableViewCell()
             }
+            delegate?.updateCurrentCell()
             
             return currentCell
             
@@ -105,6 +111,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let hourlyCell = tableView.dequeueReusableCell(withIdentifier: HourlyTableViewCell.id, for: indexPath) as? HourlyTableViewCell else {
                 return UITableViewCell()
             }
+            hourlyCell.delegate = self
            
             return hourlyCell
         } else {
@@ -182,3 +189,12 @@ extension MainView: HeaderForDailyCellDelegate {
         }
     }
 }
+
+extension MainView: HourlyTableViewCellDelegate {
+    func updateHourlyCollectionCell(at index: Int) {
+        delegate?.updateHourlyCell(at: index)
+    }
+    
+    
+}
+

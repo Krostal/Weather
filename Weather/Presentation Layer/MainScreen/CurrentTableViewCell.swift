@@ -224,8 +224,9 @@ final class CurrentTableViewCell: UITableViewCell {
             
             currentWeatherStackView.topAnchor.constraint(equalTo: infoLabel.bottomAnchor, constant: 8),
             currentWeatherStackView.heightAnchor.constraint(equalToConstant: 30),
-            currentWeatherStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 78),
-            currentWeatherStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -78),
+            currentWeatherStackView.leadingAnchor.constraint(lessThanOrEqualTo: leadingAnchor, constant: 78),
+            currentWeatherStackView.trailingAnchor.constraint(greaterThanOrEqualTo: trailingAnchor, constant: -78),
+            currentWeatherStackView.centerXAnchor.constraint(equalTo: centerXAnchor),
             
             currentTimeLabel.topAnchor.constraint(equalTo: currentWeatherStackView.bottomAnchor, constant: 10),
             currentTimeLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
@@ -275,13 +276,20 @@ final class CurrentTableViewCell: UITableViewCell {
 }
 
 extension CurrentTableViewCell: Configurable {
-    func configure(with model: Weather) {
-//        guard let timePeriod = model.timePeriod?.allObjects as? [TimePeriod],
-//              let currentData = timePeriod.first?.timePeriodData?.instantData else {
-//            return
-//        }
-//        currentTemp.text = String(currentData.airTemperature)
-        
+    func configure(with model: Weather, at index: Int) {
+        guard let timePeriod = model.timePeriod?.allObjects as? [TimePeriod],
+              let currentData = timePeriod.first?.timePeriodData?.instantData,
+              let next1Hoursforecast = timePeriod.first?.timePeriodData?.next1HoursForecast,
+              let next6Hoursforecast = timePeriod.first?.timePeriodData?.next6HoursForecast else {
+            return
+        }
+        tempRangeLabel.text = "\(next6Hoursforecast.airTemperatureMin)° / \(next6Hoursforecast.airTemperatureMax)°"
+        currentTemp.text = "\(currentData.airTemperature)°"
+        infoLabel.text = next1Hoursforecast.symbolCode
+        precipitationAmountLabel.text = "\(next1Hoursforecast.precipitationAmount) мм"
+        windSpeedLabel.text = "\(currentData.windSpeed) м/с"
+        humidityLabel.text = "\(currentData.relativeHumidity)%"
+        currentTimeLabel.text = "\(timePeriod.first?.time)"
     }
 }
 
