@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0906A00B2ADE635100076DB0 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 0906A00A2ADE635100076DB0 /* DGCharts */; };
 		0957A7E62AD6EE8900B1DC36 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7E52AD6EE8900B1DC36 /* OnboardingViewController.swift */; };
 		0957A7E82AD6EFA100B1DC36 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7E72AD6EFA100B1DC36 /* OnboardingView.swift */; };
 		0957A7EF2AD70A8A00B1DC36 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7EE2AD70A8A00B1DC36 /* SettingsViewController.swift */; };
@@ -34,8 +35,6 @@
 		0985D37E2AD3B4CD00063E87 /* TemperatureСhartTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0985D37D2AD3B4CD00063E87 /* TemperatureСhartTableViewCell.swift */; };
 		0985D3802AD3B56000063E87 /* HourlyForecastTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0985D37F2AD3B56000063E87 /* HourlyForecastTableViewCell.swift */; };
 		0985D3822AD3BF7200063E87 /* TemperatureChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0985D3812AD3BF7200063E87 /* TemperatureChartView.swift */; };
-		0985D3852AD3C32B00063E87 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 0985D3842AD3C32B00063E87 /* DGCharts */; };
-		0985D3872AD3C32B00063E87 /* DGChartsDynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 0985D3862AD3C32B00063E87 /* DGChartsDynamic */; };
 		0985D3892AD42B4900063E87 /* InfoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0985D3882AD42B4900063E87 /* InfoCollectionViewCell.swift */; };
 		098C0B822AD96DC5007EB098 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098C0B812AD96DC5007EB098 /* LocationService.swift */; };
 		09B768822ADA513300BC6585 /* ProtocolConfigurable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09B768812ADA513300BC6585 /* ProtocolConfigurable.swift */; };
@@ -100,8 +99,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0985D3872AD3C32B00063E87 /* DGChartsDynamic in Frameworks */,
-				0985D3852AD3C32B00063E87 /* DGCharts in Frameworks */,
+				0906A00B2ADE635100076DB0 /* DGCharts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,8 +275,7 @@
 			);
 			name = Weather;
 			packageProductDependencies = (
-				0985D3842AD3C32B00063E87 /* DGCharts */,
-				0985D3862AD3C32B00063E87 /* DGChartsDynamic */,
+				0906A00A2ADE635100076DB0 /* DGCharts */,
 			);
 			productName = Weather;
 			productReference = 09FB5B7D2AD1322E00B46781 /* Weather.app */;
@@ -309,7 +306,7 @@
 			);
 			mainGroup = 09FB5B742AD1322E00B46781;
 			packageReferences = (
-				0985D3832AD3C32B00063E87 /* XCRemoteSwiftPackageReference "Charts" */,
+				0906A0092ADE635100076DB0 /* XCRemoteSwiftPackageReference "Charts" */,
 			);
 			productRefGroup = 09FB5B7E2AD1322E00B46781 /* Products */;
 			projectDirPath = "";
@@ -524,6 +521,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -552,6 +550,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -590,26 +589,21 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		0985D3832AD3C32B00063E87 /* XCRemoteSwiftPackageReference "Charts" */ = {
+		0906A0092ADE635100076DB0 /* XCRemoteSwiftPackageReference "Charts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/danielgindi/Charts";
 			requirement = {
-				kind = upToNextMinorVersion;
+				kind = upToNextMajorVersion;
 				minimumVersion = 5.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0985D3842AD3C32B00063E87 /* DGCharts */ = {
+		0906A00A2ADE635100076DB0 /* DGCharts */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 0985D3832AD3C32B00063E87 /* XCRemoteSwiftPackageReference "Charts" */;
+			package = 0906A0092ADE635100076DB0 /* XCRemoteSwiftPackageReference "Charts" */;
 			productName = DGCharts;
-		};
-		0985D3862AD3C32B00063E87 /* DGChartsDynamic */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0985D3832AD3C32B00063E87 /* XCRemoteSwiftPackageReference "Charts" */;
-			productName = DGChartsDynamic;
 		};
 /* End XCSwiftPackageProductDependency section */
 

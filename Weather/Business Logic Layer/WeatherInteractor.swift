@@ -20,11 +20,66 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         self.locationService = locationService
     }
     
+    func fetchFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void) {
+        guard let coordinates = locationService.currentCoordinates else {
+            return
+        }
+        
+//        if let existingWeather = self.findExistingWeather(coordinates: coordinates) {
+//            self.context.delete(existingWeather)
+//            print("Погода для координат \(coordinates) успешно удалена")
+//        }
+        
+        locationService.getLocationName { [weak self] name in
+            guard let self else { return }
+            self.locationName = name
+            self.fetchDataService.fetchData(coordinates: (coordinates.latitude, coordinates.longitude)) { result in
+                print(coordinates)
+                switch result {
+                case .success(let weatherJsonModel):
+                    self.saveToCoreData(weatherJsonModel) { result in
+                        switch result {
+                        case .success:
+                            print("Data saved to Core Data successfully.")
+                            completion(.success(weatherJsonModel))
+                        case .failure(let error):
+                            print("Error saving data to Core Data: \(error.localizedDescription)")
+                            completion(.failure(error))
+                        }
+                    }
+                case .failure(let error):
+                    print("Error fetching data from the network: \(error)")
+                    completion(.failure(error))
+                }
+                
+            }
+        }
+    }
+    
+    private func findExistingWeather(coordinates: (latitude: Double, longitude: Double)) -> Weather? {
+        
+        let fetchRequest: NSFetchRequest<Weather> = Weather.fetchRequest()
+        
+        let tolerance = 0.01
+
+        let latitudePredicate = NSPredicate(format: "location.latitude - %f <= %f", coordinates.latitude, tolerance)
+        let longitudePredicate = NSPredicate(format: "location.longitude - %f <= %f", coordinates.longitude, tolerance)
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [latitudePredicate, longitudePredicate])
+        
+        do {
+            let existingWeather = try self.context.fetch(fetchRequest).first
+            return existingWeather
+        } catch {
+            print("Error fetching existing Weather: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
     private func saveToCoreData(_ weather: WeatherJsonModel, completion: @escaping (Result<Void, Error>) -> Void) {
         
-        let weatherCoreDataModel = Weather(context: context)
-        let location = Location(context: context)
-        let unit = Unit(context: context)
+        let weatherCoreDataModel = Weather(context: self.context)
+        let location = Location(context: self.context)
+        let unit = Unit(context: self.context)
         
         weatherCoreDataModel.updatedAt = weather.properties.meta.updatedAt
         // Location
@@ -66,14 +121,14 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         // Time Series
         
         for timeSeries in weather.properties.timeseries {
-            let timePeriod = TimePeriod(context: context)
+            let timePeriod = TimePeriod(context: self.context)
             timePeriod.time = timeSeries.time
             
-            let timePeriodData = TimePeriodData(context: context)
-            let instantData = InstantData(context: context)
-            let next1HoursForecast = Next1HoursForecast(context: context)
-            let next6HoursForecast = Next6HoursForecast(context: context)
-            let next12HoursForecast = Next12HoursForecast(context: context)
+            let timePeriodData = TimePeriodData(context: self.context)
+            let instantData = InstantData(context: self.context)
+            let next1HoursForecast = Next1HoursForecast(context: self.context)
+            let next6HoursForecast = Next6HoursForecast(context: self.context)
+            let next12HoursForecast = Next12HoursForecast(context: self.context)
             
             guard let instantDetails = timeSeries.data.instant.details else {
                 continue
@@ -149,40 +204,10 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         }
         
         do {
-            try context.save()
+            try self.context.save()
             completion(.success(()))
         } catch {
             completion(.failure(error))
-        }
-    }
-    
-    func fetchFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void) {
-        guard let coordinates = locationService.currentCoordinates else {
-            return
-        }
-        
-        locationService.getLocationName { [weak self] name in
-            guard let self else { return }
-            self.locationName = name
-            self.fetchDataService.fetchData(coordinates: (coordinates.latitude, coordinates.longitude)) { result in
-                switch result {
-                case .success(let weatherJsonModel):
-                    self.saveToCoreData(weatherJsonModel) { result in
-                        switch result {
-                        case .success:
-                            print("Data saved to Core Data successfully.")
-                            completion(.success(weatherJsonModel))
-                        case .failure(let error):
-                            print("Error saving data to Core Data: \(error.localizedDescription)")
-                            completion(.failure(error))
-                        }
-                    }
-                case .failure(let error):
-                    print("Error fetching data from the network: \(error)")
-                    completion(.failure(error))
-                }
-                
-            }
         }
     }
     

@@ -4,7 +4,7 @@ import Foundation
 
 final class FetchDataService<T: Decodable> {
     
-    func fetchData(coordinates: (longitude: Double, latitude: Double), completion: @escaping (Result<T,FetchDataError>) -> Void) {
+    func fetchData(coordinates: (latitude: Double, longitude: Double), completion: @escaping (Result<T,FetchDataError>) -> Void) {
         
         let urlString = API.weatherURL(latitude: coordinates.latitude, longitude: coordinates.longitude)
         

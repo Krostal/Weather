@@ -60,6 +60,11 @@ final class MainViewController: UIViewController {
                     self.mainView.tableView.refreshControl?.endRefreshing()
                     self.updateNavigationBarTitle()
                     self.updateCurrentCell()
+                    
+                    for hour in 0..<24 {
+                        self.updateHourlyCell(at: hour)
+                    }
+                                        
                 case .failure(let error):
                     print("FetchWeather error \(error.localizedDescription)")
                     self.mainView.tableView.refreshControl?.endRefreshing()
@@ -84,15 +89,16 @@ final class MainViewController: UIViewController {
         
         do {
             try fetchedResultsController?.performFetch()
-            mainView.tableView.reloadData()
+            DispatchQueue.main.async {
+                self.mainView.tableView.reloadData()
+            }
         } catch {
             print("Error fetching favorite posts: \(error.localizedDescription)")
         }
-        
     }
     
     @objc private func refreshWeatherData() {
-        
+        self.fetchWeather()
     }
     
     @objc private func showSettings(_ sender: UIBarButtonItem) {
@@ -135,7 +141,6 @@ extension MainViewController: MainViewDelegate {
     
     func updateHourlyCell(at index: Int) {
         guard let weatherModel = fetchedResultsController?.fetchedObjects?.last else { return }
-
         let indexPath = IndexPath(item: index, section: 0)
         
         DispatchQueue.main.async {
@@ -146,7 +151,7 @@ extension MainViewController: MainViewDelegate {
             }
         }
     }
-    
+
 }
 
 extension MainViewController: NSFetchedResultsControllerDelegate {

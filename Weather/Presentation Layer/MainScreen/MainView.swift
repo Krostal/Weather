@@ -112,7 +112,6 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             hourlyCell.delegate = self
-           
             return hourlyCell
         } else {
             guard let dailyCell = tableView.dequeueReusableCell(withIdentifier: DailyTableViewCell.id, for: indexPath) as? DailyTableViewCell else {
@@ -191,10 +190,9 @@ extension MainView: HeaderForDailyCellDelegate {
 }
 
 extension MainView: HourlyTableViewCellDelegate {
+    
     func updateHourlyCollectionCell(at index: Int) {
         delegate?.updateHourlyCell(at: index)
     }
-    
-    
 }
 

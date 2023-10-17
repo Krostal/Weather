@@ -78,30 +78,57 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
         ])
     }
     
-    private func formattedCurrentDate() -> String {
+    func toFormattedString(date: Date) -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm, E d MMMM"
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        let currentDate = Date()
-        let formattedDate = dateFormatter.string(from: currentDate)
-        return formattedDate
+        dateFormatter.dateFormat = "HH:mm"
+        return dateFormatter.string(from: date)
     }
-    
+
 }
 
 extension HourlyCollectionViewCell: Configurable {
     func configure(with model: Weather, at index: Int) {
-        guard let timePeriod = model.timePeriod?.allObjects as? [TimePeriod],
-              let currentData = timePeriod[index].timePeriodData?.instantData,
-              let next1Hoursforecast = timePeriod[index].timePeriodData?.next1HoursForecast,
-              index < timePeriod.count else {
+        guard let timePeriod = (model.timePeriod?.allObjects as? [TimePeriod]),
+              index < timePeriod.count && index < 24 else {
             return
         }
-        hourLabel.text = timePeriod[index].time
-        print(hourLabel.text)
-        weatherIcon.image = UIImage(named: next1Hoursforecast.symbolCode ?? "")
-        tempLabel.text = "\(currentData.airTemperature)°"
         
+        let sortedTimePeriod = timePeriod.sorted(by: { ($0.time ?? "") < ($1.time ?? "")})
+
+        var forecastFor24Hours: [TimePeriod] = []
+        for i in 0..<min(24, sortedTimePeriod.count) {
+            forecastFor24Hours.append(sortedTimePeriod[i])
+        }
+        
+        guard let currentData = forecastFor24Hours[index].timePeriodData?.instantData,
+              let next1Hoursforecast = forecastFor24Hours[index].timePeriodData?.next1HoursForecast else {
+            return
+        }
+        
+        if let savedTime = forecastFor24Hours[index].time {
+            if let time = ISO8601DateFormatter().date(from: savedTime) {
+                let currentTime = toFormattedString(date: time)
+                hourLabel.text = "\(currentTime)"
+                weatherIcon.image = UIImage(named: next1Hoursforecast.symbolCode ?? "")
+                tempLabel.text = "\(currentData.airTemperature)°"
+            }
+            
+        }
+        
+//        let stringTime = ISO8601DateFormatter().string(from: Date())
+//        let roundedTime = stringTime.prefix(13)
+//        
+//        if let index = sortedTimePeriod.firstIndex(where: {
+//            if let time = $0.time?.prefix(13) {
+//                return roundedTime == time
+//            }
+//            return false
+//        }) {
+//            self.currentHourIndex = index
+//            self.isCurrentTimeItem = true
+//        } else {
+//            print("Ошибка поиска индекса текущего времени в массиве")
+//        }
     }
 }
 
