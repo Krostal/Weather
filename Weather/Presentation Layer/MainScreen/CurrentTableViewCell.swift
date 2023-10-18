@@ -277,39 +277,20 @@ final class CurrentTableViewCell: UITableViewCell {
 
 extension CurrentTableViewCell: Configurable {
     func configure(with model: Weather, at index: Int) {
-        guard let timePeriod = (model.timePeriod?.allObjects as? [TimePeriod]) else {
-            return
-        }
-        let sortedTimePeriod = timePeriod.sorted(by: { ($0.time ?? "") < ($1.time ?? "")})
         
-        let stringTime = ISO8601DateFormatter().string(from: Date())
-        let roundedTime = stringTime.prefix(13)
-        var indexOfCurrentTime: Int = 0
-        
-        if let index = sortedTimePeriod.firstIndex(where: {
-            if let time = $0.time?.prefix(13) {
-                return roundedTime == time
-            }
-            return false
-        }) {
-            indexOfCurrentTime = index
-        } else {
-            print("Ошибка поиска индекса текущего времени в массиве")
-        }
-        
-        let currentTime = sortedTimePeriod[indexOfCurrentTime]
-        guard let currentData = currentTime.timePeriodData?.instantData,
-              let next1Hoursforecast = currentTime.timePeriodData?.next1HoursForecast,
-              let next6Hoursforecast = currentTime.timePeriodData?.next6HoursForecast else {
+        guard let timePeriodSet = model.timePeriod,
+              let timePeriod = Array(timePeriodSet) as? [TimePeriod],
+              let instantData = timePeriod.first?.timePeriodData?.instantData,
+              let next1Hoursforecast = timePeriod.first?.timePeriodData?.next1HoursForecast,
+              let next6Hoursforecast = timePeriod.first?.timePeriodData?.next6HoursForecast else {
             return
         }
         
         tempRangeLabel.text = "\(next6Hoursforecast.airTemperatureMin)° / \(next6Hoursforecast.airTemperatureMax)°"
-        currentTemp.text = "\(currentData.airTemperature)°"
+        currentTemp.text = "\(instantData.airTemperature)°"
         infoLabel.text = next1Hoursforecast.symbolCode
         precipitationAmountLabel.text = "\(next1Hoursforecast.precipitationAmount) мм"
-        windSpeedLabel.text = "\(currentData.windSpeed) м/с"
-        humidityLabel.text = "\(currentData.relativeHumidity)%"
+        windSpeedLabel.text = "\(instantData.windSpeed) м/с"
+        humidityLabel.text = "\(instantData.relativeHumidity)%"
     }
 }
-

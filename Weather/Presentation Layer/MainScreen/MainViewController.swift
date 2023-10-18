@@ -7,9 +7,7 @@ final class MainViewController: UIViewController {
     private lazy var mainView = MainView()
         
     private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService<WeatherJsonModel>(), coreDataService: CoreDataService.shared, locationService: LocationService())
-    
-    private var fetchedResultsController: NSFetchedResultsController<Weather>?
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -19,7 +17,6 @@ final class MainViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        configureFetchedResultController()
         let backButton = UIBarButtonItem()
         backButton.title = "Назад"
         navigationItem.backBarButtonItem = backButton
@@ -45,8 +42,19 @@ final class MainViewController: UIViewController {
     }
     
     private func updateNavigationBarTitle() {
-        guard let locationName = fetchedResultsController?.fetchedObjects?.last?.location?.name else { return }
-        navigationItem.title = locationName
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        request.fetchLimit = 1
+            
+            do {
+                let result = try CoreDataService.shared.setContext().fetch(request)
+                if let weather = result.last {
+                    if let locationName = weather.location?.name {
+                        navigationItem.title = locationName
+                    }
+                }
+            } catch {
+                print("Error fetching weather data: \(error.localizedDescription)")
+            }
     }
     
     private func fetchWeather() {
@@ -64,36 +72,16 @@ final class MainViewController: UIViewController {
                     for hour in 0..<24 {
                         self.updateHourlyCell(at: hour)
                     }
-                                        
+                    
+                    for day in 0..<self.mainView.numberOfDays {
+                        self.updateDailyCell(at: day)
+                    }
+                    
                 case .failure(let error):
                     print("FetchWeather error \(error.localizedDescription)")
                     self.mainView.tableView.refreshControl?.endRefreshing()
                 }
             }
-        }
-    }
-    
-    private func configureFetchedResultController() {
-
-        let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: true)
-        let request = Weather.fetchRequest()
-        request.sortDescriptors = [sortDescriptor]
-        
-        fetchedResultsController = NSFetchedResultsController(
-            fetchRequest: request,
-            managedObjectContext: CoreDataService.shared.setContext(),
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
-        fetchedResultsController?.delegate = self
-        
-        do {
-            try fetchedResultsController?.performFetch()
-            DispatchQueue.main.async {
-                self.mainView.tableView.reloadData()
-            }
-        } catch {
-            print("Error fetching favorite posts: \(error.localizedDescription)")
         }
     }
     
@@ -133,58 +121,62 @@ extension MainViewController: MainViewDelegate {
     }
     
     func updateCurrentCell() {
-        guard let weatherModel = fetchedResultsController?.fetchedObjects?.last else { return }
-        if let currentCell = mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? CurrentTableViewCell {
-            currentCell.configure(with: weatherModel, at: 0)
+        
+        let currentDate = Date()
+        let calendar = Calendar.current
+        guard let startDate = calendar.date(byAdding: .minute, value: -59, to: currentDate),
+              let endDate = calendar.date(byAdding: .second, value: 59, to: currentDate) else { return }
+
+            
+        let predicate = NSPredicate(format: "ANY timePeriod.time >= %@ AND ANY timePeriod.time <= %@", startDate as CVarArg, endDate as CVarArg)
+            
+            let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+            request.predicate = predicate
+            request.fetchLimit = 1
+            
+        do {
+            let result = try CoreDataService.shared.setContext().fetch(request)
+            if let weather = result.last {
+                if let currentCell = mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? CurrentTableViewCell {
+                    currentCell.configure(with: weather, at: 0)
+                }
+            }
+        } catch {
+            print("updateCurrentCell: Error fetching weather data: \(error.localizedDescription)")
         }
     }
     
     func updateHourlyCell(at index: Int) {
-        guard let weatherModel = fetchedResultsController?.fetchedObjects?.last else { return }
-        let indexPath = IndexPath(item: index, section: 0)
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
         
-        DispatchQueue.main.async {
-            if let hourlyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 1)) as? HourlyTableViewCell {
-                if let hourlyCollectionCell = hourlyCell.collectionView.cellForItem(at: indexPath) as? HourlyCollectionViewCell {
-                    hourlyCollectionCell.configure(with: weatherModel, at: index)
+        do {
+            let result = try CoreDataService.shared.setContext().fetch(request)
+            if let weather = result.last {
+                let indexPath = IndexPath(item: index, section: 0)
+                if let hourlyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 1)) as? HourlyTableViewCell {
+                    if let hourlyCollectionCell = hourlyCell.collectionView.cellForItem(at: indexPath) as? HourlyCollectionViewCell {
+                        hourlyCollectionCell.configure(with: weather, at: index)
+                    }
                 }
+            }
+        } catch {
+            print("updateHourlyCell: Error fetching weather data: \(error.localizedDescription)")
+        }
+    }
+    
+    func updateDailyCell(at index: Int) {
+//        guard let weatherModel = fetchedResultsController?.fetchedObjects?.last else { return }
+//        if let dailyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: index, section: 2)) as? DailyTableViewCell {
+//            dailyCell.configure(with: weatherModel, at: index)
+//        }
+    }
+    
+    func changeForecastDays() {
+        DispatchQueue.main.async {
+            for day in 0..<self.mainView.numberOfDays {
+                self.updateDailyCell(at: day)
             }
         }
     }
 
 }
-
-extension MainViewController: NSFetchedResultsControllerDelegate {
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        mainView.tableView.beginUpdates()
-    }
-    
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        switch type {
-        case .insert:
-//            guard let newIndexPath else { return }
-//            mainView.tableView.insertRows(at: [newIndexPath], with: .left)
-            mainView.tableView.reloadData()
-        case .delete:
-//            guard let indexPath else { return }
-//            mainView.tableView.deleteRows(at: [indexPath], with: .right)
-            mainView.tableView.reloadData()
-        case .move:
-//            guard let indexPath, let newIndexPath else { return }
-//            mainView.tableView.deleteRows(at: [indexPath], with: .right)
-//            mainView.tableView.insertRows(at: [newIndexPath], with: .left)
-            mainView.tableView.reloadData()
-        case .update:
-//            guard let indexPath else { return }
-//            mainView.tableView.reloadRows(at: [indexPath], with: .fade)
-            mainView.tableView.reloadData()
-        @unknown default:
-            fatalError()
-        }
-    }
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        mainView.tableView.endUpdates()
-    }
-}
-

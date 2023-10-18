@@ -7,13 +7,15 @@ protocol MainViewDelegate: AnyObject {
     func showDailyForecast(forDate date: String)
     func updateCurrentCell()
     func updateHourlyCell(at index: Int)
+    func updateDailyCell(at index: Int)
+    func changeForecastDays()
 }
 
 final class MainView: UIView {
     
     weak var delegate: MainViewDelegate?
     
-    private var numberOfDays: Int = 7
+    var numberOfDays: Int = 7
     
     private var selectedDate: String?
     
@@ -129,6 +131,8 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             } else {
                 selectedDate = nil
             }
+            
+            delegate?.updateDailyCell(at: indexPath.row)
 
             return dailyCell
         }
@@ -181,8 +185,8 @@ extension MainView: HeaderForHourlyCellDelegate {
 extension MainView: HeaderForDailyCellDelegate {
     func updateDaysCount(_ daysCount: Int) {
         self.numberOfDays = daysCount
+        delegate?.changeForecastDays()
         tableView.reloadSections(IndexSet(integer: 2), with: .fade)
-        
         if let headerForDailyCell = tableView.headerView(forSection: 2) as? HeaderForDailyCell {
             headerForDailyCell.updateButtonText("\(numberOfDays) дней")
         }

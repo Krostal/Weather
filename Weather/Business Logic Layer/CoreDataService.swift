@@ -38,5 +38,18 @@ final class CoreDataService {
         }
     }
     
+    func isAlreadyExist(updatedAt: Date) -> Bool {
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        request.predicate = NSPredicate(format: "updatedAt == %@", updatedAt as CVarArg)
+
+        do {
+            let result = try setContext().fetch(request)
+            return !result.isEmpty
+        } catch {
+            print("Error checking existing weather data: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
 }
 

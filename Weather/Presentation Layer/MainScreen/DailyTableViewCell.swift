@@ -140,5 +140,33 @@ final class DailyTableViewCell: UITableViewCell {
             rightStackView.bottomAnchor.constraint(equalTo: infoView.bottomAnchor),
         ])
     }
+    
+    func toFormattedString(date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd'T'HH"
+        dateFormatter.locale = .current
+        return dateFormatter.string(from: date)
+    }
+    
+//    private func formatTime(fromDate date: Date) -> String {
+//        let dateFormatter = DateFormatter()
+//        dateFormatter.dateFormat = "yyyy-MM-dd HH"
+//        dateFormatter.timeZone = .current
+//        let formattedDate = dateFormatter.string(from: date)
+//        return formattedDate
+//    }
 
+}
+
+extension DailyTableViewCell: Configurable {
+    func configure(with model: Weather, at index: Int) {
+        guard let timePeriodSet = model.timePeriod,
+              let timePeriod = Array(timePeriodSet) as? [TimePeriod] else {
+            return
+        }
+        
+        
+    }
+    
+    
 }

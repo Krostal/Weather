@@ -25,11 +25,6 @@ final class WeatherInteractor: WeatherInteractorProtocol {
             return
         }
         
-//        if let existingWeather = self.findExistingWeather(coordinates: coordinates) {
-//            self.context.delete(existingWeather)
-//            print("Погода для координат \(coordinates) успешно удалена")
-//        }
-        
         locationService.getLocationName { [weak self] name in
             guard let self else { return }
             self.locationName = name
@@ -40,7 +35,6 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                     self.saveToCoreData(weatherJsonModel) { result in
                         switch result {
                         case .success:
-                            print("Data saved to Core Data successfully.")
                             completion(.success(weatherJsonModel))
                         case .failure(let error):
                             print("Error saving data to Core Data: \(error.localizedDescription)")
@@ -77,11 +71,25 @@ final class WeatherInteractor: WeatherInteractorProtocol {
     
     private func saveToCoreData(_ weather: WeatherJsonModel, completion: @escaping (Result<Void, Error>) -> Void) {
         
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.timeZone = .current
+        
+        guard let updatedAt = dateFormatter.date(from: weather.properties.meta.updatedAt) else {
+            return
+        }
+        
+        if coreDataService.isAlreadyExist(updatedAt: updatedAt) {
+            print("Weather with matching updatedAt already exists")
+            completion(.success(()))
+            return
+        }
+        
         let weatherCoreDataModel = Weather(context: self.context)
         let location = Location(context: self.context)
         let unit = Unit(context: self.context)
         
-        weatherCoreDataModel.updatedAt = weather.properties.meta.updatedAt
+        weatherCoreDataModel.updatedAt = updatedAt
+        
         // Location
         let coordinates = weather.geometry.coordinates
         location.longitude = coordinates[0]
@@ -122,7 +130,8 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         
         for timeSeries in weather.properties.timeseries {
             let timePeriod = TimePeriod(context: self.context)
-            timePeriod.time = timeSeries.time
+            
+            timePeriod.time = dateFormatter.date(from: timeSeries.time)
             
             let timePeriodData = TimePeriodData(context: self.context)
             let instantData = InstantData(context: self.context)
@@ -205,6 +214,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         
         do {
             try self.context.save()
+            print("Data saved to Core Data successfully.")
             completion(.success(()))
         } catch {
             completion(.failure(error))

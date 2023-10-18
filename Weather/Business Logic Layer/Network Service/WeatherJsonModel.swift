@@ -19,7 +19,7 @@ struct Properties: Codable {
 }
 
 struct Meta: Codable {
-    let updatedAt: String?
+    let updatedAt: String
     let units: Units
 }
 
