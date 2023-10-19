@@ -78,7 +78,7 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
         ])
     }
     
-    func toFormattedString(date: Date) -> String {
+    private func toFormattedString(date: Date) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
         dateFormatter.timeZone = .current
@@ -91,28 +91,23 @@ extension HourlyCollectionViewCell: Configurable {
     func configure(with model: Weather, at index: Int) {
         guard let timePeriodSet = model.timePeriod,
               let timePeriod = Array(timePeriodSet.prefix(24)) as? [TimePeriod],
+              let currentData = timePeriod[index].timePeriodData?.instantData,
+              let next1Hoursforecast = timePeriod[index].timePeriodData?.next1HoursForecast,
               index < timePeriod.count else {
             return
         }
         
-        var forecastFor24Hours: [TimePeriod] = []
-        for i in 0..<timePeriod.count {
-            forecastFor24Hours.append(timePeriod[i])
+        
+        if let savedStringTime = timePeriod[index].time {
+            if let savedTime = ISO8601DateFormatter().date(from: savedStringTime) {
+                let time = toFormattedString(date: savedTime)
+                hourLabel.text = "\(time)"
+                weatherIcon.image = UIImage(named: next1Hoursforecast.symbolCode ?? "")
+                tempLabel.text = "\(currentData.airTemperature)°"
+            }
         }
-        
-        guard let currentData = forecastFor24Hours[index].timePeriodData?.instantData,
-              let next1Hoursforecast = forecastFor24Hours[index].timePeriodData?.next1HoursForecast else {
-            return
-        }
-        
-        if let savedTime = forecastFor24Hours[index].time {
-            let time = toFormattedString(date: savedTime)
-            hourLabel.text = "\(time)"
-        }
-        
-        weatherIcon.image = UIImage(named: next1Hoursforecast.symbolCode ?? "")
-        tempLabel.text = "\(currentData.airTemperature)°"
-        
     }
 }
+
+
 

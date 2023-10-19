@@ -77,6 +77,8 @@ final class MainViewController: UIViewController {
                         self.updateDailyCell(at: day)
                     }
                     
+//                    self.mainView.tableView.reloadData()
+                    
                 case .failure(let error):
                     print("FetchWeather error \(error.localizedDescription)")
                     self.mainView.tableView.refreshControl?.endRefreshing()
@@ -102,7 +104,6 @@ final class MainViewController: UIViewController {
         navigationController?.modalTransitionStyle = .coverVertical
         navigationController?.present(onboardingViewController, animated: true)
     }
-    
 }
 
 extension MainViewController: MainViewDelegate {
@@ -121,54 +122,43 @@ extension MainViewController: MainViewDelegate {
     }
     
     func updateCurrentCell() {
-        
-        let currentDate = Date()
-        let calendar = Calendar.current
-        guard let startDate = calendar.date(byAdding: .minute, value: -59, to: currentDate),
-              let endDate = calendar.date(byAdding: .second, value: 59, to: currentDate) else { return }
-
-            
-        let predicate = NSPredicate(format: "ANY timePeriod.time >= %@ AND ANY timePeriod.time <= %@", startDate as CVarArg, endDate as CVarArg)
-            
-            let request: NSFetchRequest<Weather> = Weather.fetchRequest()
-            request.predicate = predicate
-            request.fetchLimit = 1
-            
-        do {
-            let result = try CoreDataService.shared.setContext().fetch(request)
-            if let weather = result.last {
-                if let currentCell = mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? CurrentTableViewCell {
-                    currentCell.configure(with: weather, at: 0)
-                }
+        let weathersArray = interactor.getWeatherFromCoreData(withPredicate: nil)
+        if let weather = weathersArray.last {
+            if let currentCell = self.mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? CurrentTableViewCell {
+                currentCell.configure(with: weather, at: 0)
             }
-        } catch {
-            print("updateCurrentCell: Error fetching weather data: \(error.localizedDescription)")
         }
     }
     
     func updateHourlyCell(at index: Int) {
-        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
-        
-        do {
-            let result = try CoreDataService.shared.setContext().fetch(request)
-            if let weather = result.last {
-                let indexPath = IndexPath(item: index, section: 0)
-                if let hourlyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 1)) as? HourlyTableViewCell {
-                    if let hourlyCollectionCell = hourlyCell.collectionView.cellForItem(at: indexPath) as? HourlyCollectionViewCell {
-                        hourlyCollectionCell.configure(with: weather, at: index)
-                    }
+        let weathersArray = interactor.getWeatherFromCoreData(withPredicate: nil)
+        if let weather = weathersArray.last {
+            let indexPath = IndexPath(item: index, section: 0)
+            if let hourlyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 1)) as? HourlyTableViewCell {
+                if let hourlyCollectionCell = hourlyCell.collectionView.cellForItem(at: indexPath) as? HourlyCollectionViewCell {
+                    hourlyCollectionCell.configure(with: weather, at: index)
                 }
             }
-        } catch {
-            print("updateHourlyCell: Error fetching weather data: \(error.localizedDescription)")
         }
     }
     
     func updateDailyCell(at index: Int) {
-//        guard let weatherModel = fetchedResultsController?.fetchedObjects?.last else { return }
-//        if let dailyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: index, section: 2)) as? DailyTableViewCell {
-//            dailyCell.configure(with: weatherModel, at: index)
-//        }
+        let request: NSFetchRequest<TimePeriod> = TimePeriod.fetchRequest()
+
+        do {
+            let result = try CoreDataService.shared.setContext().fetch(request)
+            print("Количество полученных массивов TimePeriod:", result.count)
+        } catch {
+            print("Error checking existing weather data: \(error.localizedDescription)")
+        }
+        
+        let weathersArray = interactor.getWeatherFromCoreData(withPredicate: nil)
+        if let weather = weathersArray.last {
+            print("Количество полученных массивов Wether.timePeriod:", weather.timePeriod?.count)
+            if let dailyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: index, section: 2)) as? DailyTableViewCell {
+                dailyCell.configure(with: weather, at: index)
+            }
+        }
     }
     
     func changeForecastDays() {

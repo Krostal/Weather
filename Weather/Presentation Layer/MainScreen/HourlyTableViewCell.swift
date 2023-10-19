@@ -49,7 +49,6 @@ final class HourlyTableViewCell: UITableViewCell {
             collectionView.heightAnchor.constraint(equalToConstant: 85)
         ])
     }
-
 }
 
 extension HourlyTableViewCell: UICollectionViewDataSource {
@@ -63,7 +62,8 @@ extension HourlyTableViewCell: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        delegate?.updateHourlyCollectionCell(at: indexPath.item)
+        delegate?.updateHourlyCollectionCell(at: indexPath.row)
+        print("IndexPath.item", indexPath.row)
         
         return cell
     }

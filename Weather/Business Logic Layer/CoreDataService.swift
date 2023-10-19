@@ -38,9 +38,9 @@ final class CoreDataService {
         }
     }
     
-    func isAlreadyExist(updatedAt: Date) -> Bool {
+    func isAlreadyExist(updatedAt: String, locationName: String) -> Bool {
         let request: NSFetchRequest<Weather> = Weather.fetchRequest()
-        request.predicate = NSPredicate(format: "updatedAt == %@", updatedAt as CVarArg)
+        request.predicate = NSPredicate(format: "location.name ==%@ AND updatedAt == %@", locationName as CVarArg, updatedAt as CVarArg)
 
         do {
             let result = try setContext().fetch(request)

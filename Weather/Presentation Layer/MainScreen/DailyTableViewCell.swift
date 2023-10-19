@@ -161,12 +161,14 @@ final class DailyTableViewCell: UITableViewCell {
 extension DailyTableViewCell: Configurable {
     func configure(with model: Weather, at index: Int) {
         guard let timePeriodSet = model.timePeriod,
-              let timePeriod = Array(timePeriodSet) as? [TimePeriod] else {
+              let timePeriod = Array(timePeriodSet) as? [TimePeriod],
+              let currentData = timePeriod[index].timePeriodData?.instantData,
+              let next1Hoursforecast = timePeriod[index].timePeriodData?.next1HoursForecast,
+              index < timePeriod.count else {
             return
         }
         
-        
     }
-    
-    
 }
+
+

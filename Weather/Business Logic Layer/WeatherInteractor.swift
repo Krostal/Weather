@@ -3,6 +3,7 @@ import CoreData
 
 protocol WeatherInteractorProtocol {
     func fetchFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void)
+    func getWeatherFromCoreData(withPredicate predicate: NSPredicate?) -> [Weather]
 }
 
 final class WeatherInteractor: WeatherInteractorProtocol {
@@ -50,6 +51,22 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         }
     }
     
+    func getWeatherFromCoreData(withPredicate predicate: NSPredicate?) -> [Weather] {
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        
+        if let predicate = predicate {
+            request.predicate = predicate
+        }
+        
+        do {
+            let results = try self.context.fetch(request)
+            return results
+        } catch {
+            print("Error fetching weather data: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
     private func findExistingWeather(coordinates: (latitude: Double, longitude: Double)) -> Weather? {
         
         let fetchRequest: NSFetchRequest<Weather> = Weather.fetchRequest()
@@ -71,17 +88,14 @@ final class WeatherInteractor: WeatherInteractorProtocol {
     
     private func saveToCoreData(_ weather: WeatherJsonModel, completion: @escaping (Result<Void, Error>) -> Void) {
         
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.timeZone = .current
+        let updatedAt = weather.properties.meta.updatedAt
         
-        guard let updatedAt = dateFormatter.date(from: weather.properties.meta.updatedAt) else {
-            return
-        }
-        
-        if coreDataService.isAlreadyExist(updatedAt: updatedAt) {
-            print("Weather with matching updatedAt already exists")
-            completion(.success(()))
-            return
+        if let location = locationName {
+            if coreDataService.isAlreadyExist(updatedAt: updatedAt, locationName: location) {
+                print("Weather with matching updatedAt already exists")
+                completion(.success(()))
+                return
+            }
         }
         
         let weatherCoreDataModel = Weather(context: self.context)
@@ -131,7 +145,8 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         for timeSeries in weather.properties.timeseries {
             let timePeriod = TimePeriod(context: self.context)
             
-            timePeriod.time = dateFormatter.date(from: timeSeries.time)
+            timePeriod.time = timeSeries.time
+            print("Время: \(timePeriod.time)")
             
             let timePeriodData = TimePeriodData(context: self.context)
             let instantData = InstantData(context: self.context)

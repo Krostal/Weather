@@ -52,7 +52,7 @@
         <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next12HoursForecast" inverseEntity="TimePeriodData"/>
     </entity>
     <entity name="TimePeriod" representedClassName="TimePeriod" syncable="YES" codeGenerationType="class">
-        <attribute name="time" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="time" optional="YES" attributeType="String"/>
         <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="timePeriod" inverseEntity="TimePeriodData"/>
         <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="timePeriod" inverseEntity="Weather"/>
     </entity>
@@ -91,7 +91,7 @@
         <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="unit" inverseEntity="Weather"/>
     </entity>
     <entity name="Weather" representedClassName="Weather" syncable="YES" codeGenerationType="class">
-        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="updatedAt" attributeType="String"/>
         <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Location" inverseName="weather" inverseEntity="Location"/>
         <relationship name="timePeriod" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="TimePeriod" inverseName="weather" inverseEntity="TimePeriod"/>
         <relationship name="unit" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Unit" inverseName="weather" inverseEntity="Unit"/>

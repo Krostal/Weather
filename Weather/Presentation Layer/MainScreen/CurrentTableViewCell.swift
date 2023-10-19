@@ -273,6 +273,15 @@ final class CurrentTableViewCell: UITableViewCell {
         let formattedDate = dateFormatter.string(from: currentDate)
         return formattedDate
     }
+    
+    private func formattedCurrentHour() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = TimeZone(identifier: "UTC")
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH"
+        let currentDate = Date()
+        let formattedDate = dateFormatter.string(from: currentDate)
+        return formattedDate
+    }
 }
 
 extension CurrentTableViewCell: Configurable {
@@ -280,11 +289,19 @@ extension CurrentTableViewCell: Configurable {
         
         guard let timePeriodSet = model.timePeriod,
               let timePeriod = Array(timePeriodSet) as? [TimePeriod],
-              let instantData = timePeriod.first?.timePeriodData?.instantData,
-              let next1Hoursforecast = timePeriod.first?.timePeriodData?.next1HoursForecast,
-              let next6Hoursforecast = timePeriod.first?.timePeriodData?.next6HoursForecast else {
+                let currentTimePeriod = timePeriod.first(where: { timePeriod in
+                    if let currentTime = timePeriod.time?.prefix(13) {
+                        return currentTime == formattedCurrentHour()
+                    }
+                    return false
+                }),
+              let instantData = currentTimePeriod.timePeriodData?.instantData,
+              let next1Hoursforecast = currentTimePeriod.timePeriodData?.next1HoursForecast,
+              let next6Hoursforecast = currentTimePeriod.timePeriodData?.next6HoursForecast else {
             return
         }
+        
+        print(currentTimePeriod.time)
         
         tempRangeLabel.text = "\(next6Hoursforecast.airTemperatureMin)° / \(next6Hoursforecast.airTemperatureMax)°"
         currentTemp.text = "\(instantData.airTemperature)°"
