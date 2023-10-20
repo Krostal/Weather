@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22222" systemVersion="23A344" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22225" systemVersion="23A344" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
     <entity name="InstantData" representedClassName="InstantData" syncable="YES" codeGenerationType="class">
         <attribute name="airPressureAtSeaLevel" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="airTemperature" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -51,7 +51,7 @@
         <attribute name="symbolCode" optional="YES" attributeType="String"/>
         <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next12HoursForecast" inverseEntity="TimePeriodData"/>
     </entity>
-    <entity name="TimePeriod" representedClassName="TimePeriod" isAbstract="YES" syncable="YES" codeGenerationType="class">
+    <entity name="TimePeriod" representedClassName="TimePeriod" syncable="YES" codeGenerationType="class">
         <attribute name="time" optional="YES" attributeType="String"/>
         <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="TimePeriodData" inverseName="timePeriod" inverseEntity="TimePeriodData"/>
         <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="timePeriod" inverseEntity="Weather"/>

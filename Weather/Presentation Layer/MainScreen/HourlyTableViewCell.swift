@@ -63,7 +63,6 @@ extension HourlyTableViewCell: UICollectionViewDataSource {
         }
         
         delegate?.updateHourlyCollectionCell(at: indexPath.row)
-        print("IndexPath.item", indexPath.row)
         
         return cell
     }

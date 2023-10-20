@@ -50,6 +50,7 @@ final class CoreDataService {
                     return true
                 } else {
                     setContext().delete(existingWeather)
+                    print("Существующая модель Weather для данной локации \(locationName) удалена")
                     return false
                 }
             }

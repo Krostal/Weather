@@ -143,18 +143,8 @@ extension MainViewController: MainViewDelegate {
     }
     
     func updateDailyCell(at index: Int) {
-        let request: NSFetchRequest<TimePeriod> = TimePeriod.fetchRequest()
-
-        do {
-            let result = try CoreDataService.shared.setContext().fetch(request)
-            print("Количество полученных массивов TimePeriod:", result.count)
-        } catch {
-            print("Error checking existing weather data: \(error.localizedDescription)")
-        }
-        
         let weathersArray = interactor.getWeatherFromCoreData(withPredicate: nil)
         if let weather = weathersArray.last {
-            print("Количество полученных массивов Wether.timePeriod:", weather.timePeriod?.count)
             if let dailyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: index, section: 2)) as? DailyTableViewCell {
                 dailyCell.configure(with: weather, at: index)
             }

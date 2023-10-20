@@ -300,9 +300,7 @@ extension CurrentTableViewCell: Configurable {
               let next6Hoursforecast = currentTimePeriod.timePeriodData?.next6HoursForecast else {
             return
         }
-        
-        print(currentTimePeriod.time)
-        
+                
         tempRangeLabel.text = "\(next6Hoursforecast.airTemperatureMin)° / \(next6Hoursforecast.airTemperatureMax)°"
         currentTemp.text = "\(instantData.airTemperature)°"
         infoLabel.text = next1Hoursforecast.symbolCode

@@ -68,31 +68,6 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         }
     }
     
-    private func deleteWeatherWithLocationName(_ locationName: String) -> Bool {
-        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
-        request.predicate = NSPredicate(format: "location.name == %@", locationName)
-
-        do {
-            let context = CoreDataService.shared.setContext()
-            let result = try context.fetch(request)
-
-            for existingWeather in result {
-                context.delete(existingWeather)
-            }
-
-            do {
-                try context.save()
-                return true
-            } catch {
-                print("Error saving context: \(error.localizedDescription)")
-                return false
-            }
-        } catch {
-            print("Error fetching weather data: \(error.localizedDescription)")
-            return false
-        }
-    }
-    
     private func saveToCoreData(_ weather: WeatherJsonModel, completion: @escaping (Result<Void, Error>) -> Void) {
         
         let updatedAt = weather.properties.meta.updatedAt
@@ -153,7 +128,6 @@ final class WeatherInteractor: WeatherInteractorProtocol {
             let timePeriod = TimePeriod(context: self.context)
             
             timePeriod.time = timeSeries.time
-            print("Время: \(timePeriod.time)")
             
             let timePeriodData = TimePeriodData(context: self.context)
             let instantData = InstantData(context: self.context)
@@ -226,8 +200,6 @@ final class WeatherInteractor: WeatherInteractorProtocol {
             timePeriod.timePeriodData = timePeriodData
             
             weatherCoreDataModel.addToTimePeriod(timePeriod)
-            print("Счетчик:", weatherCoreDataModel.timePeriod?.count)
-            
         }
         
         do {
