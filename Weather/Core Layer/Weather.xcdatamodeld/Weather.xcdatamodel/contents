@@ -51,16 +51,16 @@
         <attribute name="symbolCode" optional="YES" attributeType="String"/>
         <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="next12HoursForecast" inverseEntity="TimePeriodData"/>
     </entity>
-    <entity name="TimePeriod" representedClassName="TimePeriod" syncable="YES" codeGenerationType="class">
+    <entity name="TimePeriod" representedClassName="TimePeriod" isAbstract="YES" syncable="YES" codeGenerationType="class">
         <attribute name="time" optional="YES" attributeType="String"/>
-        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="timePeriod" inverseEntity="TimePeriodData"/>
+        <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="TimePeriodData" inverseName="timePeriod" inverseEntity="TimePeriodData"/>
         <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="timePeriod" inverseEntity="Weather"/>
     </entity>
     <entity name="TimePeriodData" representedClassName="TimePeriodData" syncable="YES" codeGenerationType="class">
-        <relationship name="instantData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="InstantData" inverseName="timePeriodData" inverseEntity="InstantData"/>
-        <relationship name="next1HoursForecast" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next1HoursForecast" inverseName="timePeriodData" inverseEntity="Next1HoursForecast"/>
-        <relationship name="next6HoursForecast" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next6HoursForecast" inverseName="timePeriodData" inverseEntity="Next6HoursForecast"/>
-        <relationship name="next12HoursForecast" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Next12HoursForecast" inverseName="timePeriodData" inverseEntity="Next12HoursForecast"/>
+        <relationship name="instantData" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="InstantData" inverseName="timePeriodData" inverseEntity="InstantData"/>
+        <relationship name="next1HoursForecast" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Next1HoursForecast" inverseName="timePeriodData" inverseEntity="Next1HoursForecast"/>
+        <relationship name="next6HoursForecast" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Next6HoursForecast" inverseName="timePeriodData" inverseEntity="Next6HoursForecast"/>
+        <relationship name="next12HoursForecast" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Next12HoursForecast" inverseName="timePeriodData" inverseEntity="Next12HoursForecast"/>
         <relationship name="timePeriod" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="timePeriodData" inverseEntity="TimePeriod"/>
     </entity>
     <entity name="Unit" representedClassName="Unit" syncable="YES" codeGenerationType="class">
@@ -92,8 +92,8 @@
     </entity>
     <entity name="Weather" representedClassName="Weather" syncable="YES" codeGenerationType="class">
         <attribute name="updatedAt" attributeType="String"/>
-        <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Location" inverseName="weather" inverseEntity="Location"/>
-        <relationship name="timePeriod" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="TimePeriod" inverseName="weather" inverseEntity="TimePeriod"/>
-        <relationship name="unit" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Unit" inverseName="weather" inverseEntity="Unit"/>
+        <relationship name="location" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Location" inverseName="weather" inverseEntity="Location"/>
+        <relationship name="timePeriod" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="TimePeriod" inverseName="weather" inverseEntity="TimePeriod"/>
+        <relationship name="unit" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Unit" inverseName="weather" inverseEntity="Unit"/>
     </entity>
 </model>

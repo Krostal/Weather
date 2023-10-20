@@ -40,11 +40,20 @@ final class CoreDataService {
     
     func isAlreadyExist(updatedAt: String, locationName: String) -> Bool {
         let request: NSFetchRequest<Weather> = Weather.fetchRequest()
-        request.predicate = NSPredicate(format: "location.name ==%@ AND updatedAt == %@", locationName as CVarArg, updatedAt as CVarArg)
+        request.predicate = NSPredicate(format: "location.name == %@", locationName)
 
         do {
             let result = try setContext().fetch(request)
-            return !result.isEmpty
+
+            if let existingWeather = result.first {
+                if existingWeather.updatedAt == updatedAt {
+                    return true
+                } else {
+                    setContext().delete(existingWeather)
+                    return false
+                }
+            }
+            return false
         } catch {
             print("Error checking existing weather data: \(error.localizedDescription)")
             return false
