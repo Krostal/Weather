@@ -7,6 +7,8 @@ final class DailyTableViewCell: UITableViewCell {
     
     static let id = "DailyTableViewCell"
     
+    private let dateFormatter = CustomDateFormatter()
+    
     private enum Constants {
         static let horizontalPadding: CGFloat = 10.0
         static let verticalSpacing: CGFloat = 17.0
@@ -137,126 +139,27 @@ final class DailyTableViewCell: UITableViewCell {
             rightStackView.bottomAnchor.constraint(equalTo: infoView.bottomAnchor),
         ])
     }
-    
-    func toFormattedString(date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd'T'HH"
-        dateFormatter.locale = .current
-        return dateFormatter.string(from: date)
-    }
-    
-    private func formattedDay(date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        dateFormatter.timeZone = .current
-        return dateFormatter.string(from: date)
-    }
-    
-    private func formatterToUTC(date: String) -> String? {
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.timeZone =  TimeZone.current
-        
-        if let localDate = dateFormatter.date(from: date) {
-            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-            return dateFormatter.string(from: localDate)
-        }
-        return nil
-    }
-
 }
 
 extension DailyTableViewCell: Configurable {
     func configure(with model: Weather, at index: Int) {
-        guard let timePeriodSet = model.timePeriod,
-              let timePeriod = Array(timePeriodSet) as? [TimePeriod] else {
+        
+        guard let dailyTimePeriod = DailyTimePeriod(model: model) else {
             return
         }
         
-        // Конвертируем в местный часовой пояс и отсеиваем текущий день
+        let sortedDailyForecast = dailyTimePeriod.dailyForecast.sorted { $0.key < $1.key }
         
-        let timePeriodForNextDays = timePeriod.filter {
-            if let time = $0.time {
-                if let savedTime = ISO8601DateFormatter().date(from: time) {
-                    let formattedTime = formattedDay(date: savedTime)
-                    return formattedDay(date: Date()) != formattedTime
-                }
-            }
-            return true
+        let dateKeys = sortedDailyForecast.map { String($0.key) }
+        
+        if index >= dateKeys.count {
+            return
         }
         
-        // Конвертируем в формат времени UTC, так как из JSON мы получаем именно такой формат
+        let dateKey = dateKeys[index]
         
-        let forecast = timePeriodForNextDays.filter {
-            if let time = $0.time,
-               let _ = formatterToUTC(date: time) {
-                return true
-            }
-            return true
-        }
-        
-        // оставляем 4 временных периода
-        
-        let timesToKeep = ["00:00:00Z", "06:00:00Z", "12:00:00Z", "18:00:00Z"]
-        
-        let filteredTimePeriods = forecast.filter { timePeriod in
-            if let time = timePeriod.time,
-               let timeComponents = time.components(separatedBy: "T").last {
-                return timesToKeep.contains(timeComponents)
-            }
-            return false
-        }
-        
-        // массив orderedTimePeriods содержит массивы по дням currentDayTimePeriods в последовательности утро, день, вечер, ночь.
-        
-        var dailyForecast: [[TimePeriod]] = []
-        
-        var partsOfDay: [TimePeriod] = []
-        
-        for (index, timePeriod) in filteredTimePeriods.dropFirst().enumerated() {
-            partsOfDay.append(timePeriod)
-            
-            if partsOfDay.count == 4 || index == filteredTimePeriods.count - 2 {
-                dailyForecast.append(partsOfDay)
-                partsOfDay = []
-            }
-        }
-        
-        if dailyForecast.count > index && dailyForecast[index].count > 2 {
-            if let date = dailyForecast[index][1].time,
-               let range = date.range(of: "T") {
-                let dateString = date.prefix(upTo: range.lowerBound)
-                let components = dateString.split(separator: "-")
-                
-                let currentDate = ISO8601DateFormatter().string(from: Date())
-                if let rangeCurrentDate = currentDate.range(of: "T") {
-                let currentDateString = currentDate.prefix(upTo: rangeCurrentDate.lowerBound)
-                let componentsCurrentDate = currentDateString.split(separator: "-")
-                
-                    if components.count == 3 && componentsCurrentDate.count == 3 {
-                        if components[2] != componentsCurrentDate[2] {
-                            let formattedString = "\(components[2])/\(components[1])"
-                            dateLabel.text = formattedString
-                        } else {
-                            if let alternateDate = dailyForecast[index][2].time, let rangeAlternate = alternateDate.range(of: "T") {
-                                let alternateDateString = alternateDate.prefix(upTo: rangeAlternate.lowerBound)
-                                let alternateComponents = alternateDateString.split(separator: "-")
-                                
-                                if alternateComponents.count == 3 {
-                                    let formattedString = "\(alternateComponents[2])/\(alternateComponents[1])"
-                                    dateLabel.text = formattedString
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    print("Invalid date format")
-                }
-            } else {
-                print("Invalid date format")
-            }
-        }
-        
-        if let forecast = dailyForecast[index][1].timePeriodData?.next6HoursForecast {
+        if let forecast = sortedDailyForecast[index].value[1].timePeriodData?.next6HoursForecast {
+            dateLabel.text = dateKey
             precipitationIcon.image = UIImage(named: forecast.symbolCode ?? "xmark.icloud")
             precipitationLabel.text = "\(forecast.precipitationAmount)%"
             infoLabel.text = forecast.symbolCode
@@ -264,5 +167,4 @@ extension DailyTableViewCell: Configurable {
         }
     }
 }
-
 

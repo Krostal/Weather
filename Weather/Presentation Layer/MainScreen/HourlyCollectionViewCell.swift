@@ -6,6 +6,8 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
     
     static let id = "HourlyCollectionViewCell"
     
+    private let dateFormatter = CustomDateFormatter()
+    
     private lazy var hourlyForecastView: UIStackView = {
         let hourlyForecastView = UIStackView()
         hourlyForecastView.translatesAutoresizingMaskIntoConstraints = false
@@ -77,37 +79,40 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
             weatherIcon.widthAnchor.constraint(equalToConstant: 16)
         ])
     }
-    
-    private func toFormattedString(date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        dateFormatter.timeZone = .current
-        return dateFormatter.string(from: date)
-    }
-
 }
 
 extension HourlyCollectionViewCell: Configurable {
     func configure(with model: Weather, at index: Int) {
-        guard let timePeriodSet = model.timePeriod,
-              let timePeriod = Array(timePeriodSet.prefix(24)) as? [TimePeriod],
-              let currentData = timePeriod[index].timePeriodData?.instantData,
-              let next1Hoursforecast = timePeriod[index].timePeriodData?.next1HoursForecast,
-              index < timePeriod.count else {
+        guard let hourlyTimePeriod = HourlyTimePeriod(model: model, index: index) else {
             return
         }
         
-        
-        if let savedStringTime = timePeriod[index].time {
-            if let savedTime = ISO8601DateFormatter().date(from: savedStringTime) {
-                let time = toFormattedString(date: savedTime)
-                hourLabel.text = "\(time)"
-                weatherIcon.image = UIImage(named: next1Hoursforecast.symbolCode ?? "")
-                tempLabel.text = "\(currentData.airTemperature)°"
-            }
-        }
+        hourLabel.text = hourlyTimePeriod.time
+        weatherIcon.image = UIImage(named: hourlyTimePeriod.next1HoursForecast.symbolCode ?? "")
+        tempLabel.text = "\(hourlyTimePeriod.instantData.airTemperature)°"
     }
 }
+        
+        
+//        guard let timePeriodSet = model.timePeriod,
+//              let timePeriod = Array(timePeriodSet.prefix(24)) as? [TimePeriod],
+//              let currentData = timePeriod[index].timePeriodData?.instantData,
+//              let next1Hoursforecast = timePeriod[index].timePeriodData?.next1HoursForecast,
+//              index < timePeriod.count else {
+//            return
+//        }
+//        
+//        
+//        if let savedStringTime = timePeriod[index].time {
+//            if let savedTime = ISO8601DateFormatter().date(from: savedStringTime) {
+//                let time = dateFormatter.formattedStringDate(date: savedTime, dateFormat: "HH:mm")
+//                hourLabel.text = "\(time)"
+//                weatherIcon.image = UIImage(named: next1Hoursforecast.symbolCode ?? "")
+//                tempLabel.text = "\(currentData.airTemperature)°"
+//            }
+//        }
+//    }
+//}
 
 
 

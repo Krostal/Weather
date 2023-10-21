@@ -12,6 +12,8 @@ final class CurrentTableViewCell: UITableViewCell {
     
     static let id = "CurrentTableViewCell"
     
+    private let dateFormatter = CustomDateFormatter()
+    
     private lazy var containerView: UIView = {
         let containerView = UIView()
         containerView.translatesAutoresizingMaskIntoConstraints = false
@@ -145,7 +147,7 @@ final class CurrentTableViewCell: UITableViewCell {
         currentTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         currentTimeLabel.font = .systemFont(ofSize: 16, weight: .regular)
         currentTimeLabel.textColor = .systemYellow
-        currentTimeLabel.text = formattedCurrentDate()
+        currentTimeLabel.text = dateFormatter.formattedCurrentDate(dateFormat: "HH:mm, E d MMMM", locale: Locale(identifier: "ru_RU"), timeZone: nil)
         return currentTimeLabel
     }()
     
@@ -264,48 +266,43 @@ final class CurrentTableViewCell: UITableViewCell {
         semicircleLine.fillColor = UIColor.clear.cgColor
         containerView.layer.addSublayer(semicircleLine)
     }
-    
-    private func formattedCurrentDate() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm, E d MMMM"
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        let currentDate = Date()
-        let formattedDate = dateFormatter.string(from: currentDate)
-        return formattedDate
-    }
-    
-    private func formattedCurrentHour() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.timeZone = TimeZone(identifier: "UTC")
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH"
-        let currentDate = Date()
-        let formattedDate = dateFormatter.string(from: currentDate)
-        return formattedDate
-    }
 }
 
 extension CurrentTableViewCell: Configurable {
     func configure(with model: Weather, at index: Int) {
         
-        guard let timePeriodSet = model.timePeriod,
-              let timePeriod = Array(timePeriodSet) as? [TimePeriod],
-                let currentTimePeriod = timePeriod.first(where: { timePeriod in
-                    if let currentTime = timePeriod.time?.prefix(13) {
-                        return currentTime == formattedCurrentHour()
-                    }
-                    return false
-                }),
-              let instantData = currentTimePeriod.timePeriodData?.instantData,
-              let next1Hoursforecast = currentTimePeriod.timePeriodData?.next1HoursForecast,
-              let next6Hoursforecast = currentTimePeriod.timePeriodData?.next6HoursForecast else {
+        guard let currentTimePeriod = CurrentTimePeriod(model: model) else {
             return
         }
-                
-        tempRangeLabel.text = "\(next6Hoursforecast.airTemperatureMin)° / \(next6Hoursforecast.airTemperatureMax)°"
-        currentTemp.text = "\(instantData.airTemperature)°"
-        infoLabel.text = next1Hoursforecast.symbolCode
-        precipitationAmountLabel.text = "\(next1Hoursforecast.precipitationAmount) мм"
-        windSpeedLabel.text = "\(instantData.windSpeed) м/с"
-        humidityLabel.text = "\(instantData.relativeHumidity)%"
+        
+        tempRangeLabel.text = "\(currentTimePeriod.next6HoursForecast.airTemperatureMin)° / \(currentTimePeriod.next6HoursForecast.airTemperatureMax)°"
+        currentTemp.text = "\(currentTimePeriod.instantData.airTemperature)°"
+        infoLabel.text = currentTimePeriod.next1HoursForecast.symbolCode
+        precipitationAmountLabel.text = "\(currentTimePeriod.next1HoursForecast.precipitationAmount) мм"
+        windSpeedLabel.text = "\(currentTimePeriod.instantData.windSpeed) м/с"
+        humidityLabel.text = "\(currentTimePeriod.instantData.relativeHumidity)%"
     }
 }
+        
+//        guard let timePeriodSet = model.timePeriod,
+//              let timePeriod = Array(timePeriodSet) as? [TimePeriod],
+//                let currentTimePeriod = timePeriod.first(where: { timePeriod in
+//                    if let currentTime = timePeriod.time?.prefix(13) {
+//                        return currentTime == dateFormatter.formattedCurrentDate(dateFormat: "yyyy-MM-dd'T'HH", locale: nil, timeZone: TimeZone(identifier: "UTC"))
+//                    }
+//                    return false
+//                }),
+//              let instantData = currentTimePeriod.timePeriodData?.instantData,
+//              let next1Hoursforecast = currentTimePeriod.timePeriodData?.next1HoursForecast,
+//              let next6Hoursforecast = currentTimePeriod.timePeriodData?.next6HoursForecast else {
+//            return
+//        }
+//                
+//        tempRangeLabel.text = "\(next6Hoursforecast.airTemperatureMin)° / \(next6Hoursforecast.airTemperatureMax)°"
+//        currentTemp.text = "\(instantData.airTemperature)°"
+//        infoLabel.text = next1Hoursforecast.symbolCode
+//        precipitationAmountLabel.text = "\(next1Hoursforecast.precipitationAmount) мм"
+//        windSpeedLabel.text = "\(instantData.windSpeed) м/с"
+//        humidityLabel.text = "\(instantData.relativeHumidity)%"
+//    }
+//}
