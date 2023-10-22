@@ -52,6 +52,12 @@ final class HourlyTableViewCell: UITableViewCell {
             collectionView.heightAnchor.constraint(equalToConstant: 85)
         ])
     }
+    
+    private func isCellRepresentingCurrentTime(_ timePeriod: HourlyTimePeriod) -> Bool {
+        let currentTime = CustomDateFormatter().formattedCurrentDate(dateFormat: "yyyy-MM-dd'T'HH", locale: nil, timeZone: TimeZone(identifier: "UTC"))
+        let time = timePeriod.timeStringFullInUTC.prefix(13)
+        return time == currentTime
+    }
 }
 
 extension HourlyTableViewCell: UICollectionViewDataSource {
@@ -68,6 +74,9 @@ extension HourlyTableViewCell: UICollectionViewDataSource {
             hourlyTimePeriod = HourlyTimePeriod(model: model, index: indexPath.item)
             if let timePeriod = hourlyTimePeriod {
                 cell.configure(with: timePeriod, at: indexPath.item)
+                
+                let isCurrentTimeCell = isCellRepresentingCurrentTime(timePeriod)
+                cell.contentView.backgroundColor = isCurrentTimeCell ? .systemYellow : .clear
             }
         }
         return cell

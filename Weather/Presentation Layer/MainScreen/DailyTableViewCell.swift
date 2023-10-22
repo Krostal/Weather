@@ -17,7 +17,7 @@ final class DailyTableViewCell: UITableViewCell {
     private lazy var infoView: UIView = {
         let infoView = UIView()
         infoView.translatesAutoresizingMaskIntoConstraints = false
-        infoView.backgroundColor = .systemGray3
+        infoView.backgroundColor = .systemBlue.withAlphaComponent(0.1)
         infoView.layer.cornerRadius = 5
         return infoView
     }()
@@ -154,7 +154,9 @@ extension DailyTableViewCell: Configurable {
         
         let dateKey = dateKeys[index]
         
-        if let forecast = sortedDailyForecast[index].value[1].timePeriodData?.next6HoursForecast {
+        let dailyForecast = sortedDailyForecast[index].value
+        if dailyForecast.count > 1,
+           let forecast = sortedDailyForecast[index].value[1].timePeriodData?.next6HoursForecast {
             dateLabel.text = dateKey
             precipitationIcon.image = UIImage(named: forecast.symbolCode ?? "xmark.icloud")
             precipitationLabel.text = "\(forecast.precipitationAmount)%"
@@ -163,4 +165,5 @@ extension DailyTableViewCell: Configurable {
         }
     }
 }
+
 

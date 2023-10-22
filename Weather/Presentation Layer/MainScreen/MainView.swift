@@ -19,7 +19,8 @@ final class MainView: UIView {
     
     private var selectedDate: String?
     
-    private var fetchedResultsController: NSFetchedResultsController<Weather>?
+    private var numberOfDays: Int = 7
+    private var isDailyToggleOn = false
     
     let weather: Weather
     let currentTimePeriod: CurrentTimePeriod
@@ -95,7 +96,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
         } else if section == 1 {
             return 1
         } else {
-            return dailyTimePeriod.dailyForecast.keys.count
+            return numberOfDays
         }
     }
     
@@ -112,6 +113,8 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             hourlyCell.weather = weather
+            
+            
             return hourlyCell
         } else {
             guard let dailyCell = tableView.dequeueReusableCell(withIdentifier: DailyTableViewCell.id, for: indexPath) as? DailyTableViewCell else {
@@ -155,6 +158,10 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let headerForDailyCell = tableView.dequeueReusableHeaderFooterView(withIdentifier: HeaderForDailyCell.id) as? HeaderForDailyCell else {
                 return UITableViewHeaderFooterView()
             }
+            headerForDailyCell.delegate = self
+            headerForDailyCell.isToggled = isDailyToggleOn
+            headerForDailyCell.maxNumberOfDays = dailyTimePeriod.dailyForecast.keys.count
+        
             return headerForDailyCell
         }
         return nil
@@ -174,6 +181,23 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
 extension MainView: HeaderForHourlyCellDelegate {
     func buttonTapped() {
         delegate?.showHourlyForecast()
+    }
+}
+
+extension MainView: HeaderForDailyCellDelegate {
+    func changeNumberOfRows() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            
+            isDailyToggleOn.toggle()
+            numberOfDays = isDailyToggleOn ? dailyTimePeriod.dailyForecast.keys.count : 7
+            
+            self.tableView.reloadSections(IndexSet(integer: 2), with: .automatic)
+            if let headerView = tableView.headerView(forSection: 2) as? HeaderForDailyCell {
+                headerView.isToggled = isDailyToggleOn
+                headerView.updateButtonText()
+            }
+        }
     }
 }
 

@@ -7,11 +7,13 @@ struct HourlyTimePeriod {
     let time: String
     let instantData: InstantData
     let next1HoursForecast: Next1HoursForecast
+    let timeStringFullInUTC: String
     
     init() {
         self.time = ""
         self.instantData = InstantData()
         self.next1HoursForecast = Next1HoursForecast()
+        self.timeStringFullInUTC = ""
     }
 
     init?(model: Weather, index: Int) {
@@ -28,5 +30,6 @@ struct HourlyTimePeriod {
         self.time = CustomDateFormatter().formattedStringDate(date: savedTime, dateFormat: "HH:mm")
         self.instantData = currentData
         self.next1HoursForecast = next1Hoursforecast
+        self.timeStringFullInUTC = time
     }
 }
