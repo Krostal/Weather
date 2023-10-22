@@ -142,13 +142,9 @@ final class DailyTableViewCell: UITableViewCell {
 }
 
 extension DailyTableViewCell: Configurable {
-    func configure(with model: Weather, at index: Int) {
+    func configure(with timePeriod: DailyTimePeriod, at index: Int) {
         
-        guard let dailyTimePeriod = DailyTimePeriod(model: model) else {
-            return
-        }
-        
-        let sortedDailyForecast = dailyTimePeriod.dailyForecast.sorted { $0.key < $1.key }
+        let sortedDailyForecast = timePeriod.dailyForecast.sorted { $0.key < $1.key }
         
         let dateKeys = sortedDailyForecast.map { String($0.key) }
         

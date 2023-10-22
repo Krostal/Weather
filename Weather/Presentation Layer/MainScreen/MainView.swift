@@ -5,27 +5,25 @@ import CoreData
 protocol MainViewDelegate: AnyObject {
     func showHourlyForecast()
     func showDailyForecast(forDate date: String)
-    func updateCurrentCell()
-    func updateHourlyCell(at index: Int)
-    func updateDailyCell(at index: Int)
-    func changeForecastDays()
 }
 
 final class MainView: UIView {
-    
-    weak var delegate: MainViewDelegate?
-    
-    var numberOfDays: Int = 7
-    
-    private var selectedDate: String?
-    
-    private var fetchedResultsController: NSFetchedResultsController<Weather>?
     
     private enum Constants {
         static let heightHeaderOfCurrentCellSection: CGFloat = 212
         static let heightHeaderOfDailyCellSection: CGFloat = 56
         static let spacing: CGFloat = 16
     }
+    
+    weak var delegate: MainViewDelegate?
+    
+    private var selectedDate: String?
+    
+    private var fetchedResultsController: NSFetchedResultsController<Weather>?
+    
+    let weather: Weather
+    let currentTimePeriod: CurrentTimePeriod
+    let dailyTimePeriod: DailyTimePeriod
     
     lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
@@ -41,7 +39,10 @@ final class MainView: UIView {
         return tableView
     }()
     
-    override init(frame: CGRect) {
+    init(frame: CGRect, weather: Weather) {
+        self.weather = weather
+        self.currentTimePeriod = CurrentTimePeriod(model: weather) ?? CurrentTimePeriod()
+        self.dailyTimePeriod = DailyTimePeriod(model: weather) ?? DailyTimePeriod()
         super.init(frame: frame)
         setupView()
         addSubviews()
@@ -52,7 +53,6 @@ final class MainView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
     
     private func setupView() {
         backgroundColor = .white
@@ -95,7 +95,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
         } else if section == 1 {
             return 1
         } else {
-            return numberOfDays
+            return dailyTimePeriod.dailyForecast.keys.count
         }
     }
     
@@ -105,15 +105,13 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let currentCell = tableView.dequeueReusableCell(withIdentifier: CurrentTableViewCell.id, for: indexPath) as? CurrentTableViewCell else {
                 return UITableViewCell()
             }
-            delegate?.updateCurrentCell()
-            
+            currentCell.configure(with: currentTimePeriod, at: indexPath.row)
             return currentCell
-            
         } else if indexPath.section == 1 {
             guard let hourlyCell = tableView.dequeueReusableCell(withIdentifier: HourlyTableViewCell.id, for: indexPath) as? HourlyTableViewCell else {
                 return UITableViewCell()
             }
-            hourlyCell.delegate = self
+            hourlyCell.weather = weather
             return hourlyCell
         } else {
             guard let dailyCell = tableView.dequeueReusableCell(withIdentifier: DailyTableViewCell.id, for: indexPath) as? DailyTableViewCell else {
@@ -131,9 +129,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             } else {
                 selectedDate = nil
             }
-            
-            delegate?.updateDailyCell(at: indexPath.row)
-
+            dailyCell.configure(with: dailyTimePeriod, at: indexPath.row)
             return dailyCell
         }
         
@@ -159,7 +155,6 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let headerForDailyCell = tableView.dequeueReusableHeaderFooterView(withIdentifier: HeaderForDailyCell.id) as? HeaderForDailyCell else {
                 return UITableViewHeaderFooterView()
             }
-            headerForDailyCell.delegate = self
             return headerForDailyCell
         }
         return nil
@@ -179,24 +174,6 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
 extension MainView: HeaderForHourlyCellDelegate {
     func buttonTapped() {
         delegate?.showHourlyForecast()
-    }
-}
-
-extension MainView: HeaderForDailyCellDelegate {
-    func updateDaysCount(_ daysCount: Int) {
-        self.numberOfDays = daysCount
-        delegate?.changeForecastDays()
-        tableView.reloadSections(IndexSet(integer: 2), with: .fade)
-        if let headerForDailyCell = tableView.headerView(forSection: 2) as? HeaderForDailyCell {
-            headerForDailyCell.updateButtonText("\(numberOfDays) дней")
-        }
-    }
-}
-
-extension MainView: HourlyTableViewCellDelegate {
-    
-    func updateHourlyCollectionCell(at index: Int) {
-        delegate?.updateHourlyCell(at: index)
     }
 }
 

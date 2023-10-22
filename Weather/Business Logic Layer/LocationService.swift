@@ -54,10 +54,3 @@ extension LocationService: CLLocationManagerDelegate {
         }
     }
 }
-            
-//                        для проверки
-//                        let currentLattitude = 63.0160100
-//                        let currentLongittude = 112.4690100
-//                        currentLocation = CLLocation(latitude: currentLattitude, longitude: currentLongittude)
-//                        self.currentCoordinates = (currentLattitude, currentLongittude)
-            

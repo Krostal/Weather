@@ -269,40 +269,13 @@ final class CurrentTableViewCell: UITableViewCell {
 }
 
 extension CurrentTableViewCell: Configurable {
-    func configure(with model: Weather, at index: Int) {
-        
-        guard let currentTimePeriod = CurrentTimePeriod(model: model) else {
-            return
-        }
-        
-        tempRangeLabel.text = "\(currentTimePeriod.next6HoursForecast.airTemperatureMin)° / \(currentTimePeriod.next6HoursForecast.airTemperatureMax)°"
-        currentTemp.text = "\(currentTimePeriod.instantData.airTemperature)°"
-        infoLabel.text = currentTimePeriod.next1HoursForecast.symbolCode
-        precipitationAmountLabel.text = "\(currentTimePeriod.next1HoursForecast.precipitationAmount) мм"
-        windSpeedLabel.text = "\(currentTimePeriod.instantData.windSpeed) м/с"
-        humidityLabel.text = "\(currentTimePeriod.instantData.relativeHumidity)%"
+    func configure(with timePeriod: CurrentTimePeriod, at index: Int) {
+    
+        tempRangeLabel.text = "\(timePeriod.next6HoursForecast.airTemperatureMin)° / \(timePeriod.next6HoursForecast.airTemperatureMax)°"
+        currentTemp.text = "\(timePeriod.instantData.airTemperature)°"
+        infoLabel.text = timePeriod.next1HoursForecast.symbolCode
+        precipitationAmountLabel.text = "\(timePeriod.next1HoursForecast.precipitationAmount) мм"
+        windSpeedLabel.text = "\(timePeriod.instantData.windSpeed) м/с"
+        humidityLabel.text = "\(timePeriod.instantData.relativeHumidity)%"
     }
 }
-        
-//        guard let timePeriodSet = model.timePeriod,
-//              let timePeriod = Array(timePeriodSet) as? [TimePeriod],
-//                let currentTimePeriod = timePeriod.first(where: { timePeriod in
-//                    if let currentTime = timePeriod.time?.prefix(13) {
-//                        return currentTime == dateFormatter.formattedCurrentDate(dateFormat: "yyyy-MM-dd'T'HH", locale: nil, timeZone: TimeZone(identifier: "UTC"))
-//                    }
-//                    return false
-//                }),
-//              let instantData = currentTimePeriod.timePeriodData?.instantData,
-//              let next1Hoursforecast = currentTimePeriod.timePeriodData?.next1HoursForecast,
-//              let next6Hoursforecast = currentTimePeriod.timePeriodData?.next6HoursForecast else {
-//            return
-//        }
-//                
-//        tempRangeLabel.text = "\(next6Hoursforecast.airTemperatureMin)° / \(next6Hoursforecast.airTemperatureMax)°"
-//        currentTemp.text = "\(instantData.airTemperature)°"
-//        infoLabel.text = next1Hoursforecast.symbolCode
-//        precipitationAmountLabel.text = "\(next1Hoursforecast.precipitationAmount) мм"
-//        windSpeedLabel.text = "\(instantData.windSpeed) м/с"
-//        humidityLabel.text = "\(instantData.relativeHumidity)%"
-//    }
-//}

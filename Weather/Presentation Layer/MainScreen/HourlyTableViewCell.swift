@@ -12,6 +12,9 @@ final class HourlyTableViewCell: UITableViewCell {
     
     static let id = "HourlyTableViewCell"
     
+    var weather: Weather?
+    var hourlyTimePeriod: HourlyTimePeriod?
+    
     lazy var collectionView: UICollectionView = {
         let viewLayout = UICollectionViewFlowLayout()
         viewLayout.scrollDirection = .horizontal
@@ -61,9 +64,12 @@ extension HourlyTableViewCell: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HourlyCollectionViewCell.id, for: indexPath) as? HourlyCollectionViewCell else {
             return UICollectionViewCell()
         }
-        
-        delegate?.updateHourlyCollectionCell(at: indexPath.row)
-        
+        if let model = weather {
+            hourlyTimePeriod = HourlyTimePeriod(model: model, index: indexPath.item)
+            if let timePeriod = hourlyTimePeriod {
+                cell.configure(with: timePeriod, at: indexPath.item)
+            }
+        }
         return cell
     }
 }

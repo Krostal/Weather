@@ -2,15 +2,9 @@
 
 import UIKit
 
-protocol HeaderForDailyCellDelegate: AnyObject {
-    func updateDaysCount(_ daysCount: Int)
-}
-
 final class HeaderForDailyCell: UITableViewHeaderFooterView {
     
     static let id = "HeaderForDailyCell"
-    
-    weak var delegate: HeaderForDailyCellDelegate?
     
     private lazy var headerStackView: UIStackView = {
         let headerStackView = UIStackView()
@@ -70,14 +64,7 @@ final class HeaderForDailyCell: UITableViewHeaderFooterView {
     }
         
     @objc private func dailyForecastButtonTapped() {
-        if let currentText = dailyForecastButton.titleLabel?.text {
-            let strippedText = currentText.replacingOccurrences(of: " дней", with: "")
-            if let daysCount = Int(strippedText) {
-                let newDaysCount = daysCount == 7 ? 10 : 7
-                dailyForecastButton.setTitle("\(newDaysCount) дней", for: .normal)
-                delegate?.updateDaysCount(newDaysCount)
-            }
-        }
+    
     }
     
 }

@@ -3,9 +3,16 @@
 import Foundation
 
 struct HourlyTimePeriod {
+    
     let time: String
     let instantData: InstantData
     let next1HoursForecast: Next1HoursForecast
+    
+    init() {
+        self.time = ""
+        self.instantData = InstantData()
+        self.next1HoursForecast = Next1HoursForecast()
+    }
 
     init?(model: Weather, index: Int) {
         guard let timePeriodSet = model.timePeriod,

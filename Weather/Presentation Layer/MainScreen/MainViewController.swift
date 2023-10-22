@@ -4,7 +4,7 @@ import CoreData
 
 final class MainViewController: UIViewController {
     
-    private lazy var mainView = MainView()
+    private var mainView: MainView?
         
     private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService<WeatherJsonModel>(), coreDataService: CoreDataService.shared, locationService: LocationService())
         
@@ -23,10 +23,17 @@ final class MainViewController: UIViewController {
     }
     
     private func setupView() {
-        mainView.delegate = self
-        mainView.tableView.refreshControl = UIRefreshControl()
-        mainView.tableView.refreshControl?.addTarget(self, action: #selector(refreshWeatherData), for: .valueChanged)
-        view = mainView
+        let weathersArray = interactor.getWeatherFromCoreData(withPredicate: nil)
+        if let weather = weathersArray.last {
+            mainView = MainView(frame: self.view.bounds, weather: weather)
+            guard let mainView = mainView else { return }
+            mainView.delegate = self
+            mainView.tableView.refreshControl = UIRefreshControl()
+            mainView.tableView.refreshControl?.addTarget(self, action: #selector(refreshWeatherData), for: .valueChanged)
+            view = mainView
+        } else {
+            view = UIView()
+        }
     }
     
     private func setupNavigationBar() {
@@ -58,30 +65,19 @@ final class MainViewController: UIViewController {
     }
     
     private func fetchWeather() {
-        self.mainView.tableView.refreshControl?.beginRefreshing()
+        guard let mainView else { return }
+        mainView.tableView.refreshControl?.beginRefreshing()
         interactor.fetchFromNetwork { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
                 switch result {
                 case .success(_ ):
-                    self.mainView.tableView.refreshControl?.endRefreshing()
+                    mainView.tableView.refreshControl?.endRefreshing()
                     self.updateNavigationBarTitle()
-                    self.updateCurrentCell()
-                    
-                    for hour in 0..<24 {
-                        self.updateHourlyCell(at: hour)
-                    }
-                    
-                    for day in 0..<self.mainView.numberOfDays {
-                        self.updateDailyCell(at: day)
-                    }
-                    
-//                    self.mainView.tableView.reloadData()
-                    
                 case .failure(let error):
                     print("FetchWeather error \(error.localizedDescription)")
-                    self.mainView.tableView.refreshControl?.endRefreshing()
+                    mainView.tableView.refreshControl?.endRefreshing()
                 }
             }
         }
@@ -119,44 +115,6 @@ extension MainViewController: MainViewDelegate {
         dailyForecastViewController.navigationItem.title = "Погода \(date)"
         dailyForecastViewController.headerTitle = navigationItem.title
         navigationController?.pushViewController(dailyForecastViewController, animated: true)
-    }
-    
-    func updateCurrentCell() {
-        let weathersArray = interactor.getWeatherFromCoreData(withPredicate: nil)
-        if let weather = weathersArray.last {
-            if let currentCell = self.mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? CurrentTableViewCell {
-                currentCell.configure(with: weather, at: 0)
-            }
-        }
-    }
-    
-    func updateHourlyCell(at index: Int) {
-        let weathersArray = interactor.getWeatherFromCoreData(withPredicate: nil)
-        if let weather = weathersArray.last {
-            let indexPath = IndexPath(item: index, section: 0)
-            if let hourlyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: 0, section: 1)) as? HourlyTableViewCell {
-                if let hourlyCollectionCell = hourlyCell.collectionView.cellForItem(at: indexPath) as? HourlyCollectionViewCell {
-                    hourlyCollectionCell.configure(with: weather, at: index)
-                }
-            }
-        }
-    }
-    
-    func updateDailyCell(at index: Int) {
-        let weathersArray = interactor.getWeatherFromCoreData(withPredicate: nil)
-        if let weather = weathersArray.last {
-            if let dailyCell = self.mainView.tableView.cellForRow(at: IndexPath(row: index, section: 2)) as? DailyTableViewCell {
-                dailyCell.configure(with: weather, at: index)
-            }
-        }
-    }
-    
-    func changeForecastDays() {
-        DispatchQueue.main.async {
-            for day in 0..<self.mainView.numberOfDays {
-                self.updateDailyCell(at: day)
-            }
-        }
     }
 
 }
