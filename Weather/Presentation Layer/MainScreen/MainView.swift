@@ -1,5 +1,6 @@
 
 import UIKit
+import CoreData
 
 protocol MainViewDelegate: AnyObject {
     func showHourlyForecast()
@@ -8,17 +9,22 @@ protocol MainViewDelegate: AnyObject {
 
 final class MainView: UIView {
     
-    weak var delegate: MainViewDelegate?
-    
-    private var numberOfDays: Int = 7
-    
-    private var selectedDate: String?
-    
     private enum Constants {
         static let heightHeaderOfCurrentCellSection: CGFloat = 212
         static let heightHeaderOfDailyCellSection: CGFloat = 56
         static let spacing: CGFloat = 16
     }
+    
+    weak var delegate: MainViewDelegate?
+    
+    private var selectedDate: String?
+    
+    private var numberOfDays: Int = 7
+    private var isDailyToggleOn = false
+    
+    let weather: Weather
+    let currentTimePeriod: CurrentTimePeriod
+    let dailyTimePeriod: DailyTimePeriod
     
     lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
@@ -34,7 +40,10 @@ final class MainView: UIView {
         return tableView
     }()
     
-    override init(frame: CGRect) {
+    init(frame: CGRect, weather: Weather) {
+        self.weather = weather
+        self.currentTimePeriod = CurrentTimePeriod(model: weather) ?? CurrentTimePeriod()
+        self.dailyTimePeriod = DailyTimePeriod(model: weather) ?? DailyTimePeriod()
         super.init(frame: frame)
         setupView()
         addSubviews()
@@ -45,7 +54,6 @@ final class MainView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
     
     private func setupView() {
         backgroundColor = .white
@@ -98,14 +106,15 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let currentCell = tableView.dequeueReusableCell(withIdentifier: CurrentTableViewCell.id, for: indexPath) as? CurrentTableViewCell else {
                 return UITableViewCell()
             }
-
+            currentCell.configure(with: currentTimePeriod, at: indexPath.row)
             return currentCell
-            
         } else if indexPath.section == 1 {
             guard let hourlyCell = tableView.dequeueReusableCell(withIdentifier: HourlyTableViewCell.id, for: indexPath) as? HourlyTableViewCell else {
                 return UITableViewCell()
             }
-           
+            hourlyCell.weather = weather
+            
+            
             return hourlyCell
         } else {
             guard let dailyCell = tableView.dequeueReusableCell(withIdentifier: DailyTableViewCell.id, for: indexPath) as? DailyTableViewCell else {
@@ -123,7 +132,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             } else {
                 selectedDate = nil
             }
-
+            dailyCell.configure(with: dailyTimePeriod, at: indexPath.row)
             return dailyCell
         }
         
@@ -150,6 +159,9 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewHeaderFooterView()
             }
             headerForDailyCell.delegate = self
+            headerForDailyCell.isToggled = isDailyToggleOn
+            headerForDailyCell.maxNumberOfDays = dailyTimePeriod.dailyForecast.keys.count
+        
             return headerForDailyCell
         }
         return nil
@@ -173,12 +185,19 @@ extension MainView: HeaderForHourlyCellDelegate {
 }
 
 extension MainView: HeaderForDailyCellDelegate {
-    func updateDaysCount(_ daysCount: Int) {
-        self.numberOfDays = daysCount
-        tableView.reloadSections(IndexSet(integer: 2), with: .fade)
-        
-        if let headerForDailyCell = tableView.headerView(forSection: 2) as? HeaderForDailyCell {
-            headerForDailyCell.updateButtonText("\(numberOfDays) дней")
+    func changeNumberOfRows() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            
+            isDailyToggleOn.toggle()
+            numberOfDays = isDailyToggleOn ? dailyTimePeriod.dailyForecast.keys.count : 7
+            
+            self.tableView.reloadSections(IndexSet(integer: 2), with: .automatic)
+            if let headerView = tableView.headerView(forSection: 2) as? HeaderForDailyCell {
+                headerView.isToggled = isDailyToggleOn
+                headerView.updateButtonText()
+            }
         }
     }
 }
+

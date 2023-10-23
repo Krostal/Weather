@@ -5,7 +5,7 @@ import UIKit
 final class HourlyCollectionViewCell: UICollectionViewCell {
     
     static let id = "HourlyCollectionViewCell"
-    
+        
     private lazy var hourlyForecastView: UIStackView = {
         let hourlyForecastView = UIStackView()
         hourlyForecastView.translatesAutoresizingMaskIntoConstraints = false
@@ -23,15 +23,13 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
         let hourLabel = UILabel()
         hourLabel.translatesAutoresizingMaskIntoConstraints = false
         hourLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        hourLabel.textColor = .blue
-        hourLabel.text = "12:00"
+        hourLabel.textColor = .black
         return hourLabel
     }()
     
     private lazy var weatherIcon: UIImageView = {
-        let weatherIcon = UIImageView(image: UIImage(systemName: "cloud.sun"))
+        let weatherIcon = UIImageView()
         weatherIcon.translatesAutoresizingMaskIntoConstraints = false
-        weatherIcon.tintColor = .systemYellow
         return weatherIcon
     }()
     
@@ -39,8 +37,7 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
         let tempLabel = UILabel()
         tempLabel.translatesAutoresizingMaskIntoConstraints = false
         tempLabel.font = .systemFont(ofSize: 16, weight: .regular)
-        tempLabel.textColor = .blue
-        tempLabel.text = "13°"
+        tempLabel.textColor = .black
         return tempLabel
     }()
     
@@ -60,7 +57,7 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
         contentView.layer.cornerRadius = 22
         contentView.backgroundColor = .white
         contentView.layer.borderWidth = 1.0
-        contentView.layer.borderColor = UIColor.blue.cgColor
+        contentView.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.5).cgColor
     }
     
     private func setupSubviews() {
@@ -73,10 +70,19 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
             hourlyForecastView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             hourlyForecastView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 15),
             hourlyForecastView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -15),
+            
+            weatherIcon.heightAnchor.constraint(equalToConstant: 20),
+            weatherIcon.widthAnchor.constraint(equalToConstant: 20)
         ])
     }
-    
 }
 
+extension HourlyCollectionViewCell: Configurable {
+    func configure(with timePeriod: HourlyTimePeriod, at index: Int) {
+        hourLabel.text = timePeriod.time
+        weatherIcon.image = UIImage(named: timePeriod.next1HoursForecast.symbolCode ?? "")
+        tempLabel.text = "\(timePeriod.instantData.airTemperature)°"
+    }
+}
 
 

@@ -12,6 +12,8 @@ final class CurrentTableViewCell: UITableViewCell {
     
     static let id = "CurrentTableViewCell"
     
+    private let dateFormatter = CustomDateFormatter()
+    
     private lazy var containerView: UIView = {
         let containerView = UIView()
         containerView.translatesAutoresizingMaskIntoConstraints = false
@@ -74,6 +76,7 @@ final class CurrentTableViewCell: UITableViewCell {
     private lazy var precipitationIcon: UIImageView = {
         let precipitationIcon = UIImageView(image: UIImage(systemName: "cloud"))
         precipitationIcon.translatesAutoresizingMaskIntoConstraints = false
+        precipitationIcon.tintColor = .black
         return precipitationIcon
     }()
     
@@ -99,6 +102,7 @@ final class CurrentTableViewCell: UITableViewCell {
     private lazy var windIcon: UIImageView = {
         let windIcon = UIImageView(image: UIImage(systemName: "wind"))
         windIcon.translatesAutoresizingMaskIntoConstraints = false
+        windIcon.tintColor = .black
         return windIcon
     }()
     
@@ -125,6 +129,7 @@ final class CurrentTableViewCell: UITableViewCell {
     private lazy var humidityIcon: UIImageView = {
         let humidityIcon = UIImageView(image: UIImage(systemName: "humidity"))
         humidityIcon.translatesAutoresizingMaskIntoConstraints = false
+        humidityIcon.tintColor = .black
         return humidityIcon
     }()
     
@@ -142,7 +147,7 @@ final class CurrentTableViewCell: UITableViewCell {
         currentTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         currentTimeLabel.font = .systemFont(ofSize: 16, weight: .regular)
         currentTimeLabel.textColor = .systemYellow
-        currentTimeLabel.text = formattedCurrentDate()
+        currentTimeLabel.text = dateFormatter.formattedCurrentDate(dateFormat: "HH:mm, E d MMMM", locale: Locale(identifier: "ru_RU"), timeZone: nil)
         return currentTimeLabel
     }()
     
@@ -221,8 +226,9 @@ final class CurrentTableViewCell: UITableViewCell {
             
             currentWeatherStackView.topAnchor.constraint(equalTo: infoLabel.bottomAnchor, constant: 8),
             currentWeatherStackView.heightAnchor.constraint(equalToConstant: 30),
-            currentWeatherStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 78),
-            currentWeatherStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -78),
+            currentWeatherStackView.leadingAnchor.constraint(lessThanOrEqualTo: leadingAnchor, constant: 78),
+            currentWeatherStackView.trailingAnchor.constraint(greaterThanOrEqualTo: trailingAnchor, constant: -78),
+            currentWeatherStackView.centerXAnchor.constraint(equalTo: centerXAnchor),
             
             currentTimeLabel.topAnchor.constraint(equalTo: currentWeatherStackView.bottomAnchor, constant: 10),
             currentTimeLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
@@ -260,13 +266,16 @@ final class CurrentTableViewCell: UITableViewCell {
         semicircleLine.fillColor = UIColor.clear.cgColor
         containerView.layer.addSublayer(semicircleLine)
     }
+}
+
+extension CurrentTableViewCell: Configurable {
+    func configure(with timePeriod: CurrentTimePeriod, at index: Int) {
     
-    private func formattedCurrentDate() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm, E d MMMM"
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        let currentDate = Date()
-        let formattedDate = dateFormatter.string(from: currentDate)
-        return formattedDate
+        tempRangeLabel.text = "\(timePeriod.next6HoursForecast.airTemperatureMin)° / \(timePeriod.next6HoursForecast.airTemperatureMax)°"
+        currentTemp.text = "\(timePeriod.instantData.airTemperature)°"
+        infoLabel.text = timePeriod.next1HoursForecast.symbolCode
+        precipitationAmountLabel.text = "\(timePeriod.next1HoursForecast.precipitationAmount) мм"
+        windSpeedLabel.text = "\(timePeriod.instantData.windSpeed) м/с"
+        humidityLabel.text = "\(timePeriod.instantData.relativeHumidity)%"
     }
 }

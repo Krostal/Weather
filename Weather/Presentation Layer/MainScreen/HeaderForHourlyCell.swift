@@ -14,14 +14,12 @@ final class HeaderForHourlyCell: UITableViewHeaderFooterView {
     private lazy var hourlyForecastButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Подробнее на 24 часа", for: .normal)
-        button.setTitleColor(.blue, for: .normal)
+        button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(hourlyForecastButtonTapped), for: .touchUpInside)
         return button
     }()
-    
-    
     
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)

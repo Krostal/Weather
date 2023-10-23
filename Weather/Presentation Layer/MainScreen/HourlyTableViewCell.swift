@@ -2,11 +2,20 @@
 
 import UIKit
 
+protocol HourlyTableViewCellDelegate: AnyObject {
+    func updateHourlyCollectionCell(at index: Int)
+}
+
 final class HourlyTableViewCell: UITableViewCell {
+    
+    weak var delegate: HourlyTableViewCellDelegate?
     
     static let id = "HourlyTableViewCell"
     
-    private lazy var collectionView: UICollectionView = {
+    var weather: Weather?
+    var hourlyTimePeriod: HourlyTimePeriod?
+    
+    lazy var collectionView: UICollectionView = {
         let viewLayout = UICollectionViewFlowLayout()
         viewLayout.scrollDirection = .horizontal
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: viewLayout)
@@ -44,6 +53,11 @@ final class HourlyTableViewCell: UITableViewCell {
         ])
     }
     
+    private func isCellRepresentingCurrentTime(_ timePeriod: HourlyTimePeriod) -> Bool {
+        let currentTime = CustomDateFormatter().formattedCurrentDate(dateFormat: "yyyy-MM-dd'T'HH", locale: nil, timeZone: TimeZone(identifier: "UTC"))
+        let time = timePeriod.timeStringFullInUTC.prefix(13)
+        return time == currentTime
+    }
 }
 
 extension HourlyTableViewCell: UICollectionViewDataSource {
@@ -56,7 +70,15 @@ extension HourlyTableViewCell: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HourlyCollectionViewCell.id, for: indexPath) as? HourlyCollectionViewCell else {
             return UICollectionViewCell()
         }
-
+        if let model = weather {
+            hourlyTimePeriod = HourlyTimePeriod(model: model, index: indexPath.item)
+            if let timePeriod = hourlyTimePeriod {
+                cell.configure(with: timePeriod, at: indexPath.item)
+                
+                let isCurrentTimeCell = isCellRepresentingCurrentTime(timePeriod)
+                cell.contentView.backgroundColor = isCurrentTimeCell ? .systemBlue.withAlphaComponent(0.1) : .clear
+            }
+        }
         return cell
     }
 }

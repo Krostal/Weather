@@ -1,10 +1,13 @@
 
 
+import Foundation
 import UIKit
 
 final class DailyTableViewCell: UITableViewCell {
     
     static let id = "DailyTableViewCell"
+    
+    private let dateFormatter = CustomDateFormatter()
     
     private enum Constants {
         static let horizontalPadding: CGFloat = 10.0
@@ -14,7 +17,7 @@ final class DailyTableViewCell: UITableViewCell {
     private lazy var infoView: UIView = {
         let infoView = UIView()
         infoView.translatesAutoresizingMaskIntoConstraints = false
-        infoView.backgroundColor = .systemGray3
+        infoView.backgroundColor = .systemBlue.withAlphaComponent(0.1)
         infoView.layer.cornerRadius = 5
         return infoView
     }()
@@ -36,7 +39,6 @@ final class DailyTableViewCell: UITableViewCell {
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         dateLabel.font = .systemFont(ofSize: 16, weight: .regular)
         dateLabel.textColor = .black
-        dateLabel.text = "17/10"
         return dateLabel
     }()
     
@@ -51,7 +53,7 @@ final class DailyTableViewCell: UITableViewCell {
     }()
     
     private lazy var precipitationIcon: UIImageView = {
-        let precipitationIcon = UIImageView(image: UIImage(systemName: "cloud.rain"))
+        let precipitationIcon = UIImageView()
         precipitationIcon.translatesAutoresizingMaskIntoConstraints = false
         precipitationIcon.contentMode = .scaleAspectFit
         return precipitationIcon
@@ -62,7 +64,6 @@ final class DailyTableViewCell: UITableViewCell {
         precipitationAmountLabel.translatesAutoresizingMaskIntoConstraints = false
         precipitationAmountLabel.font = .systemFont(ofSize: 12, weight: .regular)
         precipitationAmountLabel.textColor = .black
-        precipitationAmountLabel.text = "50%"
         return precipitationAmountLabel
     }()
     
@@ -86,7 +87,6 @@ final class DailyTableViewCell: UITableViewCell {
         infoLabel.font = .systemFont(ofSize: 16, weight: .regular)
         infoLabel.textColor = .black
         infoLabel.numberOfLines = 2
-        infoLabel.text = "Небольшая облачность"
         return infoLabel
     }()
     
@@ -95,7 +95,6 @@ final class DailyTableViewCell: UITableViewCell {
         temperatureLabel.translatesAutoresizingMaskIntoConstraints = false
         temperatureLabel.font = .systemFont(ofSize: 18, weight: .regular)
         temperatureLabel.textColor = .black
-        temperatureLabel.text = "7° - 13°"
         return temperatureLabel
     }()
     
@@ -140,5 +139,32 @@ final class DailyTableViewCell: UITableViewCell {
             rightStackView.bottomAnchor.constraint(equalTo: infoView.bottomAnchor),
         ])
     }
+}
 
+
+
+extension DailyTableViewCell: Configurable {
+    
+    func configure(with timePeriod: DailyTimePeriod, at index: Int) {
+        
+        let sortedDailyForecast = timePeriod.dailyForecast.sorted { $0.key < $1.key }
+        
+        let dateKeys = sortedDailyForecast.map { $0.key }
+        
+        if index >= dateKeys.count {
+            return
+        }
+        
+        let dateKey = dateKeys[index]
+        
+        let dailyForecast = sortedDailyForecast[index].value
+        if dailyForecast.count > 1,
+           let forecast = dailyForecast[1].timePeriodData?.next6HoursForecast {
+            dateLabel.text = dateFormatter.formattedStringDate(date: dateKey, dateFormat: "dd/MM")
+            precipitationIcon.image = UIImage(named: forecast.symbolCode ?? "xmark.icloud")
+            precipitationLabel.text = "\(forecast.precipitationAmount)%"
+            infoLabel.text = forecast.symbolCode
+            temperatureLabel.text = "\(forecast.airTemperatureMin)° - \(forecast.airTemperatureMax)°"
+        }
+    }
 }

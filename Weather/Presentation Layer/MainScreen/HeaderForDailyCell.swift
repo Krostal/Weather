@@ -3,7 +3,7 @@
 import UIKit
 
 protocol HeaderForDailyCellDelegate: AnyObject {
-    func updateDaysCount(_ daysCount: Int)
+    func changeNumberOfRows()
 }
 
 final class HeaderForDailyCell: UITableViewHeaderFooterView {
@@ -11,6 +11,10 @@ final class HeaderForDailyCell: UITableViewHeaderFooterView {
     static let id = "HeaderForDailyCell"
     
     weak var delegate: HeaderForDailyCellDelegate?
+    
+    var isToggled: Bool = false
+        
+    var maxNumberOfDays: Int = 0 
     
     private lazy var headerStackView: UIStackView = {
         let headerStackView = UIStackView()
@@ -26,10 +30,10 @@ final class HeaderForDailyCell: UITableViewHeaderFooterView {
     private lazy var dailyForecastButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("7 дней", for: .normal)
-        button.setTitleColor(.blue, for: .normal)
+        button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(dailyForecastButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(dailyForecastButtonTapped(_:)), for: .touchUpInside)
         return button
     }()
     
@@ -37,7 +41,7 @@ final class HeaderForDailyCell: UITableViewHeaderFooterView {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = .systemFont(ofSize: 18, weight: .semibold)
-        titleLabel.textColor = .blue
+        titleLabel.textColor = .black
         titleLabel.text = "Ежедневный прогноз"
         return titleLabel
     }()
@@ -65,18 +69,16 @@ final class HeaderForDailyCell: UITableViewHeaderFooterView {
         ])
     }
     
-    func updateButtonText(_ title: String) {
-        dailyForecastButton.setTitle(title, for: .normal)
+    func updateButtonText() {
+        let buttonText = isToggled ? "Показать 7 дней" : "Показать \(maxNumberOfDays) дней"
+        dailyForecastButton.setTitle(buttonText, for: .normal)
     }
         
-    @objc private func dailyForecastButtonTapped() {
-        if let currentText = dailyForecastButton.titleLabel?.text {
-            let strippedText = currentText.replacingOccurrences(of: " дней", with: "")
-            if let daysCount = Int(strippedText) {
-                let newDaysCount = daysCount == 7 ? 10 : 7
-                dailyForecastButton.setTitle("\(newDaysCount) дней", for: .normal)
-                delegate?.updateDaysCount(newDaysCount)
-            }
+    @objc private func dailyForecastButtonTapped(_ sender: UIButton) {
+        DispatchQueue.main.async {
+            self.isToggled.toggle()
+            self.delegate?.changeNumberOfRows()
+            self.updateButtonText()
         }
     }
     
