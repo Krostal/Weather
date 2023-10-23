@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0906A00B2ADE635100076DB0 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 0906A00A2ADE635100076DB0 /* DGCharts */; };
+		0931E5D62AE6A2150086D566 /* LocationServiceError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0931E5D52AE6A2150086D566 /* LocationServiceError.swift */; };
 		0957A7E62AD6EE8900B1DC36 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7E52AD6EE8900B1DC36 /* OnboardingViewController.swift */; };
 		0957A7E82AD6EFA100B1DC36 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7E72AD6EFA100B1DC36 /* OnboardingView.swift */; };
 		0957A7EF2AD70A8A00B1DC36 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0957A7EE2AD70A8A00B1DC36 /* SettingsViewController.swift */; };
@@ -54,6 +55,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0931E5D52AE6A2150086D566 /* LocationServiceError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationServiceError.swift; sourceTree = "<group>"; };
 		0957A7E52AD6EE8900B1DC36 /* OnboardingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewController.swift; sourceTree = "<group>"; };
 		0957A7E72AD6EFA100B1DC36 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		0957A7EE2AD70A8A00B1DC36 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -114,6 +116,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0931E5D72AE6A3FA0086D566 /* LocationService */ = {
+			isa = PBXGroup;
+			children = (
+				098C0B812AD96DC5007EB098 /* LocationService.swift */,
+				0931E5D52AE6A2150086D566 /* LocationServiceError.swift */,
+			);
+			path = LocationService;
+			sourceTree = "<group>";
+		};
 		0957A7E42AD6EE3400B1DC36 /* OnboardingScreen */ = {
 			isa = PBXGroup;
 			children = (
@@ -170,8 +181,8 @@
 		0957A80E2AD8271500B1DC36 /* Business Logic Layer */ = {
 			isa = PBXGroup;
 			children = (
+				0931E5D72AE6A3FA0086D566 /* LocationService */,
 				09F45AA42AD9038E00C045D3 /* Network Service */,
-				098C0B812AD96DC5007EB098 /* LocationService.swift */,
 				09F45AA22AD8FD6000C045D3 /* WeatherInteractor.swift */,
 				0958894D2AE373440005DAEE /* CustomDateFormatter.swift */,
 			);
@@ -365,6 +376,7 @@
 				0985D37E2AD3B4CD00063E87 /* TemperatureСhartTableViewCell.swift in Sources */,
 				09FB5B992AD139A100B46781 /* CurrentTableViewCell.swift in Sources */,
 				095889542AE37FEF0005DAEE /* HourlyTimePeriod.swift in Sources */,
+				0931E5D62AE6A2150086D566 /* LocationServiceError.swift in Sources */,
 				0957A8152AD828B900B1DC36 /* FetchDataService.swift in Sources */,
 				0957A8022AD7B7CE00B1DC36 /* DatesCollectionViewCell.swift in Sources */,
 				098C0B822AD96DC5007EB098 /* LocationService.swift in Sources */,

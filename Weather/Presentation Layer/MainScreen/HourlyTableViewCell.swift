@@ -76,7 +76,7 @@ extension HourlyTableViewCell: UICollectionViewDataSource {
                 cell.configure(with: timePeriod, at: indexPath.item)
                 
                 let isCurrentTimeCell = isCellRepresentingCurrentTime(timePeriod)
-                cell.contentView.backgroundColor = isCurrentTimeCell ? .systemYellow : .clear
+                cell.contentView.backgroundColor = isCurrentTimeCell ? .systemBlue.withAlphaComponent(0.1) : .clear
             }
         }
         return cell

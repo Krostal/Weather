@@ -6,7 +6,7 @@ struct DailyTimePeriod {
     
     private let dateFormatter = CustomDateFormatter()
         
-    var dailyForecast: [String: [TimePeriod]]
+    var dailyForecast: [Date: [TimePeriod]]
     
     init() {
         self.dailyForecast = [:]
@@ -57,18 +57,19 @@ struct DailyTimePeriod {
         return filteredTimePeriods
     }
         
-    private func groupTimePeriodsByDay(_ timePeriod: [TimePeriod]) -> [String: [TimePeriod]] {
+    private func groupTimePeriodsByDay(_ timePeriod: [TimePeriod]) -> [Date: [TimePeriod]] {
         
-        var dailyForecast: [String: [TimePeriod]] = [:]
+        var dailyForecast: [Date: [TimePeriod]] = [:]
         var currentDayIndex = 1
         var partsOfDay: [TimePeriod] = []
+        let currentDate = Date()
         
         for (index, time) in timePeriod.dropFirst().enumerated() {
             partsOfDay.append(time)
             
             if partsOfDay.count == 4 || index == timePeriod.count - 2 {
-                let dateForDayKey = dateFormatter.formattedStringDate(date: Date().addingTimeInterval(TimeInterval(currentDayIndex) * 24 * 60 * 60), dateFormat: "dd/MM")
-                if partsOfDay.count > 1 {
+                if let dateForDayKey = Calendar.current.date(byAdding: .day, value: currentDayIndex, to: currentDate),
+                   partsOfDay.count > 1 {
                     dailyForecast[dateForDayKey] = partsOfDay
                 }
                 partsOfDay = []

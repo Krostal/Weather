@@ -7,6 +7,7 @@ class LocationService: NSObject {
     private let locationManager = CLLocationManager()
     private let geocoder = CLGeocoder()
     private var currentLocation: CLLocation?
+    var isLocationAuthorized: Bool = false
     var currentCoordinates: (latitude: Double, longitude: Double)?
     
     
@@ -15,7 +16,7 @@ class LocationService: NSObject {
         updateLocation()
     }
     
-    private func updateLocation() {
+    func updateLocation() {
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
@@ -51,6 +52,17 @@ extension LocationService: CLLocationManagerDelegate {
             if let currentPlace = currentLocation {
                 self.currentCoordinates = (currentPlace.coordinate.latitude, currentPlace.coordinate.longitude)
             }
+        }
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            isLocationAuthorized = true
+        case .notDetermined, .denied, .restricted:
+            isLocationAuthorized = false
+        @unknown default:
+            fatalError("Неизвестный статус разрешения использования местоположения")
         }
     }
 }

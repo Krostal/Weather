@@ -3,7 +3,7 @@
 import UIKit
 
 protocol OnboardingViewDelegate: AnyObject {
-    func startFetchingWeatherData()
+    func requestLocationWhenInUseAuthorization()
 }
 
 final class OnboardingView: UIView {
@@ -134,7 +134,7 @@ final class OnboardingView: UIView {
     }
     
     @objc func agreeButtonTapped() {
-        delegate?.startFetchingWeatherData()
+        delegate?.requestLocationWhenInUseAuthorization()
     }
     
     @objc func denyButtonTapped() {

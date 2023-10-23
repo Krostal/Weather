@@ -3,7 +3,8 @@ import CoreData
 
 protocol WeatherInteractorProtocol {
     func fetchFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void)
-    func getWeatherFromCoreData(withPredicate predicate: NSPredicate?) -> [Weather]
+    func getWeatherFromCoreData(withPredicate predicate: NSPredicate?, completion: @escaping ([Weather]) -> Void)
+    func checkPermission(completion: @escaping (Bool) -> Void)
 }
 
 final class WeatherInteractor: WeatherInteractorProtocol {
@@ -52,7 +53,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         }
     }
     
-    func getWeatherFromCoreData(withPredicate predicate: NSPredicate?) -> [Weather] {
+    func getWeatherFromCoreData(withPredicate predicate: NSPredicate?, completion: @escaping ([Weather]) -> Void) {
         let request: NSFetchRequest<Weather> = Weather.fetchRequest()
         
         if let predicate = predicate {
@@ -61,10 +62,17 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         
         do {
             let results = try self.context.fetch(request)
-            return results
+            completion(results)
         } catch {
             print("Error fetching weather data: \(error.localizedDescription)")
-            return []
+        }
+    }
+    
+    func checkPermission(completion: @escaping (Bool) -> Void) {
+        if locationService.isLocationAuthorized {
+            completion(true)
+        } else {
+            completion(false)
         }
     }
     
