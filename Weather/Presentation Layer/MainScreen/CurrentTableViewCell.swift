@@ -8,6 +8,7 @@ final class CurrentTableViewCell: UITableViewCell {
         static let horizontalPadding: CGFloat = 16.0
         static let verticalSpacing: CGFloat = 12.0
         static let halfCircleHorizontalPadding: CGFloat = 33.0
+        static let iconSize: CGFloat = 25.0
     }
     
     static let id = "CurrentTableViewCell"
@@ -28,7 +29,7 @@ final class CurrentTableViewCell: UITableViewCell {
         tempRangeLabel.translatesAutoresizingMaskIntoConstraints = false
         tempRangeLabel.font = .systemFont(ofSize: 16, weight: .regular)
         tempRangeLabel.textColor = .white
-        tempRangeLabel.text = "7° / 13°"
+
         return tempRangeLabel
     }()
     
@@ -37,7 +38,6 @@ final class CurrentTableViewCell: UITableViewCell {
         currentTemp.translatesAutoresizingMaskIntoConstraints = false
         currentTemp.font = .systemFont(ofSize: 36, weight: .semibold)
         currentTemp.textColor = .white
-        currentTemp.text = "13°"
         return currentTemp
     }()
     
@@ -46,7 +46,6 @@ final class CurrentTableViewCell: UITableViewCell {
         infoLabel.translatesAutoresizingMaskIntoConstraints = false
         infoLabel.font = .systemFont(ofSize: 16, weight: .regular)
         infoLabel.textColor = .white
-        infoLabel.text = "Возможен дождь"
         return infoLabel
     }()
     
@@ -74,7 +73,8 @@ final class CurrentTableViewCell: UITableViewCell {
     }()
     
     private lazy var precipitationIcon: UIImageView = {
-        let precipitationIcon = UIImageView(image: UIImage(systemName: "cloud"))
+        let precipitationIcon = UIImageView()
+        precipitationIcon.image = UIImage(named: "precipitation")
         precipitationIcon.translatesAutoresizingMaskIntoConstraints = false
         precipitationIcon.tintColor = .black
         return precipitationIcon
@@ -85,7 +85,6 @@ final class CurrentTableViewCell: UITableViewCell {
         rainPossibilityLabel.translatesAutoresizingMaskIntoConstraints = false
         rainPossibilityLabel.font = .systemFont(ofSize: 14, weight: .regular)
         rainPossibilityLabel.textColor = .white
-        rainPossibilityLabel.text = "3 мм"
         return rainPossibilityLabel
     }()
     
@@ -100,7 +99,8 @@ final class CurrentTableViewCell: UITableViewCell {
     }()
     
     private lazy var windIcon: UIImageView = {
-        let windIcon = UIImageView(image: UIImage(systemName: "wind"))
+        let windIcon = UIImageView()
+        windIcon.image = UIImage(named: "wind")
         windIcon.translatesAutoresizingMaskIntoConstraints = false
         windIcon.tintColor = .black
         return windIcon
@@ -111,7 +111,6 @@ final class CurrentTableViewCell: UITableViewCell {
         windSpeedLabel.translatesAutoresizingMaskIntoConstraints = false
         windSpeedLabel.font = .systemFont(ofSize: 14, weight: .regular)
         windSpeedLabel.textColor = .white
-        windSpeedLabel.text = "3 м/с"
         return windSpeedLabel
     }()
     
@@ -127,7 +126,8 @@ final class CurrentTableViewCell: UITableViewCell {
     }()
     
     private lazy var humidityIcon: UIImageView = {
-        let humidityIcon = UIImageView(image: UIImage(systemName: "humidity"))
+        let humidityIcon = UIImageView()
+        humidityIcon.image = UIImage(named: "humidity")
         humidityIcon.translatesAutoresizingMaskIntoConstraints = false
         humidityIcon.tintColor = .black
         return humidityIcon
@@ -138,7 +138,6 @@ final class CurrentTableViewCell: UITableViewCell {
         windSpeedLabel.translatesAutoresizingMaskIntoConstraints = false
         windSpeedLabel.font = .systemFont(ofSize: 14, weight: .regular)
         windSpeedLabel.textColor = .white
-        windSpeedLabel.text = "20 %"
         return windSpeedLabel
     }()
     
@@ -244,6 +243,16 @@ final class CurrentTableViewCell: UITableViewCell {
             
             sunsetTimeLabel.topAnchor.constraint(equalTo: sunsetIcon.bottomAnchor, constant: 1),
             sunsetTimeLabel.centerXAnchor.constraint(equalTo: sunsetIcon.centerXAnchor),
+            
+            precipitationIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            precipitationIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize),
+            
+            windIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            windIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize),
+            
+            humidityIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            humidityIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize)
+            
         ])
     }
     
@@ -273,7 +282,11 @@ extension CurrentTableViewCell: Configurable {
     
         tempRangeLabel.text = "\(timePeriod.next6HoursForecast.airTemperatureMin)° / \(timePeriod.next6HoursForecast.airTemperatureMax)°"
         currentTemp.text = "\(timePeriod.instantData.airTemperature)°"
-        infoLabel.text = timePeriod.next1HoursForecast.symbolCode
+        if let symbolCode = timePeriod.next1HoursForecast.symbolCode {
+            precipitationIcon.image = UIImage(named: symbolCode)
+            let currentWeatherDescription = CurrentWeatherDescription(symbolCode: symbolCode)
+            infoLabel.text = currentWeatherDescription?.description
+        }
         precipitationAmountLabel.text = "\(timePeriod.next1HoursForecast.precipitationAmount) мм"
         windSpeedLabel.text = "\(timePeriod.instantData.windSpeed) м/с"
         humidityLabel.text = "\(timePeriod.instantData.relativeHumidity)%"

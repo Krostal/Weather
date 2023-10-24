@@ -163,8 +163,10 @@ extension DailyTableViewCell: Configurable {
             dateLabel.text = dateFormatter.formattedDateToString(date: dateKey, dateFormat: "dd/MM")
             precipitationIcon.image = UIImage(named: forecast.symbolCode ?? "xmark.icloud")
             precipitationLabel.text = "\(forecast.precipitationAmount)%"
-            infoLabel.text = forecast.symbolCode
+            infoLabel.text = CurrentWeatherDescription(symbolCode: forecast.symbolCode ?? "cloud")?.description
             temperatureLabel.text = "\(forecast.airTemperatureMin)° - \(forecast.airTemperatureMax)°"
+            
+            
         }
     }
 }

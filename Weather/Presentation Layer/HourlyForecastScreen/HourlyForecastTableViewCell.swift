@@ -379,7 +379,7 @@ extension HourlyForecastTableViewCell: Configurable {
         timeLabel.text = timePeriod.time
         temperatureLabel.text = "\(timePeriod.instantData.airTemperature)°"
         weatherIcon.image = UIImage(named: timePeriod.next1HoursForecast.symbolCode ?? "xmark.icloud")
-        weatherLabel.text = timePeriod.next1HoursForecast.symbolCode
+        weatherLabel.text = CurrentWeatherDescription(symbolCode: timePeriod.next1HoursForecast.symbolCode ?? "cloud")?.description
         windSpeedLabel.text = "\(timePeriod.instantData.windSpeed) м/с, \(WindDirection(degrees: timePeriod.instantData.windFromDirection).rawValue)"
         precipitationAmountLabel.text = "\(timePeriod.next1HoursForecast.precipitationAmount) мм"
         relativeHumidityLabel.text = "\(timePeriod.instantData.relativeHumidity)%"
