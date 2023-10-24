@@ -1,12 +1,16 @@
 
-
+import DGCharts
 import UIKit
 
 final class TemperatureСhartTableViewCell: UITableViewCell {
     
     static let id = "TemperatureСhartTableViewCell"
     
-    private lazy var temperatureChartView: TemperatureChartView = {
+    var temperatureData: [ChartDataEntry] = []
+    
+    var timeData: [ChartDataEntry] = []
+    
+    lazy var temperatureChartView: TemperatureChartView = {
         let chartView = TemperatureChartView()
         chartView.translatesAutoresizingMaskIntoConstraints = false
         return chartView
@@ -36,4 +40,18 @@ final class TemperatureСhartTableViewCell: UITableViewCell {
         ])
     }
     
+    func setupChartData(timePeriod: [ThreeHoursForecast]) {
+        timePeriod.forEach {
+            let index = Double($0.index)
+            let temperature = Double($0.instantData.airTemperature)
+            let chartDataEntry = ChartDataEntry(x: index, y: temperature)
+            temperatureData.append(chartDataEntry)
+            temperatureChartView.updateChartWithWeatherData(temperatureData)
+            guard let time = Double($0.time) else { return }
+            let timeDataEntry = ChartDataEntry(x: time, y: 0)
+            timeData.append(timeDataEntry)
+            temperatureChartView.updateXAxisWithTimeData(timeData)
+        }
+    }
 }
+    

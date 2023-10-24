@@ -10,6 +10,8 @@ final class MainViewController: UIViewController {
     
     private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService<WeatherJsonModel>(), coreDataService: CoreDataService.shared, locationService: LocationService())
     
+    private var weather: Weather?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -26,9 +28,11 @@ final class MainViewController: UIViewController {
     private func setupView() {
         interactor.getWeatherFromCoreData(withPredicate: nil) { [weak self] weatherArray in
             guard let self = self else { return }
-            if let weather = weatherArray.last {
+            if let model = weatherArray.last {
+                self.weather = model
+                guard let weatherModel = self.weather else { return }
                 DispatchQueue.main.async {
-                    self.mainView = MainView(frame: self.view.bounds, weather: weather)
+                    self.mainView = MainView(frame: self.view.bounds, weather: weatherModel)
                     self.mainView?.delegate = self
                     self.mainView?.tableView.refreshControl = UIRefreshControl()
                     self.mainView?.tableView.refreshControl?.addTarget(self, action: #selector(self.refreshWeatherData), for: .valueChanged)
@@ -60,16 +64,24 @@ final class MainViewController: UIViewController {
     }
     
     private func updateNavigationBarTitle() {
-        interactor.getWeatherFromCoreData(withPredicate: nil) { [weak self] weatherArray in
-            guard let self else { return }
-            if let weather = weatherArray.last {
-                if let locationName = weather.location?.name {
-                    DispatchQueue.main.async {
-                        self.navigationItem.title = locationName
-                    }
+        if let weatherModel = self.weather {
+            if let locationName = weatherModel.location?.name {
+                DispatchQueue.main.async {
+                    self.navigationItem.title = locationName
                 }
-            } else {
-                print ("Ошибка получения модели Weather")
+            }
+        } else {
+            interactor.getWeatherFromCoreData(withPredicate: nil) { [weak self] weatherArray in
+                guard let self else { return }
+                if let weather = weatherArray.last {
+                    if let locationName = weather.location?.name {
+                        DispatchQueue.main.async {
+                            self.navigationItem.title = locationName
+                        }
+                    }
+                } else {
+                    print ("Ошибка получения модели Weather")
+                }
             }
         }
     }
@@ -198,8 +210,8 @@ final class MainViewController: UIViewController {
 extension MainViewController: MainViewDelegate {
 
     func showHourlyForecast() {
-        let hourlyForecastViewController = HourlyForecastViewController()
-        hourlyForecastViewController.headerTitle = navigationItem.title
+        guard let weatherModel = self.weather else { return }
+        let hourlyForecastViewController = HourlyForecastViewController(headerTitle: navigationItem.title ?? "", weatherModel: weatherModel)
         navigationController?.pushViewController(hourlyForecastViewController, animated: true)
     }
     

@@ -41,6 +41,8 @@
 		0985D3802AD3B56000063E87 /* HourlyForecastTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0985D37F2AD3B56000063E87 /* HourlyForecastTableViewCell.swift */; };
 		0985D3822AD3BF7200063E87 /* TemperatureChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0985D3812AD3BF7200063E87 /* TemperatureChartView.swift */; };
 		0985D3892AD42B4900063E87 /* InfoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0985D3882AD42B4900063E87 /* InfoCollectionViewCell.swift */; };
+		098AC4F92AE7C8BF004D945D /* WindDirections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098AC4F82AE7C8BF004D945D /* WindDirections.swift */; };
+		098AC4FB2AE7DC89004D945D /* ThreeHoursForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098AC4FA2AE7DC89004D945D /* ThreeHoursForecast.swift */; };
 		098C0B822AD96DC5007EB098 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098C0B812AD96DC5007EB098 /* LocationService.swift */; };
 		09B768822ADA513300BC6585 /* ProtocolConfigurable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09B768812ADA513300BC6585 /* ProtocolConfigurable.swift */; };
 		09F45AA32AD8FD6000C045D3 /* WeatherInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09F45AA22AD8FD6000C045D3 /* WeatherInteractor.swift */; };
@@ -89,6 +91,8 @@
 		0985D37F2AD3B56000063E87 /* HourlyForecastTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyForecastTableViewCell.swift; sourceTree = "<group>"; };
 		0985D3812AD3BF7200063E87 /* TemperatureChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureChartView.swift; sourceTree = "<group>"; };
 		0985D3882AD42B4900063E87 /* InfoCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoCollectionViewCell.swift; sourceTree = "<group>"; };
+		098AC4F82AE7C8BF004D945D /* WindDirections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindDirections.swift; sourceTree = "<group>"; };
+		098AC4FA2AE7DC89004D945D /* ThreeHoursForecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeHoursForecast.swift; sourceTree = "<group>"; };
 		098C0B812AD96DC5007EB098 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		09B768812ADA513300BC6585 /* ProtocolConfigurable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtocolConfigurable.swift; sourceTree = "<group>"; };
 		09F45AA22AD8FD6000C045D3 /* WeatherInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherInteractor.swift; sourceTree = "<group>"; };
@@ -204,6 +208,7 @@
 				095889502AE37CB60005DAEE /* CurrentTimePeriod.swift */,
 				095889532AE37FEF0005DAEE /* HourlyTimePeriod.swift */,
 				095889552AE38B490005DAEE /* DailyTimePeriod.swift */,
+				098AC4FA2AE7DC89004D945D /* ThreeHoursForecast.swift */,
 			);
 			path = WeatherFormatter;
 			sourceTree = "<group>";
@@ -217,6 +222,7 @@
 				0985D3772AD3AEBB00063E87 /* HourlyForecastScreen */,
 				0957A7F52AD7B7CE00B1DC36 /* DailyForecastScreen */,
 				09B768812ADA513300BC6585 /* ProtocolConfigurable.swift */,
+				098AC4F82AE7C8BF004D945D /* WindDirections.swift */,
 			);
 			path = "Presentation Layer";
 			sourceTree = "<group>";
@@ -386,6 +392,7 @@
 				0957A7E62AD6EE8900B1DC36 /* OnboardingViewController.swift in Sources */,
 				09FB5B9B2AD139AE00B46781 /* HourlyTableViewCell.swift in Sources */,
 				0985D3822AD3BF7200063E87 /* TemperatureChartView.swift in Sources */,
+				098AC4FB2AE7DC89004D945D /* ThreeHoursForecast.swift in Sources */,
 				0957A8062AD7B7CE00B1DC36 /* DailyForecastView.swift in Sources */,
 				0957A8172AD828DB00B1DC36 /* FetchDataError.swift in Sources */,
 				095889562AE38B490005DAEE /* DailyTimePeriod.swift in Sources */,
@@ -397,6 +404,7 @@
 				0967D3BF2AD26C2B0060156B /* HeaderForHourlyCell.swift in Sources */,
 				0957A8012AD7B7CE00B1DC36 /* DailyForecastViewController.swift in Sources */,
 				0957A8042AD7B7CE00B1DC36 /* DatesTableViewCell.swift in Sources */,
+				098AC4F92AE7C8BF004D945D /* WindDirections.swift in Sources */,
 				0958894E2AE373440005DAEE /* CustomDateFormatter.swift in Sources */,
 				0985D37C2AD3B3BD00063E87 /* HourlyForecastView.swift in Sources */,
 				0985D37A2AD3AFE000063E87 /* HourlyForecastViewController.swift in Sources */,

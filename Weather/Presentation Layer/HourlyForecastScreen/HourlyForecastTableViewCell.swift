@@ -5,10 +5,11 @@ import UIKit
 final class HourlyForecastTableViewCell: UITableViewCell {
     
     static let id = "HourlyForecastTableViewCell"
-    
+        
     private enum Constants {
         static let viewSpacing: CGFloat = 16.0
         static let itemSpacing: CGFloat = 11.0
+        static let iconSize: CGFloat = 20.0
     }
     
     private lazy var dateLabel: UILabel = {
@@ -16,7 +17,6 @@ final class HourlyForecastTableViewCell: UITableViewCell {
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         dateLabel.font = .systemFont(ofSize: 18, weight: .semibold)
         dateLabel.textColor = .black
-        dateLabel.text = formattedCurrentDate()
         return dateLabel
     }()
     
@@ -31,7 +31,7 @@ final class HourlyForecastTableViewCell: UITableViewCell {
         leftStackView.translatesAutoresizingMaskIntoConstraints = false
         leftStackView.axis = .vertical
         leftStackView.spacing = Constants.itemSpacing
-        leftStackView.alignment = .center
+        leftStackView.alignment = .leading
         leftStackView.distribution = .equalCentering
         leftStackView.addArrangedSubview(timeLabel)
         leftStackView.addArrangedSubview(temperatureLabel)
@@ -43,7 +43,6 @@ final class HourlyForecastTableViewCell: UITableViewCell {
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
         timeLabel.font = .systemFont(ofSize: 14, weight: .semibold)
         timeLabel.textColor = .black
-        timeLabel.text = "12:00"
         return timeLabel
     }()
     
@@ -52,7 +51,6 @@ final class HourlyForecastTableViewCell: UITableViewCell {
         temperatureLabel.translatesAutoresizingMaskIntoConstraints = false
         temperatureLabel.font = .systemFont(ofSize: 18, weight: .semibold)
         temperatureLabel.textColor = .black
-        temperatureLabel.text = "13°"
         return temperatureLabel
     }()
     
@@ -66,6 +64,7 @@ final class HourlyForecastTableViewCell: UITableViewCell {
         rightStackView.addArrangedSubview(weatherStackView)
         rightStackView.addArrangedSubview(windStackView)
         rightStackView.addArrangedSubview(precipitationStackView)
+        rightStackView.addArrangedSubview(humidityStackView)
         rightStackView.addArrangedSubview(cloudyStackView)
         return rightStackView
     }()
@@ -106,7 +105,6 @@ final class HourlyForecastTableViewCell: UITableViewCell {
         weatherLabel.translatesAutoresizingMaskIntoConstraints = false
         weatherLabel.font = .systemFont(ofSize: 14, weight: .regular)
         weatherLabel.textColor = .black
-        weatherLabel.text = "Преимущественно солнечно"
         return weatherLabel
     }()
     
@@ -143,7 +141,7 @@ final class HourlyForecastTableViewCell: UITableViewCell {
     }()
     
     private lazy var windIcon: UIImageView = {
-        let windIcon = UIImageView(image: UIImage(systemName: "wind"))
+        let windIcon = UIImageView(image: UIImage(named: "wind"))
         windIcon.translatesAutoresizingMaskIntoConstraints = false
         windIcon.contentMode = .scaleAspectFit
         return windIcon
@@ -164,7 +162,6 @@ final class HourlyForecastTableViewCell: UITableViewCell {
         windSpeedLabel.translatesAutoresizingMaskIntoConstraints = false
         windSpeedLabel.font = .systemFont(ofSize: 14, weight: .regular)
         windSpeedLabel.textColor = .systemGray
-        windSpeedLabel.text = "2 м/с ССЗ"
         return windSpeedLabel
     }()
     
@@ -193,7 +190,7 @@ final class HourlyForecastTableViewCell: UITableViewCell {
     }()
     
     private lazy var precipitationIcon: UIImageView = {
-        let precipitationIcon = UIImageView(image: UIImage(systemName: "cloud"))
+        let precipitationIcon = UIImageView(image: UIImage(named: "precipitation"))
         precipitationIcon.translatesAutoresizingMaskIntoConstraints = false
         precipitationIcon.contentMode = .scaleAspectFit
         return precipitationIcon
@@ -215,6 +212,55 @@ final class HourlyForecastTableViewCell: UITableViewCell {
         precipitationAmountLabel.font = .systemFont(ofSize: 14, weight: .regular)
         precipitationAmountLabel.textColor = .systemGray
         precipitationAmountLabel.text = "27%"
+        return precipitationAmountLabel
+    }()
+    
+    private lazy var humidityStackView: UIStackView = {
+        let humidityStackView = UIStackView()
+        humidityStackView.translatesAutoresizingMaskIntoConstraints = false
+        humidityStackView.axis = .horizontal
+        humidityStackView.spacing = Constants.itemSpacing
+        humidityStackView.alignment = .fill
+        humidityStackView.distribution = .equalSpacing
+        humidityStackView.addArrangedSubview(humidityDetailStackView)
+        humidityStackView.addArrangedSubview(relativeHumidityLabel)
+        return humidityStackView
+    }()
+    
+    private lazy var humidityDetailStackView: UIStackView = {
+        let humidityDetailStackView = UIStackView()
+        humidityDetailStackView.translatesAutoresizingMaskIntoConstraints = false
+        humidityDetailStackView.axis = .horizontal
+        humidityDetailStackView.spacing = Constants.itemSpacing
+        humidityDetailStackView.alignment = .leading
+        humidityDetailStackView.distribution = .fill
+        humidityDetailStackView.addArrangedSubview(humidityIcon)
+        humidityDetailStackView.addArrangedSubview(humidityLabel)
+        return humidityDetailStackView
+    }()
+    
+    private lazy var humidityIcon: UIImageView = {
+        let precipitationIcon = UIImageView(image: UIImage(named: "humidity"))
+        precipitationIcon.translatesAutoresizingMaskIntoConstraints = false
+        precipitationIcon.contentMode = .scaleAspectFit
+        return precipitationIcon
+    }()
+    
+    private lazy var humidityLabel: UILabel = {
+        let precipitationLabel = UILabel()
+        precipitationLabel.translatesAutoresizingMaskIntoConstraints = false
+        precipitationLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        precipitationLabel.textColor = .black
+        precipitationLabel.text = "Относительная влажность"
+        return precipitationLabel
+    }()
+    
+   
+    private lazy var relativeHumidityLabel: UILabel = {
+        let precipitationAmountLabel = UILabel()
+        precipitationAmountLabel.translatesAutoresizingMaskIntoConstraints = false
+        precipitationAmountLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        precipitationAmountLabel.textColor = .systemGray
         return precipitationAmountLabel
     }()
     
@@ -243,7 +289,7 @@ final class HourlyForecastTableViewCell: UITableViewCell {
     }()
     
     private lazy var cloudyIcon: UIImageView = {
-        let cloudyIcon = UIImageView(image: UIImage(systemName: "cloud"))
+        let cloudyIcon = UIImageView(image: UIImage(named: "clouds"))
         cloudyIcon.translatesAutoresizingMaskIntoConstraints = false
         cloudyIcon.contentMode = .scaleAspectFit
         return cloudyIcon
@@ -254,7 +300,7 @@ final class HourlyForecastTableViewCell: UITableViewCell {
         cloudyLabel.translatesAutoresizingMaskIntoConstraints = false
         cloudyLabel.font = .systemFont(ofSize: 14, weight: .regular)
         cloudyLabel.textColor = .black
-        cloudyLabel.text = "Атмосферные осадки"
+        cloudyLabel.text = "Облачность"
         return cloudyLabel
     }()
     
@@ -302,22 +348,44 @@ final class HourlyForecastTableViewCell: UITableViewCell {
             leftStackView.leadingAnchor.constraint(equalTo: hourlyWeatherView.leadingAnchor),
             leftStackView.topAnchor.constraint(equalTo: hourlyWeatherView.topAnchor),
             leftStackView.heightAnchor.constraint(lessThanOrEqualTo: hourlyWeatherView.heightAnchor),
-            leftStackView.widthAnchor.constraint(equalToConstant: 40),
+            leftStackView.widthAnchor.constraint(greaterThanOrEqualToConstant: 42),
             
             rightStackView.leadingAnchor.constraint(equalTo: leftStackView.trailingAnchor, constant: Constants.itemSpacing),
             rightStackView.trailingAnchor.constraint(equalTo: hourlyWeatherView.trailingAnchor),
             rightStackView.topAnchor.constraint(equalTo: hourlyWeatherView.topAnchor),
             rightStackView.bottomAnchor.constraint(equalTo: hourlyWeatherView.bottomAnchor),
+            
+            weatherIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            weatherIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize),
+            
+            windIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            windIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize),
+            
+            precipitationIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            precipitationIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize),
+            
+            humidityIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            humidityIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize),
+            
+            cloudyIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            cloudyIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize)
         ])
     }
-    
-    private func formattedCurrentDate() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "EEEE, d MMMM yyyy"
-        dateFormatter.locale = Locale(identifier: "ru_RU")
-        let currentDate = Date()
-        let formattedDate = dateFormatter.string(from: currentDate)
-        return formattedDate
+}
+
+extension HourlyForecastTableViewCell: Configurable {
+    func configure(with timePeriod: HourlyTimePeriod, at index: Int) {
+        dateLabel.text = CustomDateFormatter().formattedStringToString(date: timePeriod.timeStringFullInUTC, dateFormat: "EEEE, d MMMM yyyy", locale: Locale(identifier: "ru_RU"))
+        timeLabel.text = timePeriod.time
+        temperatureLabel.text = "\(timePeriod.instantData.airTemperature)°"
+        weatherIcon.image = UIImage(named: timePeriod.next1HoursForecast.symbolCode ?? "xmark.icloud")
+        weatherLabel.text = timePeriod.next1HoursForecast.symbolCode
+        windSpeedLabel.text = "\(timePeriod.instantData.windSpeed) м/с, \(WindDirection(degrees: timePeriod.instantData.windFromDirection).rawValue)"
+        precipitationAmountLabel.text = "\(timePeriod.next1HoursForecast.precipitationAmount) мм"
+        relativeHumidityLabel.text = "\(timePeriod.instantData.relativeHumidity)%"
+        cloudyAmountLabel.text = "\(timePeriod.instantData.cloudAreaFraction)%"
     }
 }
+
+
 

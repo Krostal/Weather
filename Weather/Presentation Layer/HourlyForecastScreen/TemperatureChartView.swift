@@ -5,32 +5,26 @@ import UIKit
 
 final class TemperatureChartView: UIView {
     
+    var weather: Weather?
+    private var threeHoursForecast: [ThreeHoursForecast]?
+    
     private enum Constants {
         static let spacing: CGFloat = 5
     }
     
-    let tempData: [ChartDataEntry] = [
-        ChartDataEntry(x: 0, y: 20),
-        ChartDataEntry(x: 3, y: 18),
-        ChartDataEntry(x: 6, y: 14),
-        ChartDataEntry(x: 9, y: 11),
-        ChartDataEntry(x: 12, y: 15),
-        ChartDataEntry(x: 15, y: 16),
-        ChartDataEntry(x: 18, y: 17),
-        ChartDataEntry(x: 21, y: 18)
+    var tempData: [ChartDataEntry] = []
+    
+    var timeData: [ChartDataEntry] = [
+        ChartDataEntry(x: 1, y: 0),
+        ChartDataEntry(x: 2, y: 0),
+        ChartDataEntry(x: 3, y: 0),
+        ChartDataEntry(x: 4, y: 0),
+        ChartDataEntry(x: 5, y: 0),
+        ChartDataEntry(x: 6, y: 0),
+        ChartDataEntry(x: 7, y: 0),
+        ChartDataEntry(x: 8, y: 0)
     ]
     
-    let emptyData: [ChartDataEntry] = [
-        ChartDataEntry(x: 0, y: 0),
-        ChartDataEntry(x: 3, y: 0),
-        ChartDataEntry(x: 6, y: 0),
-        ChartDataEntry(x: 9, y: 0),
-        ChartDataEntry(x: 12, y: 0),
-        ChartDataEntry(x: 15, y: 0),
-        ChartDataEntry(x: 18, y: 0),
-        ChartDataEntry(x: 21, y: 0)
-    ]
-
     private lazy var lineChartView: LineChartView = {
         let chartView = LineChartView()
         chartView.translatesAutoresizingMaskIntoConstraints = false
@@ -40,7 +34,7 @@ final class TemperatureChartView: UIView {
         chartView.rightAxis.enabled = false
         chartView.xAxis.enabled = false
         chartView.xAxis.drawGridLinesEnabled = false
-
+        
         chartView.animate(xAxisDuration: 2.5)
         
         return chartView
@@ -66,12 +60,12 @@ final class TemperatureChartView: UIView {
         xAxisView.legend.enabled = false
         xAxisView.leftAxis.enabled = false
         xAxisView.rightAxis.enabled = false
-
+        
         xAxisView.xAxis.drawGridLinesEnabled = false
         xAxisView.xAxis.axisLineColor = .clear
         xAxisView.xAxis.labelPosition = .bottom
         
-        xAxisView.xAxis.labelCount = emptyData.count
+        xAxisView.xAxis.labelCount = timeData.count
         xAxisView.xAxis.valueFormatter = DefaultAxisValueFormatter { value, axis in
             let hour = Int(value)
             return "\(hour):00"
@@ -79,13 +73,12 @@ final class TemperatureChartView: UIView {
         
         return xAxisView
     }()
-   
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
         setupConstraints()
-        setupChartView()
-        setupXAxisView()
+//        setupXAxisView(with: timeData)
         setupCollectionView()
     }
     
@@ -119,9 +112,9 @@ final class TemperatureChartView: UIView {
         ])
     }
     
-    private func setupChartView() {
+    private func setupChartView(with entries: [ChartDataEntry]) {
         
-        let dataSet = LineChartDataSet(entries: tempData, label: "")
+        let dataSet = LineChartDataSet(entries: entries, label: "")
         
         dataSet.circleRadius = 2
         dataSet.drawVerticalHighlightIndicatorEnabled = false
@@ -138,12 +131,13 @@ final class TemperatureChartView: UIView {
         
         let data = LineChartData(dataSet: dataSet)
         data.setValueFormatter(self)
-
+        
         lineChartView.data = data
+        
     }
     
-    private func setupXAxisView() {
-        let dataSet = LineChartDataSet(entries: emptyData, label: "")
+    private func setupXAxisView(with entries: [ChartDataEntry]) {
+        let dataSet = LineChartDataSet(entries: entries, label: "")
                 
         dataSet.drawCirclesEnabled = true
         dataSet.circleRadius = 2
@@ -164,18 +158,39 @@ final class TemperatureChartView: UIView {
         collectionView.delegate = self
     }
     
+    func updateChartWithWeatherData(_ data: [ChartDataEntry]) {
+        setupChartView(with: data)
+        lineChartView.notifyDataSetChanged()
+    }
+    
+    func updateXAxisWithTimeData(_ data: [ChartDataEntry]) {
+        setupXAxisView(with: data)
+        xAxisView.notifyDataSetChanged()
+    }
+    
 }
 
 
 extension TemperatureChartView: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        emptyData.count
+        if let forecast = threeHoursForecast {
+            return forecast.count
+        }
+        return timeData.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: InfoCollectionViewCell.id, for: indexPath) as? InfoCollectionViewCell else {
             return UICollectionViewCell()
+        }
+        
+        if let model = weather {
+            threeHoursForecast = HourlyTimePeriod.createForEveryThirdIndex(from: model)
+            if let threeHoursTimePeriod = threeHoursForecast {
+               let forecast = threeHoursTimePeriod[indexPath.row]
+                cell.configure(with: forecast, at: indexPath.row)
+            }
         }
 
         return cell
@@ -190,7 +205,7 @@ extension TemperatureChartView: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         let availableWidth = lineChartView.frame.width
-        let numberOfItems = emptyData.count
+        let numberOfItems = timeData.count
         let totalItemWidth = CGFloat(numberOfItems) * xAxisView.xAxis.labelWidth
         let totalSpacing = availableWidth - totalItemWidth
         let minimumSpacing = totalSpacing / CGFloat(numberOfItems - 1)

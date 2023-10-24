@@ -160,7 +160,7 @@ extension DailyTableViewCell: Configurable {
         let dailyForecast = sortedDailyForecast[index].value
         if dailyForecast.count > 1,
            let forecast = dailyForecast[1].timePeriodData?.next6HoursForecast {
-            dateLabel.text = dateFormatter.formattedStringDate(date: dateKey, dateFormat: "dd/MM")
+            dateLabel.text = dateFormatter.formattedDateToString(date: dateKey, dateFormat: "dd/MM")
             precipitationIcon.image = UIImage(named: forecast.symbolCode ?? "xmark.icloud")
             precipitationLabel.text = "\(forecast.precipitationAmount)%"
             infoLabel.text = forecast.symbolCode

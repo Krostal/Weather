@@ -4,7 +4,9 @@ import UIKit
 
 final class HourlyForecastView: UIView {
     
-    var headerTitle: String?
+    private let headerTitle: String
+    private let weather: Weather
+    private var hourlyTimePeriod: HourlyTimePeriod?
         
     private enum Constants {
         static let spacing: CGFloat = 0
@@ -22,7 +24,9 @@ final class HourlyForecastView: UIView {
         return tableView
     }()
     
-    override init(frame: CGRect) {
+    init(frame: CGRect, weather: Weather, headerTitle: String) {
+        self.weather = weather
+        self.headerTitle = headerTitle
         super.init(frame: frame)
         setupView()
         addSubviews()
@@ -76,17 +80,23 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
         if section == 0 {
             return 1
         } else {
-            return 24
+            return hourlyTimePeriod?.time.count ?? 24
         }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         if indexPath.section == 0 {
-            guard let tempChartCell = tableView.dequeueReusableCell(withIdentifier: TemperatureСhartTableViewCell.id, for: indexPath) as? TemperatureСhartTableViewCell else {
+            guard let tempChartCell = tableView.dequeueReusableCell(withIdentifier: TemperatureСhartTableViewCell.id, for: indexPath) as? TemperatureСhartTableViewCell
+            else {
                 return UITableViewCell()
             }
             tempChartCell.selectionStyle = .none
+            tempChartCell.temperatureChartView.weather = weather
+            
+            let threeHoursForecast = HourlyTimePeriod.createForEveryThirdIndex(from: weather)
+
+            tempChartCell.setupChartData(timePeriod: threeHoursForecast)
 
             return tempChartCell
     
@@ -94,7 +104,13 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
             guard let hourlyForecastCell = tableView.dequeueReusableCell(withIdentifier: HourlyForecastTableViewCell.id, for: indexPath) as? HourlyForecastTableViewCell else {
                 return UITableViewCell()
             }
-
+            
+            hourlyTimePeriod = HourlyTimePeriod(model: weather, index: indexPath.row)
+            
+            if let timePeriod = hourlyTimePeriod {
+                hourlyForecastCell.configure(with: timePeriod, at: indexPath.row)
+            }
+            
             return hourlyForecastCell
         }
     }
@@ -112,3 +128,4 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
     }
     
 }
+
