@@ -190,7 +190,7 @@ extension MainView: HeaderForDailyCellDelegate {
             guard let self else { return }
             
             isDailyToggleOn.toggle()
-            numberOfDays = isDailyToggleOn ? dailyTimePeriod.dailyForecast.keys.count : 7
+            numberOfDays = isDailyToggleOn ? max(dailyTimePeriod.dailyForecast.keys.count, 0) : min(dailyTimePeriod.dailyForecast.keys.count, 7)
             
             self.tableView.reloadSections(IndexSet(integer: 2), with: .automatic)
             if let headerView = tableView.headerView(forSection: 2) as? HeaderForDailyCell {
