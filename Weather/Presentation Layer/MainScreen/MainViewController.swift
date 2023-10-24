@@ -13,7 +13,6 @@ final class MainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        setupNavigationBar()
         fetchWeather()
     }
     
@@ -34,6 +33,7 @@ final class MainViewController: UIViewController {
                     self.mainView?.tableView.refreshControl = UIRefreshControl()
                     self.mainView?.tableView.refreshControl?.addTarget(self, action: #selector(self.refreshWeatherData), for: .valueChanged)
                     self.view = self.mainView
+                    self.setupNavigationBar()
                 }
             } else {
                 self.onboardingView = OnboardingView()
@@ -99,8 +99,6 @@ final class MainViewController: UIViewController {
             if isAuthorized {
                 DispatchQueue.main.async {
                     self.fetchWeather()
-//                    self.setupView()
-//                    self.setupNavigationBar()
                 }
             } else {
                 self.mainView?.tableView.refreshControl?.endRefreshing()
@@ -167,6 +165,19 @@ final class MainViewController: UIViewController {
     
     @objc private func refreshWeatherData() {
         checkLocationPermission()
+        interactor.fetchFromNetwork { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                switch result {
+                case .success(_ ):
+                    self.setupView()
+                    self.updateNavigationBarTitle()
+                case .failure(let error):
+                    print("FetchWeather error \(error.localizedDescription)")
+                }
+            }
+        }
     }
     
     @objc private func showSettings(_ sender: UIBarButtonItem) {
@@ -203,20 +214,6 @@ extension MainViewController: MainViewDelegate {
 
 extension MainViewController: OnboardingViewDelegate {
     func requestLocationWhenInUseAuthorization() {
-        self.checkLocationPermission()
-        
-        interactor.fetchFromNetwork { [weak self] result in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_ ):
-                    self.setupView()
-                    self.updateNavigationBarTitle()
-                case .failure(let error):
-                    print("FetchWeather error \(error.localizedDescription)")
-                }
-            }
-        }
+        self.refreshWeatherData()
     }
 }
