@@ -95,8 +95,9 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
             tempChartCell.temperatureChartView.weather = weather
             
             let threeHoursForecast = HourlyTimePeriod.createForEveryThirdIndex(from: weather)
+            let hours = HourlyTimePeriod.createArrayOfHours(from: weather)
 
-            tempChartCell.setupChartData(timePeriod: threeHoursForecast)
+            tempChartCell.setupChartData(timePeriod: threeHoursForecast, hours: hours)
 
             return tempChartCell
     

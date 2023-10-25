@@ -11,19 +11,12 @@ final class TemperatureChartView: UIView {
     private enum Constants {
         static let spacing: CGFloat = 5
     }
-    
+        
     var tempData: [ChartDataEntry] = []
     
-    var timeData: [ChartDataEntry] = [
-        ChartDataEntry(x: 1, y: 0),
-        ChartDataEntry(x: 2, y: 0),
-        ChartDataEntry(x: 3, y: 0),
-        ChartDataEntry(x: 4, y: 0),
-        ChartDataEntry(x: 5, y: 0),
-        ChartDataEntry(x: 6, y: 0),
-        ChartDataEntry(x: 7, y: 0),
-        ChartDataEntry(x: 8, y: 0)
-    ]
+    var timeData: [ChartDataEntry] = []
+    
+    var xValues: [String] = []
     
     private lazy var lineChartView: LineChartView = {
         let chartView = LineChartView()
@@ -33,6 +26,7 @@ final class TemperatureChartView: UIView {
         chartView.leftAxis.enabled = false
         chartView.rightAxis.enabled = false
         chartView.xAxis.enabled = false
+        chartView.xAxis.labelPosition = .bottom
         chartView.xAxis.drawGridLinesEnabled = false
         
         chartView.animate(xAxisDuration: 2.5)
@@ -65,12 +59,6 @@ final class TemperatureChartView: UIView {
         xAxisView.xAxis.axisLineColor = .clear
         xAxisView.xAxis.labelPosition = .bottom
         
-        xAxisView.xAxis.labelCount = timeData.count
-        xAxisView.xAxis.valueFormatter = DefaultAxisValueFormatter { value, axis in
-            let hour = Int(value)
-            return "\(hour):00"
-        }
-        
         return xAxisView
     }()
     
@@ -78,8 +66,8 @@ final class TemperatureChartView: UIView {
         super.init(frame: frame)
         setupView()
         setupConstraints()
-//        setupXAxisView(with: timeData)
         setupCollectionView()
+        
     }
     
     required init?(coder: NSCoder) {
@@ -109,6 +97,7 @@ final class TemperatureChartView: UIView {
             xAxisView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Constants.spacing),
             xAxisView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Constants.spacing),
             xAxisView.heightAnchor.constraint(equalToConstant: 30),
+            
         ])
     }
     
@@ -136,20 +125,26 @@ final class TemperatureChartView: UIView {
         
     }
     
-    private func setupXAxisView(with entries: [ChartDataEntry]) {
-        let dataSet = LineChartDataSet(entries: entries, label: "")
-                
+    private func setupXAxisView(with data: [ChartDataEntry]) {
+        let dataSet = LineChartDataSet(entries: data, label: "")
+        
         dataSet.drawCirclesEnabled = true
         dataSet.circleRadius = 2
         dataSet.setCircleColors(.black)
         dataSet.setColor(.black)
         dataSet.drawFilledEnabled = false
-        dataSet.drawValuesEnabled = false
+        dataSet.drawValuesEnabled = true
         
         dataSet.drawVerticalHighlightIndicatorEnabled = false
         dataSet.drawHorizontalHighlightIndicatorEnabled = false
         
         let data = LineChartData(dataSet: dataSet)
+        
+        xAxisView.xAxis.labelCount = timeData.count
+        print(timeData)
+        print(xValues)
+        xAxisView.xAxis.valueFormatter = IndexAxisValueFormatter(values: xValues)
+    
         xAxisView.data = data
     }
     
@@ -163,20 +158,18 @@ final class TemperatureChartView: UIView {
         lineChartView.notifyDataSetChanged()
     }
     
-    func updateXAxisWithTimeData(_ data: [ChartDataEntry]) {
+    func updateChartWithTimeData(_ data: [ChartDataEntry], _ array: [String]) {
+        self.timeData = data
+        self.xValues = array
         setupXAxisView(with: data)
         xAxisView.notifyDataSetChanged()
     }
-    
 }
 
 
 extension TemperatureChartView: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if let forecast = threeHoursForecast {
-            return forecast.count
-        }
         return timeData.count
     }
     
@@ -204,7 +197,7 @@ extension TemperatureChartView: UICollectionViewDelegateFlowLayout {
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        let availableWidth = lineChartView.frame.width
+        let availableWidth = xAxisView.frame.width
         let numberOfItems = timeData.count
         let totalItemWidth = CGFloat(numberOfItems) * xAxisView.xAxis.labelWidth
         let totalSpacing = availableWidth - totalItemWidth
@@ -220,7 +213,7 @@ extension TemperatureChartView: UICollectionViewDelegateFlowLayout {
 
 extension TemperatureChartView: ValueFormatter {
     func stringForValue(_ value: Double, entry: ChartDataEntry, dataSetIndex: Int, viewPortHandler: ViewPortHandler?) -> String {
-        let intValue = Int(value)
-        return "\(intValue)°"
+        let roundedValue = String(format: "%.1f", value)
+        return "\(roundedValue)°"
     }
 }

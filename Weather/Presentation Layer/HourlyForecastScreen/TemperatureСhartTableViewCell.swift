@@ -10,6 +10,8 @@ final class TemperatureСhartTableViewCell: UITableViewCell {
     
     var timeData: [ChartDataEntry] = []
     
+    var arrayOfHours: [String] = []
+    
     lazy var temperatureChartView: TemperatureChartView = {
         let chartView = TemperatureChartView()
         chartView.translatesAutoresizingMaskIntoConstraints = false
@@ -28,30 +30,41 @@ final class TemperatureСhartTableViewCell: UITableViewCell {
     }
     
     private func addSubviews() {
-        addSubview(temperatureChartView)
+        contentView.addSubview(temperatureChartView)
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            temperatureChartView.topAnchor.constraint(equalTo: topAnchor, constant: 10),
+            temperatureChartView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
             temperatureChartView.leadingAnchor.constraint(equalTo: leadingAnchor),
             temperatureChartView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            temperatureChartView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10),
+            temperatureChartView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
         ])
     }
     
-    func setupChartData(timePeriod: [ThreeHoursForecast]) {
+    func setupChartData(timePeriod: [ThreeHoursForecast], hours: [String]) {
         timePeriod.forEach {
+            let time = $0.time
             let index = Double($0.index)
             let temperature = Double($0.instantData.airTemperature)
-            let chartDataEntry = ChartDataEntry(x: index, y: temperature)
-            temperatureData.append(chartDataEntry)
-            temperatureChartView.updateChartWithWeatherData(temperatureData)
-            guard let time = Double($0.time) else { return }
-            let timeDataEntry = ChartDataEntry(x: time, y: 0)
-            timeData.append(timeDataEntry)
-            temperatureChartView.updateXAxisWithTimeData(timeData)
+            guard let hour = Double(time) else { return }
+            
+            let chartWeatherData = ChartDataEntry(x: index, y: temperature)
+            temperatureData.append(chartWeatherData)
+            
+            let chartTimeData = ChartDataEntry(x: hour, y: 0)
+            timeData.append(chartTimeData)
         }
+        
+        hours.forEach {
+            arrayOfHours.append(" \($0)")
+        }
+        
+        temperatureChartView.updateChartWithWeatherData(temperatureData)
+        temperatureChartView.updateChartWithTimeData(timeData, arrayOfHours)
+        temperatureData.removeAll()
+        timeData.removeAll()
+        arrayOfHours.removeAll()
     }
 }
     
