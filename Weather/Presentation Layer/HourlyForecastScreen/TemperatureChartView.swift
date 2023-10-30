@@ -58,6 +58,8 @@ final class TemperatureChartView: UIView {
         xAxisView.xAxis.drawGridLinesEnabled = false
         xAxisView.xAxis.axisLineColor = .clear
         xAxisView.xAxis.labelPosition = .bottom
+        xAxisView.xAxis.forceLabelsEnabled = true
+        
         
         return xAxisView
     }()
@@ -133,18 +135,14 @@ final class TemperatureChartView: UIView {
         dataSet.setCircleColors(.black)
         dataSet.setColor(.black)
         dataSet.drawFilledEnabled = false
-        dataSet.drawValuesEnabled = true
+        dataSet.drawValuesEnabled = false
         
         dataSet.drawVerticalHighlightIndicatorEnabled = false
         dataSet.drawHorizontalHighlightIndicatorEnabled = false
         
         let data = LineChartData(dataSet: dataSet)
-        
-        xAxisView.xAxis.labelCount = timeData.count
-        print(timeData)
-        print(xValues)
-        xAxisView.xAxis.valueFormatter = IndexAxisValueFormatter(values: xValues)
-    
+        xAxisView.xAxis.setLabelCount(timeData.count, force: true)
+        xAxisView.xAxis.valueFormatter = CustomXAxisValueFormatter(hour: xValues)
         xAxisView.data = data
     }
     
@@ -161,6 +159,12 @@ final class TemperatureChartView: UIView {
     func updateChartWithTimeData(_ data: [ChartDataEntry], _ array: [String]) {
         self.timeData = data
         self.xValues = array
+        
+        guard let entry = timeData.first else { return }
+        let firstValue = entry.x
+        if firstValue != 0 && firstValue != 3 && firstValue != 6 && firstValue != 9 && firstValue != 12 && firstValue != 15 && firstValue != 18 && firstValue != 21 {
+            self.xValues.insert("", at: 0)
+        }
         setupXAxisView(with: data)
         xAxisView.notifyDataSetChanged()
     }
@@ -209,6 +213,23 @@ extension TemperatureChartView: UICollectionViewDelegateFlowLayout {
         return 0
     }
     
+}
+
+class CustomXAxisValueFormatter: DGCharts.AxisValueFormatter {
+    let hour: [String]
+
+    init(hour: [String]) {
+        self.hour = hour
+    }
+
+    func stringForValue(_ value: Double, axis: AxisBase?) -> String {
+        let index = Int(value)
+        if index >= 0 && index < hour.count {
+            return hour[index]
+        } else {
+            return ""
+        }
+    }
 }
 
 extension TemperatureChartView: ValueFormatter {

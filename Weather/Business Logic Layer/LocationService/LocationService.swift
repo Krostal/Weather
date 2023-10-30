@@ -8,6 +8,7 @@ class LocationService: NSObject {
     private let geocoder = CLGeocoder()
     private var currentLocation: CLLocation?
     var isLocationAuthorized: Bool = false
+    var isDetermined: Bool = false
     var currentCoordinates: (latitude: Double, longitude: Double)?
     
     
@@ -59,8 +60,12 @@ extension LocationService: CLLocationManagerDelegate {
         switch manager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
             isLocationAuthorized = true
-        case .notDetermined, .denied, .restricted:
+            isDetermined = true
+        case .denied, .restricted:
             isLocationAuthorized = false
+            isDetermined = true
+        case .notDetermined:
+            isDetermined = false
         @unknown default:
             fatalError("Неизвестный статус разрешения использования местоположения")
         }

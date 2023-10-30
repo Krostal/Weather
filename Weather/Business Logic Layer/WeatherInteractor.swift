@@ -5,6 +5,7 @@ protocol WeatherInteractorProtocol {
     func fetchFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void)
     func getWeatherFromCoreData(withPredicate predicate: NSPredicate?, completion: @escaping ([Weather]) -> Void)
     func checkPermission(completion: @escaping (Bool) -> Void)
+    func isDetermined() -> Bool
 }
 
 final class WeatherInteractor: WeatherInteractorProtocol {
@@ -74,6 +75,10 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         } else {
             completion(false)
         }
+    }
+    
+    func isDetermined() -> Bool {
+        locationService.isDetermined
     }
     
     private func saveToCoreData(_ weather: WeatherJsonModel, completion: @escaping (Result<Void, Error>) -> Void) {

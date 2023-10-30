@@ -14,9 +14,12 @@ final class MainViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        refreshWeatherData()
-        setupView()
-        fetchWeather()
+        if interactor.isDetermined() {
+            refreshWeatherData()
+        } else {
+            setupView()
+            fetchWeather()
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
