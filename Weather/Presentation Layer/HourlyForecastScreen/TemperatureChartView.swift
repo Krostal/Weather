@@ -16,7 +16,7 @@ final class TemperatureChartView: UIView {
     
     var timeData: [ChartDataEntry] = []
     
-    var xValues: [String] = []
+    var values: [Double] = []
     
     private lazy var lineChartView: LineChartView = {
         let chartView = LineChartView()
@@ -142,7 +142,7 @@ final class TemperatureChartView: UIView {
         
         let data = LineChartData(dataSet: dataSet)
         xAxisView.xAxis.setLabelCount(timeData.count, force: true)
-        xAxisView.xAxis.valueFormatter = CustomXAxisValueFormatter(hour: xValues)
+        xAxisView.xAxis.valueFormatter = CustomXAxisValueFormatter(hours: values)
         xAxisView.data = data
     }
     
@@ -156,15 +156,14 @@ final class TemperatureChartView: UIView {
         lineChartView.notifyDataSetChanged()
     }
     
-    func updateChartWithTimeData(_ data: [ChartDataEntry], _ array: [String]) {
+    func updateChartWithTimeData(_ data: [ChartDataEntry]) {
         self.timeData = data
-        self.xValues = array
-        
-        guard let entry = timeData.first else { return }
-        let firstValue = entry.x
-        if firstValue != 0 && firstValue != 3 && firstValue != 6 && firstValue != 9 && firstValue != 12 && firstValue != 15 && firstValue != 18 && firstValue != 21 {
-            self.xValues.insert("", at: 0)
+
+        timeData.forEach { entry in
+            let time = entry.x
+            self.values.append(time)
         }
+        
         setupXAxisView(with: data)
         xAxisView.notifyDataSetChanged()
     }
@@ -216,16 +215,17 @@ extension TemperatureChartView: UICollectionViewDelegateFlowLayout {
 }
 
 class CustomXAxisValueFormatter: DGCharts.AxisValueFormatter {
-    let hour: [String]
+    let hours: [Double]
 
-    init(hour: [String]) {
-        self.hour = hour
+    init(hours: [Double]) {
+        self.hours = hours
     }
 
     func stringForValue(_ value: Double, axis: AxisBase?) -> String {
-        let index = Int(value)
-        if index >= 0 && index < hour.count {
-            return hour[index]
+        let index = Int(value)/3
+        if index >= 0 && index < hours.count {
+            let hour = Int(hours[index])
+            return " \(hour):00"
         } else {
             return ""
         }

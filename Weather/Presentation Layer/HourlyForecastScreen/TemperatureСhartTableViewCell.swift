@@ -10,8 +10,6 @@ final class TemperatureСhartTableViewCell: UITableViewCell {
     
     var timeData: [ChartDataEntry] = []
     
-    var arrayOfHours: [String] = []
-    
     lazy var temperatureChartView: TemperatureChartView = {
         let chartView = TemperatureChartView()
         chartView.translatesAutoresizingMaskIntoConstraints = false
@@ -42,7 +40,7 @@ final class TemperatureСhartTableViewCell: UITableViewCell {
         ])
     }
     
-    func setupChartData(timePeriod: [ThreeHoursForecast], hours: [String]) {
+    func setupChartData(timePeriod: [ThreeHoursForecast]) {
         timePeriod.forEach {
             let time = $0.time
             let index = Double($0.index)
@@ -56,15 +54,10 @@ final class TemperatureСhartTableViewCell: UITableViewCell {
             timeData.append(chartTimeData)
         }
         
-        hours.forEach {
-            arrayOfHours.append(" \($0)")
-        }
-        
         temperatureChartView.updateChartWithWeatherData(temperatureData)
-        temperatureChartView.updateChartWithTimeData(timeData, arrayOfHours)
+        temperatureChartView.updateChartWithTimeData(timeData)
         temperatureData.removeAll()
         timeData.removeAll()
-        arrayOfHours.removeAll()
     }
 }
     

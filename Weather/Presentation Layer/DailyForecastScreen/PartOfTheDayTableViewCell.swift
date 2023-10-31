@@ -16,7 +16,6 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
         partOfTheDayLabel.translatesAutoresizingMaskIntoConstraints = false
         partOfTheDayLabel.font = .systemFont(ofSize: 18, weight: .semibold)
         partOfTheDayLabel.textColor = .black
-        partOfTheDayLabel.text = "День"
         return partOfTheDayLabel
     }()
     
@@ -89,7 +88,7 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
         NSLayoutConstraint.activate([
             
             partOfTheDayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.viewSpacing),
-            partOfTheDayLabel.widthAnchor.constraint(equalToConstant: 50),
+            partOfTheDayLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 50),
             partOfTheDayLabel.centerYAnchor.constraint(equalTo: tempLabel.centerYAnchor),
             
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Constants.viewSpacing),
@@ -99,17 +98,31 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
         ])
     }
     
-    func configuresection1() {
-        partOfTheDayLabel.text = "День"
+    func configureMorning() {
+        partOfTheDayLabel.text = "Утро"
         weatherIcon.image = UIImage(systemName: "cloud.sun.rain")
-        tempLabel.text = "15°"
+        tempLabel.text = "18°"
         weatherLabel.text = "Кратковременный дождь"
     }
     
-    func configuresection2() {
+    func configureNoon() {
+        partOfTheDayLabel.text = "День"
+        weatherIcon.image = UIImage(systemName: "moon.stars")
+        tempLabel.text = "25°"
+        weatherLabel.text = "Ясно"
+    }
+    
+    func configureEvening() {
+        partOfTheDayLabel.text = "Вечер"
+        weatherIcon.image = UIImage(systemName: "moon.stars")
+        tempLabel.text = "22°"
+        weatherLabel.text = "Ясно"
+    }
+    
+    func configureNight() {
         partOfTheDayLabel.text = "Ночь"
         weatherIcon.image = UIImage(systemName: "moon.stars")
-        tempLabel.text = "10°"
+        tempLabel.text = "17°"
         weatherLabel.text = "Ясно"
     }
     

@@ -67,24 +67,4 @@ extension HourlyTimePeriod {
         
         return threeHoursForecasts
     }
-    
-    static func createArrayOfHours(from model: Weather) -> [String] {
-        guard let timePeriodSet = model.timePeriod,
-              let timePeriodArray = Array(timePeriodSet.prefix(24)) as? [TimePeriod] else {
-            return []
-        }
-        
-        var hours: [String] = []
-        
-        for timePeriod in timePeriodArray {
-            if let time = timePeriod.time,
-               let savedTime = ISO8601DateFormatter().date(from: time) {
-                let formattedTime = CustomDateFormatter().formattedDateToString(date: savedTime, dateFormat: "HH:mm")
-                let hour = formattedTime
-                hours.append(hour)
-            }
-        }
-        return hours
-    }
-    
 }

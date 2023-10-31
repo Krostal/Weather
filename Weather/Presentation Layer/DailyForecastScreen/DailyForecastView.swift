@@ -67,11 +67,11 @@ final class DailyForecastView: UIView {
 extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        5
+        7
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 1 || section == 2 {
+        if section == 1 || section == 2 || section == 3 || section == 4 {
             return 6
         } else {
             return 1
@@ -87,7 +87,7 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
             
             return datesCell
             
-        } else if indexPath.section == 1 || indexPath.section == 2 {
+        } else if indexPath.section == 1 || indexPath.section == 2 || indexPath.section == 3 || indexPath.section == 4 {
             
             if indexPath.row == 0 {
                 guard let partOfTheDayCell = tableView.dequeueReusableCell(withIdentifier: PartOfTheDayTableViewCell.id, for: indexPath) as? PartOfTheDayTableViewCell else {
@@ -95,9 +95,13 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
                 }
                 
                 if indexPath.section == 1 {
-                    partOfTheDayCell.configuresection1()
+                    partOfTheDayCell.configureMorning()
+                } else if indexPath.section == 2 {
+                    partOfTheDayCell.configureNoon()
+                } else if indexPath.section == 3 {
+                    partOfTheDayCell.configureEvening()
                 } else {
-                    partOfTheDayCell.configuresection2()
+                    partOfTheDayCell.configureNight()
                 }
                 
                 partOfTheDayCell.selectionStyle = .none
@@ -122,12 +126,12 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
                 weatherInfoCell.selectionStyle = .none
                 return weatherInfoCell
             }
-        } else if indexPath.section == 3 {
+        } else if indexPath.section == 5 {
             guard let sunAndMoonCell = tableView.dequeueReusableCell(withIdentifier: SunAndMoonTableViewCell.id, for: indexPath) as? SunAndMoonTableViewCell else {
                 return UITableViewCell()
             }
             return sunAndMoonCell
-        } else if indexPath.section == 4 {
+        } else if indexPath.section == 6 {
             guard let airQualityCell = tableView.dequeueReusableCell(withIdentifier: AirQualityTableViewCell.id, for: indexPath) as? AirQualityTableViewCell else {
                 return UITableViewCell()
             }
@@ -138,7 +142,7 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
     
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.section == 3 {
+        if indexPath.section == 5 {
             return 180
         }
         return UITableView.automaticDimension
@@ -153,7 +157,7 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if indexPath.section == 1 && indexPath.row == 0 || indexPath.section == 2 && indexPath.row == 0 {
+        if indexPath.section == 1 && indexPath.row == 0 || indexPath.section == 2 && indexPath.row == 0 || indexPath.section == 3 && indexPath.row == 0 || indexPath.section == 4 && indexPath.row == 0 {
             cell.separatorInset = UIEdgeInsets(top: 0, left: tableView.frame.size.width, bottom: 0, right: 0)
         } else {
             cell.separatorInset = UIEdgeInsets(top: 0, left: Constants.separatorInsets, bottom: 0, right: Constants.separatorInsets)
