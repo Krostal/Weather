@@ -78,7 +78,7 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
 }
 
 extension HourlyCollectionViewCell: Configurable {
-    func configure(with timePeriod: HourlyTimePeriod, at index: Int) {
+    func configure(with timePeriod: HourlyTimePeriod, at index: Int, at part: Int? = nil, at row: Int? = nil) {
         hourLabel.text = timePeriod.time
         weatherIcon.image = UIImage(named: timePeriod.next1HoursForecast.symbolCode ?? "")
         tempLabel.text = "\(timePeriod.instantData.airTemperature)°"

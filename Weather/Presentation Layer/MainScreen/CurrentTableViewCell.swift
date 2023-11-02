@@ -278,7 +278,7 @@ final class CurrentTableViewCell: UITableViewCell {
 }
 
 extension CurrentTableViewCell: Configurable {
-    func configure(with timePeriod: CurrentTimePeriod, at index: Int) {
+    func configure(with timePeriod: CurrentTimePeriod, at index: Int, at part: Int? = nil, at row: Int? = nil) {
     
         tempRangeLabel.text = "\(timePeriod.next6HoursForecast.airTemperatureMin)° / \(timePeriod.next6HoursForecast.airTemperatureMax)°"
         currentTemp.text = "\(timePeriod.instantData.airTemperature)°"

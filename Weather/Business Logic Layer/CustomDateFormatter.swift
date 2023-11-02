@@ -13,9 +13,10 @@ struct CustomDateFormatter {
         return formattedDate
     }
     
-    func formattedDateToString(date: Date, dateFormat: String) -> String {
+    func formattedDateToString(date: Date, dateFormat: String, locale: Locale?) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = dateFormat
+        dateFormatter.locale = locale
         dateFormatter.timeZone = .current
         return dateFormatter.string(from: date)
     }

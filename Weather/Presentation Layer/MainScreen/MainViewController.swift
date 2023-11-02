@@ -187,6 +187,7 @@ final class MainViewController: UIViewController {
             DispatchQueue.main.async {
                 switch result {
                 case .success(_ ):
+                    self.mainView?.tableView.reloadData()
                     self.setupView()
                     self.updateNavigationBarTitle()
                 case .failure(let error):
@@ -219,10 +220,19 @@ extension MainViewController: MainViewDelegate {
         navigationController?.pushViewController(hourlyForecastViewController, animated: true)
     }
     
-    func showDailyForecast(forDate date: String) {
-        let dailyForecastViewController = DailyForecastViewController()
-        dailyForecastViewController.navigationItem.title = "Погода \(date)"
+    func showDailyForecast(forDate date: Date, dateIndex: Int) {
+        guard let weather = weather,
+                let dailyTimePeriod = DailyTimePeriod(model: weather)
+        else {
+            return
+        }
+        
+        let dailyForecastViewController = DailyForecastViewController(dailyTimePeriod: dailyTimePeriod, dateIndex: dateIndex, selectedDate: date)
+        let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"))
+        dailyForecastViewController.navigationItem.title = dateString
+        
         dailyForecastViewController.headerTitle = navigationItem.title
+    
         navigationController?.pushViewController(dailyForecastViewController, animated: true)
     }
 

@@ -27,7 +27,7 @@ struct HourlyTimePeriod {
             return nil
         }
 
-        self.time = CustomDateFormatter().formattedDateToString(date: savedTime, dateFormat: "HH:mm")
+        self.time = CustomDateFormatter().formattedDateToString(date: savedTime, dateFormat: "HH:mm", locale: nil)
         self.instantData = currentData
         self.next1HoursForecast = next1Hoursforecast
         self.timeStringFullInUTC = time
@@ -50,7 +50,7 @@ extension HourlyTimePeriod {
                let time = timePeriod.time,
                let savedTime = ISO8601DateFormatter().date(from: time) {
                 
-                let formattedTime = CustomDateFormatter().formattedDateToString(date: savedTime, dateFormat: "HH")
+                let formattedTime = CustomDateFormatter().formattedDateToString(date: savedTime, dateFormat: "HH", locale: nil)
                 let timeStringFullInUTC = time
                 
                 let threeHoursForecast = ThreeHoursForecast(

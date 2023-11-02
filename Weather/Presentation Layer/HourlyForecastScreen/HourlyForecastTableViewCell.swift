@@ -374,7 +374,7 @@ final class HourlyForecastTableViewCell: UITableViewCell {
 }
 
 extension HourlyForecastTableViewCell: Configurable {
-    func configure(with timePeriod: HourlyTimePeriod, at index: Int) {
+    func configure(with timePeriod: HourlyTimePeriod, at index: Int, at part: Int? = nil, at row: Int? = nil) {
         dateLabel.text = CustomDateFormatter().formattedStringToString(date: timePeriod.timeStringFullInUTC, dateFormat: "EEEE, d MMMM yyyy", locale: Locale(identifier: "ru_RU"))
         timeLabel.text = timePeriod.time
         temperatureLabel.text = "\(timePeriod.instantData.airTemperature)°"

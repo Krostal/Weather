@@ -4,7 +4,7 @@ import CoreData
 
 protocol MainViewDelegate: AnyObject {
     func showHourlyForecast()
-    func showDailyForecast(forDate date: String)
+    func showDailyForecast(forDate date: Date, dateIndex: Int)
 }
 
 final class MainView: UIView {
@@ -17,10 +17,10 @@ final class MainView: UIView {
     
     weak var delegate: MainViewDelegate?
     
-    private var selectedDate: String?
-    
     private var numberOfDays: Int = 7
     private var isDailyToggleOn = false
+
+    private var selectedDate: Date?
     
     let weather: Weather
     let currentTimePeriod: CurrentTimePeriod
@@ -78,10 +78,6 @@ final class MainView: UIView {
             tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -Constants.spacing)
         ])
     }
-    
-    @objc private func dailyCellTapped() {
-        delegate?.showDailyForecast(forDate: selectedDate ?? "???")
-    }
 }
 
 extension MainView: UITableViewDataSource, UITableViewDelegate {
@@ -120,22 +116,27 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let dailyCell = tableView.dequeueReusableCell(withIdentifier: DailyTableViewCell.id, for: indexPath) as? DailyTableViewCell else {
                 return UITableViewCell()
             }
+            
             dailyCell.accessoryType = .disclosureIndicator
             
-            let doubleTapGesture = UITapGestureRecognizer(target: self, action: #selector(dailyCellTapped))
-            doubleTapGesture.numberOfTapsRequired = 2
-            dailyCell.isUserInteractionEnabled = true
-            dailyCell.addGestureRecognizer(doubleTapGesture)
-            
-            if let dateLabel = dailyCell.dateLabel.text {
-                selectedDate = dateLabel
-            } else {
-                selectedDate = nil
-            }
             dailyCell.configure(with: dailyTimePeriod, at: indexPath.row)
+            
             return dailyCell
         }
         
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        if let cell = tableView.cellForRow(at: indexPath) as? DailyTableViewCell {
+            let sortedDailyForecast = dailyTimePeriod.dailyForecast.sorted { $0.key < $1.key }
+            let dateKeys = sortedDailyForecast.map { $0.key }
+            if indexPath.row >= dateKeys.count {
+                return
+            }
+            let dateKey = dateKeys[indexPath.row]
+            delegate?.showDailyForecast(forDate: dateKey, dateIndex: indexPath.row)
+        }
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

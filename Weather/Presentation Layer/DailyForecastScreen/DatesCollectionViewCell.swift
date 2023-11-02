@@ -11,7 +11,6 @@ final class DatesCollectionViewCell: UICollectionViewCell {
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         dateLabel.font = .systemFont(ofSize: 18, weight: .regular)
         dateLabel.textColor = .black
-        dateLabel.text = "16/04 ПТ"
         dateLabel.textAlignment = .center
         return dateLabel
     }()
@@ -47,7 +46,19 @@ final class DatesCollectionViewCell: UICollectionViewCell {
             dateLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
     }
+}
+
+extension DatesCollectionViewCell: Configurable {
     
+    func configure(with timePeriod: DailyTimePeriod, at index: Int, at part: Int? = nil, at row: Int? = nil) {
+        let sortedDailyForecast = timePeriod.dailyForecast.sorted { $0.key < $1.key }
+        let dateKeys = sortedDailyForecast.map { $0.key }
+        if index >= dateKeys.count {
+            return
+        }
+        let dateKey = dateKeys[index]
+        dateLabel.text = CustomDateFormatter().formattedDateToString(date: dateKey, dateFormat: "dd.MM E", locale: Locale(identifier: "ru_RU"))
+    }
 }
 
 

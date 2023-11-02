@@ -2,14 +2,26 @@
 
 import UIKit
 
+protocol DailyForecastViewDelegate: AnyObject {
+    func updateView(date: Date)
+}
+
 final class DailyForecastView: UIView {
     
-    var headerTitle: String?
-        
     private enum Constants {
         static let spacing: CGFloat = 0
         static let separatorInsets: CGFloat = 16
     }
+    
+    weak var delegate: DailyForecastViewDelegate?
+    
+    private let dailyTimePeriod: DailyTimePeriod
+    private var dateIndex: Int
+    private var selectedDate: Date
+    
+    private var numberOfSections: Int = 0
+    
+    var headerTitle: String?
     
     lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .insetGrouped)
@@ -25,12 +37,16 @@ final class DailyForecastView: UIView {
         return tableView
     }()
     
-    override init(frame: CGRect) {
+    init(frame: CGRect, dailyTimePeriod: DailyTimePeriod, dateIndex: Int, selectedDate: Date) {
+        self.dailyTimePeriod = dailyTimePeriod
+        self.dateIndex = dateIndex
+        self.selectedDate = selectedDate
         super.init(frame: frame)
         setupView()
         addSubviews()
         setupTableView()
         setupLayout()
+        calculateNumberOfSections()
     }
     
     required init?(coder: NSCoder) {
@@ -60,21 +76,35 @@ final class DailyForecastView: UIView {
             tableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: Constants.spacing),
             tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -Constants.spacing)
         ])
+    }
+    
+    private func calculateNumberOfSections() -> Int {
+        let selectedDay = CustomDateFormatter().formattedDateToString(date: selectedDate, dateFormat: "yyyy-MM-dd", locale: nil)
         
+        var count: Int = 0
+        for (date, timePeriods) in dailyTimePeriod.dailyForecast {
+            let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "yyyy-MM-dd", locale: nil)
+            if dateString == selectedDay {
+                count += timePeriods.count
+            }
+        }
+        numberOfSections = count + 3
+        print(numberOfSections, "numberOfSections")
+        return numberOfSections
     }
 }
 
 extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        7
+        return numberOfSections
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 1 || section == 2 || section == 3 || section == 4 {
-            return 6
-        } else {
+        if section == 0 || section == numberOfSections - 1 || section == numberOfSections - 2 {
             return 1
+        } else {
+            return 6
         }
     }
     
@@ -84,65 +114,47 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
             guard let datesCell = tableView.dequeueReusableCell(withIdentifier: DatesTableViewCell.id, for: indexPath) as? DatesTableViewCell else {
                 return UITableViewCell()
             }
-            
+            datesCell.dailyTimePeriod = dailyTimePeriod
+            datesCell.currentDateIndex = dateIndex
+            datesCell.delegate = self
             return datesCell
             
-        } else if indexPath.section == 1 || indexPath.section == 2 || indexPath.section == 3 || indexPath.section == 4 {
-            
+        } else if indexPath.section == numberOfSections - 2 {
+            guard let sunAndMoonCell = tableView.dequeueReusableCell(withIdentifier: SunAndMoonTableViewCell.id, for: indexPath) as? SunAndMoonTableViewCell else {
+                return UITableViewCell()
+            }
+            return sunAndMoonCell
+        } else if indexPath.section == numberOfSections - 1 {
+            guard let airQualityCell = tableView.dequeueReusableCell(withIdentifier: AirQualityTableViewCell.id, for: indexPath) as? AirQualityTableViewCell else {
+                return UITableViewCell()
+            }
+            return airQualityCell
+        } else {
             if indexPath.row == 0 {
                 guard let partOfTheDayCell = tableView.dequeueReusableCell(withIdentifier: PartOfTheDayTableViewCell.id, for: indexPath) as? PartOfTheDayTableViewCell else {
                     return UITableViewCell()
                 }
-                
-                if indexPath.section == 1 {
-                    partOfTheDayCell.configureMorning()
-                } else if indexPath.section == 2 {
-                    partOfTheDayCell.configureNoon()
-                } else if indexPath.section == 3 {
-                    partOfTheDayCell.configureEvening()
-                } else {
-                    partOfTheDayCell.configureNight()
-                }
-                
                 partOfTheDayCell.selectionStyle = .none
+                
+                partOfTheDayCell.configure(with: dailyTimePeriod, at: dateIndex, at: indexPath.section)
+                
                 return partOfTheDayCell
             } else {
                 guard let weatherInfoCell = tableView.dequeueReusableCell(withIdentifier: WeatherInfoTableViewCell.id, for: indexPath) as? WeatherInfoTableViewCell else {
                     return UITableViewCell()
                 }
-                
-                if indexPath.row == 1 {
-                    weatherInfoCell.configureRow1()
-                } else if indexPath.row == 2 {
-                    weatherInfoCell.configureRow2()
-                } else if indexPath.row == 3 {
-                    weatherInfoCell.configureRow3()
-                } else if indexPath.row == 4 {
-                    weatherInfoCell.configureRow4()
-                } else if indexPath.row == 5 {
-                    weatherInfoCell.configureRow5()
-                }
-                
                 weatherInfoCell.selectionStyle = .none
+                
+                weatherInfoCell.configure(with: dailyTimePeriod, at: dateIndex, at: indexPath.section, at: indexPath.row)
+                
                 return weatherInfoCell
             }
-        } else if indexPath.section == 5 {
-            guard let sunAndMoonCell = tableView.dequeueReusableCell(withIdentifier: SunAndMoonTableViewCell.id, for: indexPath) as? SunAndMoonTableViewCell else {
-                return UITableViewCell()
-            }
-            return sunAndMoonCell
-        } else if indexPath.section == 6 {
-            guard let airQualityCell = tableView.dequeueReusableCell(withIdentifier: AirQualityTableViewCell.id, for: indexPath) as? AirQualityTableViewCell else {
-                return UITableViewCell()
-            }
-            return airQualityCell
         }
-        return UITableViewCell()
     }
     
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.section == 5 {
+        if indexPath.section == numberOfSections - 2 {
             return 180
         }
         return UITableView.automaticDimension
@@ -163,5 +175,14 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
             cell.separatorInset = UIEdgeInsets(top: 0, left: Constants.separatorInsets, bottom: 0, right: Constants.separatorInsets)
         }
     }
+    
+}
+
+extension DailyForecastView: DatesTableViewCellDelegate {
+    func showForecastForSelectedDate(date: Date) {
+        
+        delegate?.updateView(date: date)
+    }
+    
     
 }

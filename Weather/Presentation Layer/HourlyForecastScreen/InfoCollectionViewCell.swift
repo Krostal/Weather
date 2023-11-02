@@ -58,7 +58,7 @@ final class InfoCollectionViewCell: UICollectionViewCell {
 }
 
 extension InfoCollectionViewCell: Configurable {
-    func configure(with timePeriod: ThreeHoursForecast, at index: Int) {
+    func configure(with timePeriod: ThreeHoursForecast, at index: Int, at part: Int? = nil, at row: Int? = nil) {
         weatherIcon.image = UIImage(named: timePeriod.next1HoursForecast.symbolCode ?? "xmark.icloud")
         precipitationLabel.text = "\(Int(timePeriod.instantData.relativeHumidity))%"
     }
