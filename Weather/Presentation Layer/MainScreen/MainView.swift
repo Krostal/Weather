@@ -128,7 +128,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        if let cell = tableView.cellForRow(at: indexPath) as? DailyTableViewCell {
+        if tableView.cellForRow(at: indexPath) is DailyTableViewCell {
             let sortedDailyForecast = dailyTimePeriod.dailyForecast.sorted { $0.key < $1.key }
             let dateKeys = sortedDailyForecast.map { $0.key }
             if indexPath.row >= dateKeys.count {

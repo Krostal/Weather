@@ -3,7 +3,7 @@
 import UIKit
 
 protocol DailyForecastViewDelegate: AnyObject {
-    func updateView(date: Date)
+    func updateView(date: Date, index: Int)
 }
 
 final class DailyForecastView: UIView {
@@ -78,7 +78,7 @@ final class DailyForecastView: UIView {
         ])
     }
     
-    private func calculateNumberOfSections() -> Int {
+    private func calculateNumberOfSections(){
         let selectedDay = CustomDateFormatter().formattedDateToString(date: selectedDate, dateFormat: "yyyy-MM-dd", locale: nil)
         
         var count: Int = 0
@@ -89,8 +89,10 @@ final class DailyForecastView: UIView {
             }
         }
         numberOfSections = count + 3
-        print(numberOfSections, "numberOfSections")
-        return numberOfSections
+    }
+    
+    private func updateViewWithSelectedDate() {
+        
     }
 }
 
@@ -115,7 +117,7 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             datesCell.dailyTimePeriod = dailyTimePeriod
-            datesCell.currentDateIndex = dateIndex
+            datesCell.selectedIndex = dateIndex
             datesCell.delegate = self
             return datesCell
             
@@ -179,9 +181,10 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
 }
 
 extension DailyForecastView: DatesTableViewCellDelegate {
-    func showForecastForSelectedDate(date: Date) {
-        
-        delegate?.updateView(date: date)
+    func showForecastForSelectedDate(date: Date, index: Int) {
+        dateIndex = index
+        selectedDate = date
+        delegate?.updateView(date: date, index: index)
     }
     
     

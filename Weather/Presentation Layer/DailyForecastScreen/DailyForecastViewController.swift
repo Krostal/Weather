@@ -25,19 +25,24 @@ final class DailyForecastViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        updateView(forDate: selectedDate, dateIndex: dateIndex)
     }
     
     private func setupView() {
         dailyForecastView = DailyForecastView(frame: self.view.bounds, dailyTimePeriod: dailyTimePeriod, dateIndex: dateIndex, selectedDate: selectedDate)
+        dailyForecastView?.delegate = self
         view = dailyForecastView
         dailyForecastView?.headerTitle = headerTitle
     }
-    
-    private func updateView(forDate date: Date, dateIndex: Int) {
-//        dailyForecastView?.updateWeatherData(with: dailyTimePeriod)
+}
+
+extension DailyForecastViewController: DailyForecastViewDelegate {
+    func updateView(date: Date, index: Int) {
+        selectedDate = date
+        dateIndex = index
+        setupView()
         navigationItem.title = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"))
     }
+    
     
 }
 
