@@ -18,6 +18,7 @@ final class DailyForecastView: UIView {
     private let dailyTimePeriod: DailyTimePeriod
     private var dateIndex: Int
     private var selectedDate: Date
+    private let airQuality: AirQuality
     
     private var numberOfSections: Int = 0
     
@@ -37,10 +38,11 @@ final class DailyForecastView: UIView {
         return tableView
     }()
     
-    init(frame: CGRect, dailyTimePeriod: DailyTimePeriod, dateIndex: Int, selectedDate: Date) {
+    init(frame: CGRect, dailyTimePeriod: DailyTimePeriod, dateIndex: Int, selectedDate: Date, airQuality: AirQuality) {
         self.dailyTimePeriod = dailyTimePeriod
         self.dateIndex = dateIndex
         self.selectedDate = selectedDate
+        self.airQuality = airQuality
         super.init(frame: frame)
         setupView()
         addSubviews()
@@ -130,6 +132,8 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
             guard let airQualityCell = tableView.dequeueReusableCell(withIdentifier: AirQualityTableViewCell.id, for: indexPath) as? AirQualityTableViewCell else {
                 return UITableViewCell()
             }
+            airQualityCell.configure(with: airQuality, at: dateIndex
+            )
             return airQualityCell
         } else {
             if indexPath.row == 0 {

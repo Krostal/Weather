@@ -46,4 +46,11 @@ struct CustomDateFormatter {
         }
         return nil
     }
+    
+    func formattedStringToDate(date: String, dateFormat: String) -> Date? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = dateFormat
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        return dateFormatter.date(from: date)
+    }
 }

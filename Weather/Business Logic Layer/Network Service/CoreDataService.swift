@@ -38,7 +38,7 @@ final class CoreDataService {
         }
     }
     
-    func isAlreadyExist(updatedAt: String, locationName: String) -> Bool {
+    func isWeatherAlreadyExist(updatedAt: String, locationName: String) -> Bool {
         let request: NSFetchRequest<Weather> = Weather.fetchRequest()
         request.predicate = NSPredicate(format: "location.name == %@", locationName)
 
@@ -51,6 +51,11 @@ final class CoreDataService {
                 } else {
                     setContext().delete(existingWeather)
                     print("Существующая модель Weather для данной локации \(locationName) удалена")
+                    do {
+                        try setContext().save()
+                    } catch {
+                        print("Error saving context after deleting AirQuality model: \(error.localizedDescription)")
+                    }
                     return false
                 }
             }
@@ -58,6 +63,27 @@ final class CoreDataService {
         } catch {
             print("Error checking existing weather data: \(error.localizedDescription)")
             return false
+        }
+    }
+    
+    func deleteExistingAirQualityModel(locationName: String) {
+        let request: NSFetchRequest<AirQuality> = AirQuality.fetchRequest()
+        request.predicate = NSPredicate(format: "coordinates.city == %@", locationName)
+
+        do {
+            let result = try setContext().fetch(request)
+
+            if let existingAirQualityModel = result.first {
+                setContext().delete(existingAirQualityModel)
+                print("Существующая модель AirQuality для данной локации \(locationName) удалена")
+                do {
+                    try setContext().save()
+                } catch {
+                    print("Error saving context after deleting AirQuality model: \(error.localizedDescription)")
+                }
+            }
+        } catch {
+            print("Error checking existing weather data: \(error.localizedDescription)")
         }
     }
     

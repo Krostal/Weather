@@ -79,10 +79,7 @@ extension DatesTableViewCell: UICollectionViewDataSource {
         if let timePeriod = dailyTimePeriod {
             cell.configure(with: timePeriod, at: indexPath.item)
         }
-        
-        if indexPath.item == selectedIndex {
-            cell.contentView.backgroundColor = .systemYellow
-        }
+        cell.contentView.backgroundColor = indexPath.item == selectedIndex ? .systemYellow : .systemBlue.withAlphaComponent(0.1)
         
         return cell
     }

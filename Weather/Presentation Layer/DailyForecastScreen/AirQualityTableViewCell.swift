@@ -44,7 +44,6 @@ final class AirQualityTableViewCell: UITableViewCell {
         levelLabel.translatesAutoresizingMaskIntoConstraints = false
         levelLabel.font = .systemFont(ofSize: 30, weight: .semibold)
         levelLabel.textColor = .black
-        levelLabel.text = "42"
         return levelLabel
     }()
     
@@ -56,20 +55,17 @@ final class AirQualityTableViewCell: UITableViewCell {
         qualityLabel.textAlignment = .center
         qualityLabel.layer.cornerRadius = 5
         qualityLabel.clipsToBounds = true
-        qualityLabel.backgroundColor = .systemMint
-        qualityLabel.text = "хорошо"
         return qualityLabel
     }()
     
     private lazy var descriptionLabel: UILabel = {
-        let qualityLabel = UILabel()
-        qualityLabel.translatesAutoresizingMaskIntoConstraints = false
-        qualityLabel.font = .systemFont(ofSize: 16, weight: .regular)
-        qualityLabel.textColor = .systemGray
-        qualityLabel.textAlignment = .natural
-        qualityLabel.numberOfLines = 0
-        qualityLabel.text = "Качество воздуха считается удовлетворительным и загрязнение воздуха представляется незначительным в пределах нормы"
-        return qualityLabel
+        let descriptionLabel = UILabel()
+        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+        descriptionLabel.font = .systemFont(ofSize: 16, weight: .regular)
+        descriptionLabel.textColor = .systemGray
+        descriptionLabel.textAlignment = .natural
+        descriptionLabel.numberOfLines = 0
+        return descriptionLabel
     }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -115,6 +111,34 @@ final class AirQualityTableViewCell: UITableViewCell {
             descriptionLabel.bottomAnchor.constraint(equalTo: airQualityView.bottomAnchor, constant: -Constants.itemSpacing),
         ])
     }
+}
 
-    
+extension AirQualityTableViewCell: Configurable {
+    func configure(with model: AirQuality, at index: Int, at section: Int? = nil, at row: Int? = nil) {
+        guard let forecastSet = model.airQualityForecast,
+              let forecast = Array(forecastSet) as? [AirQualityForecast] else {
+            return
+        }
+        
+        let currentDate = Date()
+        
+        let forecastForNextDays = forecast.filter {
+            if let day = $0.day,
+               let formattedDay = CustomDateFormatter().formattedStringToDate(date: day, dateFormat: "yyyy-MM-dd") {
+                return formattedDay > currentDate
+            }
+            return true
+        }
+        
+        if index < forecastForNextDays.count {
+            levelLabel.text = String(forecastForNextDays[index].index)
+            qualityLabel.text = AirQualityDescription(pm25Index: forecastForNextDays[index].index).rawValue
+            qualityLabel.backgroundColor = AirQualityDescription(pm25Index: forecastForNextDays[index].index).color
+            descriptionLabel.text = AirQualityDescription(pm25Index: forecastForNextDays[index].index).description
+        } else {
+            levelLabel.text = "?"
+            qualityLabel.backgroundColor = .systemGray
+            qualityLabel.text = "не определено"
+        }
+    }
 }

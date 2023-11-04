@@ -29,7 +29,6 @@ final class DatesCollectionViewCell: UICollectionViewCell {
     private func setupView() {
         contentView.clipsToBounds = true
         contentView.layer.cornerRadius = 5
-        contentView.backgroundColor = .systemBlue.withAlphaComponent(0.1)
         contentView.layer.borderWidth = 0.5
         contentView.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.1).cgColor
     }

@@ -8,7 +8,7 @@ final class MainViewController: UIViewController {
     
     private var onboardingView: OnboardingView?
     
-    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService<WeatherJsonModel>(), coreDataService: CoreDataService.shared, locationService: LocationService())
+    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchWeatherDataService: FetchDataService<WeatherJsonModel>(), fetchAirQualityDataService: FetchDataService<AirQualityJsonModel>(), coreDataService: CoreDataService.shared, locationService: LocationService())
     
     private var weather: Weather?
     
@@ -19,6 +19,7 @@ final class MainViewController: UIViewController {
         } else {
             setupView()
             fetchWeather()
+            fetchAirQuality()
         }
     }
     
@@ -93,7 +94,7 @@ final class MainViewController: UIViewController {
     private func fetchWeather() {
         guard let mainView else { return }
         mainView.tableView.refreshControl?.beginRefreshing()
-        interactor.fetchFromNetwork { [weak self] result in
+        interactor.fetchWeatherFromNetwork { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
@@ -105,6 +106,17 @@ final class MainViewController: UIViewController {
                     print("FetchWeather error \(error.localizedDescription)")
                     mainView.tableView.refreshControl?.endRefreshing()
                 }
+            }
+        }
+    }
+    
+    private func fetchAirQuality() {
+        interactor.fetchAirQualityFromNetwork { result in
+            switch result {
+            case .success(_ ):
+                print("Данные о качестве воздуха успешно получены")
+            case .failure(let error):
+                print("AirQuality error \(error.localizedDescription)")
             }
         }
     }
@@ -181,7 +193,7 @@ final class MainViewController: UIViewController {
     
     @objc private func refreshWeatherData() {
         checkLocationPermission()
-        interactor.fetchFromNetwork { [weak self] result in
+        interactor.fetchWeatherFromNetwork { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
@@ -195,6 +207,7 @@ final class MainViewController: UIViewController {
                 }
             }
         }
+        fetchAirQuality()
     }
     
     @objc private func showSettings(_ sender: UIBarButtonItem) {

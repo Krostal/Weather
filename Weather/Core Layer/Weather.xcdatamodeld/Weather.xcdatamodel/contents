@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22225" systemVersion="23A344" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="AirQuality" representedClassName="AirQuality" syncable="YES" codeGenerationType="class">
+        <relationship name="airQualityForecast" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="AirQualityForecast" inverseName="airQuality" inverseEntity="AirQualityForecast"/>
+        <relationship name="coordinates" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Coordinates" inverseName="airQuality" inverseEntity="Coordinates"/>
+    </entity>
+    <entity name="AirQualityForecast" representedClassName="AirQualityForecast" syncable="YES" codeGenerationType="class">
+        <attribute name="day" optional="YES" attributeType="String"/>
+        <attribute name="index" optional="YES" attributeType="Integer 64" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="airQuality" optional="YES" maxCount="1" deletionRule="Nullify" ordered="YES" destinationEntity="AirQuality" inverseName="airQualityForecast" inverseEntity="AirQuality"/>
+    </entity>
+    <entity name="Coordinates" representedClassName="Coordinates" syncable="YES" codeGenerationType="class">
+        <attribute name="city" optional="YES" attributeType="String"/>
+        <attribute name="lat" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="long" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="airQuality" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="AirQuality" inverseName="coordinates" inverseEntity="AirQuality"/>
+    </entity>
     <entity name="InstantData" representedClassName="InstantData" syncable="YES" codeGenerationType="class">
         <attribute name="airPressureAtSeaLevel" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="airTemperature" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>

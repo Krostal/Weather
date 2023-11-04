@@ -136,6 +136,7 @@ final class TemperatureChartView: UIView {
         dataSet.setColor(.black)
         dataSet.drawFilledEnabled = false
         dataSet.drawValuesEnabled = false
+        dataSet.mode = .horizontalBezier
         
         dataSet.drawVerticalHighlightIndicatorEnabled = false
         dataSet.drawHorizontalHighlightIndicatorEnabled = false
@@ -164,7 +165,7 @@ final class TemperatureChartView: UIView {
             self.values.append(time)
         }
         
-        setupXAxisView(with: data)
+        setupXAxisView(with: timeData)
         xAxisView.notifyDataSetChanged()
     }
 }
