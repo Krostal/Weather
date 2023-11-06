@@ -19,6 +19,7 @@ final class DailyForecastView: UIView {
     private var dateIndex: Int
     private var selectedDate: Date
     private let airQuality: AirQuality
+    private let astronomy: Astronomy
     
     private var numberOfSections: Int = 0
     
@@ -38,11 +39,12 @@ final class DailyForecastView: UIView {
         return tableView
     }()
     
-    init(frame: CGRect, dailyTimePeriod: DailyTimePeriod, dateIndex: Int, selectedDate: Date, airQuality: AirQuality) {
+    init(frame: CGRect, dailyTimePeriod: DailyTimePeriod, dateIndex: Int, selectedDate: Date, airQuality: AirQuality, astronomy: Astronomy) {
         self.dailyTimePeriod = dailyTimePeriod
         self.dateIndex = dateIndex
         self.selectedDate = selectedDate
         self.airQuality = airQuality
+        self.astronomy = astronomy
         super.init(frame: frame)
         setupView()
         addSubviews()
@@ -122,18 +124,22 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
             datesCell.selectedIndex = dateIndex
             datesCell.delegate = self
             return datesCell
-            
         } else if indexPath.section == numberOfSections - 2 {
             guard let sunAndMoonCell = tableView.dequeueReusableCell(withIdentifier: SunAndMoonTableViewCell.id, for: indexPath) as? SunAndMoonTableViewCell else {
                 return UITableViewCell()
             }
+            sunAndMoonCell.selectionStyle = .none
+            sunAndMoonCell.dateIndex = dateIndex
+            sunAndMoonCell.astronomy = astronomy
+            sunAndMoonCell.configure(with: astronomy, at: dateIndex)
+            
             return sunAndMoonCell
         } else if indexPath.section == numberOfSections - 1 {
             guard let airQualityCell = tableView.dequeueReusableCell(withIdentifier: AirQualityTableViewCell.id, for: indexPath) as? AirQualityTableViewCell else {
                 return UITableViewCell()
             }
-            airQualityCell.configure(with: airQuality, at: dateIndex
-            )
+            airQualityCell.selectionStyle = .none
+            airQualityCell.configure(with: airQuality, at: dateIndex)
             return airQualityCell
         } else {
             if indexPath.row == 0 {
@@ -141,18 +147,14 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
                     return UITableViewCell()
                 }
                 partOfTheDayCell.selectionStyle = .none
-                
                 partOfTheDayCell.configure(with: dailyTimePeriod, at: dateIndex, at: indexPath.section)
-                
                 return partOfTheDayCell
             } else {
                 guard let weatherInfoCell = tableView.dequeueReusableCell(withIdentifier: WeatherInfoTableViewCell.id, for: indexPath) as? WeatherInfoTableViewCell else {
                     return UITableViewCell()
                 }
                 weatherInfoCell.selectionStyle = .none
-                
                 weatherInfoCell.configure(with: dailyTimePeriod, at: dateIndex, at: indexPath.section, at: indexPath.row)
-                
                 return weatherInfoCell
             }
         }

@@ -9,8 +9,7 @@ class LocationService: NSObject {
     private var currentLocation: CLLocation?
     var isLocationAuthorized: Bool = false
     var isDetermined: Bool = false
-    var currentCoordinates: (latitude: Double, longitude: Double)?
-    
+    var currentCoordinates: (latitude: Double, longitude: Double)?    
     
     override init() {
         super.init()

@@ -4,6 +4,9 @@ import UIKit
 
 final class SunAndMoonTableViewCell: UITableViewCell {
     
+    var dateIndex: Int?
+    var astronomy: Astronomy?
+    
     static let id = "SunAndMoonTableViewCell"
     
     private enum Constants {
@@ -125,13 +128,10 @@ extension SunAndMoonTableViewCell: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SunAndMoonCollectionViewCell.id, for: indexPath) as? SunAndMoonCollectionViewCell else {
             return UICollectionViewCell()
         }
-        
-        if indexPath.row == 0 {
-            cell.configureSunInfo()
-        } else {
-            cell.configureMoonInfo()
+        if let astronomyModel = astronomy,
+        let index = dateIndex {
+            cell.configure(with: astronomyModel, at: index, at: 0, at: indexPath.item)
         }
-        
         return cell
     }
 }
@@ -158,6 +158,25 @@ extension SunAndMoonTableViewCell: UICollectionViewDelegateFlowLayout {
         return Constants.itemHorizontalSpacing
     }
     
+}
+
+extension SunAndMoonTableViewCell: Configurable {
+    func configure(with model: Astronomy, at index: Int, at section: Int? = nil, at row: Int? = nil) {
+        guard let forecastSet = model.astronomyForecast,
+              let forecast = Array(forecastSet) as? [AstronomyForecast] else {
+            return
+        }
+        
+        let filteredForecast = Array(forecast.dropFirst())
+        
+        if index < filteredForecast.count {
+            moonPhaseLabel.text = MoonPhases(value: filteredForecast[index].moonPhase).rawValue
+            moonPhaseIcon.image = UIImage(systemName: MoonPhases(value: filteredForecast[index].moonPhase).systemImageName)
+        } else {
+            moonPhaseLabel.text = "?"
+            moonPhaseIcon.image = UIImage(systemName: "moon.zzz")
+        }
+    }
 }
 
 

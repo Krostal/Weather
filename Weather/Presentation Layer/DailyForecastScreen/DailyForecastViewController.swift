@@ -2,9 +2,10 @@ import UIKit
 
 final class DailyForecastViewController: UIViewController {
     
-    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchWeatherDataService: FetchDataService<WeatherJsonModel>(), fetchAirQualityDataService: FetchDataService<AirQualityJsonModel>(), coreDataService: CoreDataService.shared, locationService: LocationService())
+    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService(), coreDataService: CoreDataService.shared, locationService: LocationService())
     
     private let dailyTimePeriod: DailyTimePeriod
+    private var astronomy: Astronomy
     private var dateIndex: Int
     private var selectedDate: Date
     private var airQuality: AirQuality?
@@ -13,8 +14,9 @@ final class DailyForecastViewController: UIViewController {
     
     var headerTitle: String?
     
-    init(dailyTimePeriod: DailyTimePeriod, dateIndex: Int, selectedDate: Date) {
+    init(dailyTimePeriod: DailyTimePeriod, astronomy: Astronomy, dateIndex: Int, selectedDate: Date) {
         self.dailyTimePeriod = dailyTimePeriod
+        self.astronomy = astronomy
         self.dateIndex = dateIndex
         self.selectedDate = selectedDate
         super.init(nibName: nil, bundle: nil)
@@ -30,12 +32,13 @@ final class DailyForecastViewController: UIViewController {
     }
     
     private func setupView() {
+        
         interactor.getAirQualityFromCoreData { [weak self] airQualityArray in
-            guard let self else { return }
+            guard let self = self else { return }
             if let model = airQualityArray.last {
                 self.airQuality = model
                 guard let airQualityModel = self.airQuality else { return }
-                self.dailyForecastView = DailyForecastView(frame: self.view.bounds, dailyTimePeriod: self.dailyTimePeriod, dateIndex: self.dateIndex, selectedDate: self.selectedDate, airQuality: airQualityModel)
+                self.dailyForecastView = DailyForecastView(frame: self.view.bounds, dailyTimePeriod: self.dailyTimePeriod, dateIndex: self.dateIndex, selectedDate: self.selectedDate, airQuality: airQualityModel, astronomy: self.astronomy)
                 self.dailyForecastView?.delegate = self
                 self.view = self.dailyForecastView
                 self.dailyForecastView?.headerTitle = self.headerTitle
@@ -53,7 +56,5 @@ extension DailyForecastViewController: DailyForecastViewDelegate {
         setupView()
         navigationItem.title = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"))
     }
-    
-    
 }
 

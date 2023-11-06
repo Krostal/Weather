@@ -8,9 +8,10 @@ final class MainViewController: UIViewController {
     
     private var onboardingView: OnboardingView?
     
-    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchWeatherDataService: FetchDataService<WeatherJsonModel>(), fetchAirQualityDataService: FetchDataService<AirQualityJsonModel>(), coreDataService: CoreDataService.shared, locationService: LocationService())
+    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService(), coreDataService: CoreDataService.shared, locationService: LocationService())
     
     private var weather: Weather?
+    private var astronomy: Astronomy?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,13 +32,22 @@ final class MainViewController: UIViewController {
     }
     
     private func setupView() {
+        
         interactor.getWeatherFromCoreData(withPredicate: nil) { [weak self] weatherArray in
             guard let self = self else { return }
             if let model = weatherArray.last {
                 self.weather = model
                 guard let weatherModel = self.weather else { return }
+                interactor.getAstronomyFromCoreData(withPredicate: nil) { astronomyArray in
+                    if let model = astronomyArray.last {
+                        self.astronomy = model
+                    } else {
+                        print("в CoreData отсутствует модель Astronomy")
+                    }
+                }
+                guard let astronomyModel = self.astronomy else { return }
                 DispatchQueue.main.async {
-                    self.mainView = MainView(frame: self.view.bounds, weather: weatherModel)
+                    self.mainView = MainView(frame: self.view.bounds, weather: weatherModel, astronomy: astronomyModel)
                     self.mainView?.delegate = self
                     self.mainView?.tableView.refreshControl = UIRefreshControl()
                     self.mainView?.tableView.refreshControl?.addTarget(self, action: #selector(self.refreshWeatherData), for: .valueChanged)
@@ -96,7 +106,7 @@ final class MainViewController: UIViewController {
         mainView.tableView.refreshControl?.beginRefreshing()
         interactor.fetchWeatherFromNetwork { [weak self] result in
             guard let self = self else { return }
-            
+            fetchAstronomy()
             DispatchQueue.main.async {
                 switch result {
                 case .success(_ ):
@@ -117,6 +127,17 @@ final class MainViewController: UIViewController {
                 print("Данные о качестве воздуха успешно получены")
             case .failure(let error):
                 print("AirQuality error \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func fetchAstronomy() {
+        interactor.fetchAstronomyFromNetwork { result in
+            switch result {
+            case .success(_ ):
+                print("Астрономические данные успешно получены")
+            case .failure(let error):
+                print("Astronomy error \(error.localizedDescription)")
             }
         }
     }
@@ -193,9 +214,10 @@ final class MainViewController: UIViewController {
     
     @objc private func refreshWeatherData() {
         checkLocationPermission()
+        fetchAirQuality()
         interactor.fetchWeatherFromNetwork { [weak self] result in
             guard let self = self else { return }
-            
+            fetchAstronomy()
             DispatchQueue.main.async {
                 switch result {
                 case .success(_ ):
@@ -207,7 +229,6 @@ final class MainViewController: UIViewController {
                 }
             }
         }
-        fetchAirQuality()
     }
     
     @objc private func showSettings(_ sender: UIBarButtonItem) {
@@ -235,12 +256,13 @@ extension MainViewController: MainViewDelegate {
     
     func showDailyForecast(forDate date: Date, dateIndex: Int) {
         guard let weather = weather,
-                let dailyTimePeriod = DailyTimePeriod(model: weather)
+              let dailyTimePeriod = DailyTimePeriod(model: weather),
+              let astronomy = astronomy
         else {
             return
         }
         
-        let dailyForecastViewController = DailyForecastViewController(dailyTimePeriod: dailyTimePeriod, dateIndex: dateIndex, selectedDate: date)
+        let dailyForecastViewController = DailyForecastViewController(dailyTimePeriod: dailyTimePeriod, astronomy: astronomy, dateIndex: dateIndex, selectedDate: date)
         let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"))
         dailyForecastViewController.navigationItem.title = dateString
         

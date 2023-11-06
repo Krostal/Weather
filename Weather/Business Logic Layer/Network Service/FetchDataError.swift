@@ -8,6 +8,7 @@ enum FetchDataError: Error {
     case noData
     case decodingError(error: Error)
     case networkError(error: Error)
+    case invalidDate
     
     var description: String {
         switch self {
@@ -21,6 +22,8 @@ enum FetchDataError: Error {
             return "❌ Ошибка при декодировании данных: \(error)"
         case .networkError(let error):
             return "❌ Network Error: \(error.localizedDescription)"
+        case .invalidDate:
+            return "❌ Error: invalid date"
         }
     }
 }

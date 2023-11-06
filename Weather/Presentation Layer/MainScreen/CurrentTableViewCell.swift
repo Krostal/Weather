@@ -102,7 +102,7 @@ final class CurrentTableViewCell: UITableViewCell {
         let windIcon = UIImageView()
         windIcon.image = UIImage(named: "wind")
         windIcon.translatesAutoresizingMaskIntoConstraints = false
-        windIcon.tintColor = .black
+        windIcon.tintColor = .white
         return windIcon
     }()
     
@@ -113,7 +113,6 @@ final class CurrentTableViewCell: UITableViewCell {
         windSpeedLabel.textColor = .white
         return windSpeedLabel
     }()
-    
     
     private lazy var humidityStackView: UIStackView = {
         let humidityStackView = UIStackView()
@@ -129,7 +128,6 @@ final class CurrentTableViewCell: UITableViewCell {
         let humidityIcon = UIImageView()
         humidityIcon.image = UIImage(named: "humidity")
         humidityIcon.translatesAutoresizingMaskIntoConstraints = false
-        humidityIcon.tintColor = .black
         return humidityIcon
     }()
     
@@ -275,11 +273,23 @@ final class CurrentTableViewCell: UITableViewCell {
         semicircleLine.fillColor = UIColor.clear.cgColor
         containerView.layer.addSublayer(semicircleLine)
     }
+    
+    func sunData(with model: Astronomy) {
+        guard let forecastSet = model.astronomyForecast,
+              let forecast = Array(forecastSet) as? [AstronomyForecast] else {
+            return
+        }
+        if let sunrise = forecast.first?.sunrise,
+           let sunset = forecast.first?.sunset {
+            sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil)
+            sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil)
+        }
+    }
 }
 
 extension CurrentTableViewCell: Configurable {
     func configure(with timePeriod: CurrentTimePeriod, at index: Int, at part: Int? = nil, at row: Int? = nil) {
-    
+        
         tempRangeLabel.text = "\(timePeriod.next6HoursForecast.airTemperatureMin)° / \(timePeriod.next6HoursForecast.airTemperatureMax)°"
         currentTemp.text = "\(timePeriod.instantData.airTemperature)°"
         if let symbolCode = timePeriod.next1HoursForecast.symbolCode {
