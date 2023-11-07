@@ -82,6 +82,10 @@ final class CoreDataService {
 
         do {
             let result = try setContext().fetch(request)
+            
+            if result.count <= 1 {
+                 return true
+            }
 
             if let existingAstronomy = result.first,
                let startDate = existingAstronomy.start {

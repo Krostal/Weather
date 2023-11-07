@@ -18,7 +18,7 @@
     <entity name="Astronomy" representedClassName="Astronomy" syncable="YES" codeGenerationType="class">
         <attribute name="locationName" optional="YES" attributeType="String"/>
         <attribute name="start" optional="YES" attributeType="String"/>
-        <relationship name="astronomyForecast" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="AstronomyForecast" inverseName="astronomy" inverseEntity="AstronomyForecast"/>
+        <relationship name="astronomyForecast" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="AstronomyForecast" inverseName="astronomy" inverseEntity="AstronomyForecast"/>
     </entity>
     <entity name="AstronomyForecast" representedClassName="AstronomyForecast" syncable="YES" codeGenerationType="class">
         <attribute name="moonPhase" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>

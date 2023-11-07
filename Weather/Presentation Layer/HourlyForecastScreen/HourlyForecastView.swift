@@ -6,6 +6,7 @@ final class HourlyForecastView: UIView {
     
     private let headerTitle: String
     private let weather: Weather
+    private var selectedHour: Int?
     private var hourlyTimePeriod: HourlyTimePeriod?
         
     private enum Constants {
@@ -24,9 +25,10 @@ final class HourlyForecastView: UIView {
         return tableView
     }()
     
-    init(frame: CGRect, weather: Weather, headerTitle: String) {
+    init(frame: CGRect, weather: Weather, headerTitle: String, selectedHour: Int?) {
         self.weather = weather
         self.headerTitle = headerTitle
+        self.selectedHour = selectedHour
         super.init(frame: frame)
         setupView()
         addSubviews()
@@ -66,8 +68,18 @@ final class HourlyForecastView: UIView {
             tableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: Constants.spacing),
             tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -Constants.spacing)
         ])
-        
     }
+    
+    func scrollToRow() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            if let index = selectedHour {
+                let indexPathToScroll = IndexPath(row: index, section: 1)
+                tableView.scrollToRow(at: indexPathToScroll, at: .middle, animated: true)
+            }
+        }
+    }
+    
 }
     
 extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {

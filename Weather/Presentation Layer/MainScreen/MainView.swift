@@ -3,8 +3,9 @@ import UIKit
 import CoreData
 
 protocol MainViewDelegate: AnyObject {
-    func showHourlyForecast()
+    func showHourlyForecast(with selectedHour: Int?)
     func showDailyForecast(forDate date: Date, dateIndex: Int)
+    
 }
 
 final class MainView: UIView {
@@ -23,7 +24,7 @@ final class MainView: UIView {
     private var selectedDate: Date?
     
     let weather: Weather
-    let astronomy: Astronomy
+    let astronomy: Astronomy?
     let currentTimePeriod: CurrentTimePeriod
     let dailyTimePeriod: DailyTimePeriod
     
@@ -41,7 +42,7 @@ final class MainView: UIView {
         return tableView
     }()
     
-    init(frame: CGRect, weather: Weather, astronomy: Astronomy) {
+    init(frame: CGRect, weather: Weather, astronomy: Astronomy?) {
         self.weather = weather
         self.astronomy = astronomy
         self.currentTimePeriod = CurrentTimePeriod(model: weather) ?? CurrentTimePeriod()
@@ -105,14 +106,17 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             currentCell.configure(with: currentTimePeriod, at: indexPath.row)
-            currentCell.sunData(with: astronomy)
+            if let astronomyModel = astronomy {
+                currentCell.sunData(with: astronomyModel)
+            }
+            currentCell.selectionStyle = .none
             return currentCell
         } else if indexPath.section == 1 {
             guard let hourlyCell = tableView.dequeueReusableCell(withIdentifier: HourlyTableViewCell.id, for: indexPath) as? HourlyTableViewCell else {
                 return UITableViewCell()
             }
             hourlyCell.weather = weather
-            
+            hourlyCell.delegate = self
             
             return hourlyCell
         } else {
@@ -182,9 +186,15 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
     
 }
 
+extension MainView: HourlyTableViewCellDelegate {
+    func showSelectedHourForecast(at index: Int) {
+        delegate?.showHourlyForecast(with: index)
+    }
+}
+
 extension MainView: HeaderForHourlyCellDelegate {
     func buttonTapped() {
-        delegate?.showHourlyForecast()
+        delegate?.showHourlyForecast(with: nil)
     }
 }
 
@@ -204,4 +214,5 @@ extension MainView: HeaderForDailyCellDelegate {
         }
     }
 }
+
 

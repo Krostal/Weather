@@ -16,6 +16,17 @@ final class TemperatureChartView: UIView {
     
     var timeData: [ChartDataEntry] = []
     
+    let xAxisData: [ChartDataEntry] = [
+        ChartDataEntry(x: 0, y: 0),
+        ChartDataEntry(x: 3, y: 0),
+        ChartDataEntry(x: 6, y: 0),
+        ChartDataEntry(x: 9, y: 0),
+        ChartDataEntry(x: 12, y: 0),
+        ChartDataEntry(x: 15, y: 0),
+        ChartDataEntry(x: 18, y: 0),
+        ChartDataEntry(x: 21, y: 0),
+    ]
+    
     var values: [Double] = []
     
     private lazy var lineChartView: LineChartView = {
@@ -59,8 +70,7 @@ final class TemperatureChartView: UIView {
         xAxisView.xAxis.axisLineColor = .clear
         xAxisView.xAxis.labelPosition = .bottom
         xAxisView.xAxis.forceLabelsEnabled = true
-        
-        
+
         return xAxisView
     }()
     
@@ -128,7 +138,7 @@ final class TemperatureChartView: UIView {
     }
     
     private func setupXAxisView(with data: [ChartDataEntry]) {
-        let dataSet = LineChartDataSet(entries: data, label: "")
+        let dataSet = LineChartDataSet(entries: xAxisData, label: "")
         
         dataSet.drawCirclesEnabled = true
         dataSet.circleRadius = 2
@@ -136,15 +146,16 @@ final class TemperatureChartView: UIView {
         dataSet.setColor(.black)
         dataSet.drawFilledEnabled = false
         dataSet.drawValuesEnabled = false
-        dataSet.mode = .horizontalBezier
         
         dataSet.drawVerticalHighlightIndicatorEnabled = false
         dataSet.drawHorizontalHighlightIndicatorEnabled = false
         
-        let data = LineChartData(dataSet: dataSet)
-        xAxisView.xAxis.setLabelCount(timeData.count, force: true)
+        xAxisView.xAxis.setLabelCount(data.count, force: true)
         xAxisView.xAxis.valueFormatter = CustomXAxisValueFormatter(hours: values)
-        xAxisView.data = data
+        
+        let xAxisData = LineChartData(dataSet: dataSet)
+        xAxisView.data = xAxisData
+        
     }
     
     private func setupCollectionView() {

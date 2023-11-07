@@ -45,9 +45,9 @@ final class MainViewController: UIViewController {
                         print("в CoreData отсутствует модель Astronomy")
                     }
                 }
-                guard let astronomyModel = self.astronomy else { return }
+                
                 DispatchQueue.main.async {
-                    self.mainView = MainView(frame: self.view.bounds, weather: weatherModel, astronomy: astronomyModel)
+                    self.mainView = MainView(frame: self.view.bounds, weather: weatherModel, astronomy: self.astronomy)
                     self.mainView?.delegate = self
                     self.mainView?.tableView.refreshControl = UIRefreshControl()
                     self.mainView?.tableView.refreshControl?.addTarget(self, action: #selector(self.refreshWeatherData), for: .valueChanged)
@@ -247,22 +247,20 @@ final class MainViewController: UIViewController {
 }
 
 extension MainViewController: MainViewDelegate {
-
-    func showHourlyForecast() {
+    func showHourlyForecast(with selectedHour: Int?) {
         guard let weatherModel = self.weather else { return }
-        let hourlyForecastViewController = HourlyForecastViewController(headerTitle: navigationItem.title ?? "", weatherModel: weatherModel)
+        let hourlyForecastViewController = HourlyForecastViewController(headerTitle: navigationItem.title ?? "", weatherModel: weatherModel, selectedHour: selectedHour ?? 0)
         navigationController?.pushViewController(hourlyForecastViewController, animated: true)
     }
     
     func showDailyForecast(forDate date: Date, dateIndex: Int) {
         guard let weather = weather,
-              let dailyTimePeriod = DailyTimePeriod(model: weather),
-              let astronomy = astronomy
+              let dailyTimePeriod = DailyTimePeriod(model: weather)
         else {
             return
         }
         
-        let dailyForecastViewController = DailyForecastViewController(dailyTimePeriod: dailyTimePeriod, astronomy: astronomy, dateIndex: dateIndex, selectedDate: date)
+        let dailyForecastViewController = DailyForecastViewController(dailyTimePeriod: dailyTimePeriod, astronomy: self.astronomy, dateIndex: dateIndex, selectedDate: date)
         let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"))
         dailyForecastViewController.navigationItem.title = dateString
         

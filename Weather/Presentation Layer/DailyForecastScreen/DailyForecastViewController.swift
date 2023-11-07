@@ -5,16 +5,16 @@ final class DailyForecastViewController: UIViewController {
     private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService(), coreDataService: CoreDataService.shared, locationService: LocationService())
     
     private let dailyTimePeriod: DailyTimePeriod
-    private var astronomy: Astronomy
     private var dateIndex: Int
     private var selectedDate: Date
     private var airQuality: AirQuality?
+    private var astronomy: Astronomy?
     
     private var dailyForecastView: DailyForecastView?
     
     var headerTitle: String?
     
-    init(dailyTimePeriod: DailyTimePeriod, astronomy: Astronomy, dateIndex: Int, selectedDate: Date) {
+    init(dailyTimePeriod: DailyTimePeriod, astronomy: Astronomy?, dateIndex: Int, selectedDate: Date) {
         self.dailyTimePeriod = dailyTimePeriod
         self.astronomy = astronomy
         self.dateIndex = dateIndex

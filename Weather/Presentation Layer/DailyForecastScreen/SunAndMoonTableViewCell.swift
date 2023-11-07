@@ -130,7 +130,7 @@ extension SunAndMoonTableViewCell: UICollectionViewDataSource {
         }
         if let astronomyModel = astronomy,
         let index = dateIndex {
-            cell.configure(with: astronomyModel, at: index, at: 0, at: indexPath.item)
+            cell.configure(with: astronomyModel, at: index, at: nil, at: indexPath.item)
         }
         return cell
     }

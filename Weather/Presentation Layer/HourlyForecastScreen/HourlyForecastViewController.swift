@@ -7,10 +7,12 @@ final class HourlyForecastViewController: UIViewController {
     private var hourlyForecastView: HourlyForecastView?
     private let headerTitle: String
     private let weatherModel: Weather
+    private var selectedHour: Int?
     
-    init(headerTitle: String, weatherModel: Weather) {
+    init(headerTitle: String, weatherModel: Weather, selectedHour: Int?) {
         self.headerTitle = headerTitle
         self.weatherModel = weatherModel
+        self.selectedHour = selectedHour
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -25,9 +27,10 @@ final class HourlyForecastViewController: UIViewController {
     }
     
     private func setupView() {
-        hourlyForecastView = HourlyForecastView(frame: self.view.bounds, weather: weatherModel, headerTitle: headerTitle)
+        hourlyForecastView = HourlyForecastView(frame: self.view.bounds, weather: weatherModel, headerTitle: headerTitle, selectedHour: selectedHour)
         view = hourlyForecastView
-    }
+        hourlyForecastView?.scrollToRow()
+        }
     
     private func setupNavigationBar() {
         navigationItem.title = "Прогноз на 24 часа"
