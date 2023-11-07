@@ -9,6 +9,7 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
     private enum Constants {
         static let viewSpacing: CGFloat = 16.0
         static let itemSpacing: CGFloat = 11.0
+        static let iconSize: CGFloat = 30.0
     }
     
     private lazy var partOfTheDayLabel: UILabel = {
@@ -16,7 +17,6 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
         partOfTheDayLabel.translatesAutoresizingMaskIntoConstraints = false
         partOfTheDayLabel.font = .systemFont(ofSize: 18, weight: .semibold)
         partOfTheDayLabel.textColor = .black
-        partOfTheDayLabel.text = "День"
         return partOfTheDayLabel
     }()
     
@@ -54,7 +54,7 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
         let tempLabel = UILabel()
         tempLabel.translatesAutoresizingMaskIntoConstraints = false
         tempLabel.font = .systemFont(ofSize: 30, weight: .semibold)
-        tempLabel.textColor = .systemGray
+        tempLabel.textColor = .black
         return tempLabel
     }()
     
@@ -89,29 +89,64 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
         NSLayoutConstraint.activate([
             
             partOfTheDayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.viewSpacing),
-            partOfTheDayLabel.widthAnchor.constraint(equalToConstant: 50),
+            partOfTheDayLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 50),
             partOfTheDayLabel.centerYAnchor.constraint(equalTo: tempLabel.centerYAnchor),
             
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Constants.viewSpacing),
             stackView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             stackView.leadingAnchor.constraint(greaterThanOrEqualTo: partOfTheDayLabel.leadingAnchor),
-            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            
+            weatherIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            weatherIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize)
         ])
     }
+}
     
-    func configuresection1() {
-        partOfTheDayLabel.text = "День"
-        weatherIcon.image = UIImage(systemName: "cloud.sun.rain")
-        tempLabel.text = "15°"
-        weatherLabel.text = "Кратковременный дождь"
+
+extension PartOfTheDayTableViewCell: Configurable {
+    
+    func configure(with timePeriod: DailyTimePeriod, at index: Int, at part: Int?, at row: Int? = nil) {
+        
+        let sortedDailyForecast = timePeriod.dailyForecast.sorted { $0.key < $1.key }
+        
+        let dateKeys = sortedDailyForecast.map { $0.key }
+        
+        if index >= dateKeys.count {
+            return
+        }
+        
+        let dailyForecast = sortedDailyForecast[index].value
+        
+        guard let part = part,
+              part >= 1 && part <= 4,
+              let forecast = dailyForecast[part-1].timePeriodData
+        else {
+            return
+        }
+        
+        let instantData = forecast.instantData
+        let next6Hours = forecast.next6HoursForecast
+        
+        switch part {
+        case 1:
+            partOfTheDayLabel.text = "Утро"
+        case 2:
+            partOfTheDayLabel.text = "День"
+        case 3:
+            partOfTheDayLabel.text = "Вечер"
+        case 4:
+            partOfTheDayLabel.text = "Ночь"
+        default:
+            break
+        }
+        
+        if let instantData = instantData,
+           let next6Hours = next6Hours {
+            weatherIcon.image = UIImage(named: next6Hours.symbolCode ?? "xmark.icloud")
+            tempLabel.text = "\(instantData.airTemperature)°"
+            weatherLabel.text = CurrentWeatherDescription(symbolCode: next6Hours.symbolCode ?? "cloud")?.description
+        }
     }
-    
-    func configuresection2() {
-        partOfTheDayLabel.text = "Ночь"
-        weatherIcon.image = UIImage(systemName: "moon.stars")
-        tempLabel.text = "10°"
-        weatherLabel.text = "Ясно"
-    }
-    
 }
 

@@ -3,8 +3,9 @@ import UIKit
 import CoreData
 
 protocol MainViewDelegate: AnyObject {
-    func showHourlyForecast()
-    func showDailyForecast(forDate date: String)
+    func showHourlyForecast(with selectedHour: Int?)
+    func showDailyForecast(forDate date: Date, dateIndex: Int)
+    
 }
 
 final class MainView: UIView {
@@ -17,12 +18,13 @@ final class MainView: UIView {
     
     weak var delegate: MainViewDelegate?
     
-    private var selectedDate: String?
-    
     private var numberOfDays: Int = 7
     private var isDailyToggleOn = false
+
+    private var selectedDate: Date?
     
     let weather: Weather
+    let astronomy: Astronomy?
     let currentTimePeriod: CurrentTimePeriod
     let dailyTimePeriod: DailyTimePeriod
     
@@ -40,8 +42,9 @@ final class MainView: UIView {
         return tableView
     }()
     
-    init(frame: CGRect, weather: Weather) {
+    init(frame: CGRect, weather: Weather, astronomy: Astronomy?) {
         self.weather = weather
+        self.astronomy = astronomy
         self.currentTimePeriod = CurrentTimePeriod(model: weather) ?? CurrentTimePeriod()
         self.dailyTimePeriod = DailyTimePeriod(model: weather) ?? DailyTimePeriod()
         super.init(frame: frame)
@@ -78,10 +81,6 @@ final class MainView: UIView {
             tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -Constants.spacing)
         ])
     }
-    
-    @objc private func dailyCellTapped() {
-        delegate?.showDailyForecast(forDate: selectedDate ?? "???")
-    }
 }
 
 extension MainView: UITableViewDataSource, UITableViewDelegate {
@@ -107,35 +106,44 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             currentCell.configure(with: currentTimePeriod, at: indexPath.row)
+            if let astronomyModel = astronomy {
+                currentCell.sunData(with: astronomyModel)
+            }
+            currentCell.selectionStyle = .none
             return currentCell
         } else if indexPath.section == 1 {
             guard let hourlyCell = tableView.dequeueReusableCell(withIdentifier: HourlyTableViewCell.id, for: indexPath) as? HourlyTableViewCell else {
                 return UITableViewCell()
             }
             hourlyCell.weather = weather
-            
+            hourlyCell.delegate = self
             
             return hourlyCell
         } else {
             guard let dailyCell = tableView.dequeueReusableCell(withIdentifier: DailyTableViewCell.id, for: indexPath) as? DailyTableViewCell else {
                 return UITableViewCell()
             }
+            
             dailyCell.accessoryType = .disclosureIndicator
             
-            let doubleTapGesture = UITapGestureRecognizer(target: self, action: #selector(dailyCellTapped))
-            doubleTapGesture.numberOfTapsRequired = 2
-            dailyCell.isUserInteractionEnabled = true
-            dailyCell.addGestureRecognizer(doubleTapGesture)
-            
-            if let dateLabel = dailyCell.dateLabel.text {
-                selectedDate = dateLabel
-            } else {
-                selectedDate = nil
-            }
             dailyCell.configure(with: dailyTimePeriod, at: indexPath.row)
+            
             return dailyCell
         }
         
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        if tableView.cellForRow(at: indexPath) is DailyTableViewCell {
+            let sortedDailyForecast = dailyTimePeriod.dailyForecast.sorted { $0.key < $1.key }
+            let dateKeys = sortedDailyForecast.map { $0.key }
+            if indexPath.row >= dateKeys.count {
+                return
+            }
+            let dateKey = dateKeys[indexPath.row]
+            delegate?.showDailyForecast(forDate: dateKey, dateIndex: indexPath.row)
+        }
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -178,9 +186,15 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
     
 }
 
+extension MainView: HourlyTableViewCellDelegate {
+    func showSelectedHourForecast(at index: Int) {
+        delegate?.showHourlyForecast(with: index)
+    }
+}
+
 extension MainView: HeaderForHourlyCellDelegate {
     func buttonTapped() {
-        delegate?.showHourlyForecast()
+        delegate?.showHourlyForecast(with: nil)
     }
 }
 
@@ -190,7 +204,7 @@ extension MainView: HeaderForDailyCellDelegate {
             guard let self else { return }
             
             isDailyToggleOn.toggle()
-            numberOfDays = isDailyToggleOn ? dailyTimePeriod.dailyForecast.keys.count : 7
+            numberOfDays = isDailyToggleOn ? max(dailyTimePeriod.dailyForecast.keys.count, 0) : min(dailyTimePeriod.dailyForecast.keys.count, 7)
             
             self.tableView.reloadSections(IndexSet(integer: 2), with: .automatic)
             if let headerView = tableView.headerView(forSection: 2) as? HeaderForDailyCell {
@@ -200,4 +214,5 @@ extension MainView: HeaderForDailyCellDelegate {
         }
     }
 }
+
 

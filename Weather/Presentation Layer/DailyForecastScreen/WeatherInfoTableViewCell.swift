@@ -72,42 +72,60 @@ final class WeatherInfoTableViewCell: UITableViewCell {
             stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.viewSpacing),
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.viewSpacing),
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -Constants.viewSpacing),
+            stackView.heightAnchor.constraint(equalToConstant: 25),
             
             iconImage.widthAnchor.constraint(equalToConstant: 24),
             categorylabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 10),
             valueLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 10)
         ])
     }
+}
     
-    func configureRow1() {
-        iconImage.image = UIImage(systemName: "thermometer.sun")
-        categorylabel.text = "По ощущениям"
-        valueLabel.text = "13°"
+extension WeatherInfoTableViewCell: Configurable {
+    
+    func configure(with timePeriod: DailyTimePeriod, at index: Int, at section: Int?, at row: Int?) {
+        
+        let sortedDailyForecast = timePeriod.dailyForecast.sorted { $0.key < $1.key }
+        
+        let dateKeys = sortedDailyForecast.map { $0.key }
+        
+        if index >= dateKeys.count {
+            return
+        }
+        
+        let dailyForecast = sortedDailyForecast[index].value
+        
+        guard let section = section,
+              let forecast = dailyForecast[section-1].timePeriodData?.instantData,
+              let forecastNext6Hour = dailyForecast[section-1].timePeriodData?.next6HoursForecast
+        else {
+            return
+        }
+        
+        switch row {
+        case 1:
+            iconImage.image = UIImage(named: "humidity")
+            categorylabel.text = "Относительная влажность"
+            valueLabel.text = "\(forecast.relativeHumidity)%"
+        case 2:
+            iconImage.image = UIImage(named: "wind")
+            categorylabel.text = "Ветер"
+            valueLabel.text = "\(forecast.windSpeed) м/с, \(WindDirection(degrees: forecast.windFromDirection).rawValue)"
+        case 3:
+            iconImage.image = UIImage(systemName: "sun.min")
+            categorylabel.text = "УФ  индекс"
+            valueLabel.text = "\(forecast.ultravioletIndexClearSky) \(UVIndex(ultraVioletIndex: forecast.ultravioletIndexClearSky).rawValue)"
+        case 4:
+            iconImage.image = UIImage(named: "precipitation")
+            categorylabel.text = "Атмосферные осадки"
+            valueLabel.text = "\(forecastNext6Hour.precipitationAmount) мм"
+        case 5:
+            iconImage.image = UIImage(named: "clouds")
+            categorylabel.text = "Облачность"
+            valueLabel.text = "\(forecast.cloudAreaFraction)%"
+        default:
+            break
+        }
     }
-    
-    func configureRow2() {
-        iconImage.image = UIImage(systemName: "wind")
-        categorylabel.text = "Ветер"
-        valueLabel.text = "3 м/с ССЗ"
-    }
-    
-    func configureRow3() {
-        iconImage.image = UIImage(systemName: "sun.min")
-        categorylabel.text = "УФ  индекс"
-        valueLabel.text = "4 (умеренный)"
-    }
-    
-    func configureRow4() {
-        iconImage.image = UIImage(systemName: "cloud.rain")
-        categorylabel.text = "Дождь"
-        valueLabel.text = "55%"
-    }
-    
-    func configureRow5() {
-        iconImage.image = UIImage(systemName: "cloud")
-        categorylabel.text = "Облачность"
-        valueLabel.text = "72%"
-    }
-    
 }
 

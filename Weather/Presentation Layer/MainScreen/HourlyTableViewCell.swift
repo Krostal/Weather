@@ -3,7 +3,7 @@
 import UIKit
 
 protocol HourlyTableViewCellDelegate: AnyObject {
-    func updateHourlyCollectionCell(at index: Int)
+    func showSelectedHourForecast(at index: Int)
 }
 
 final class HourlyTableViewCell: UITableViewCell {
@@ -79,6 +79,7 @@ extension HourlyTableViewCell: UICollectionViewDataSource {
                 cell.contentView.backgroundColor = isCurrentTimeCell ? .systemBlue.withAlphaComponent(0.1) : .clear
             }
         }
+        
         return cell
     }
 }
@@ -98,13 +99,19 @@ extension HourlyTableViewCell: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
-        
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 20
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return 20
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        if let cell = collectionView.cellForItem(at: indexPath) as? HourlyCollectionViewCell {
+            delegate?.showSelectedHourForecast(at: indexPath.item)
+        }
+    }
 }

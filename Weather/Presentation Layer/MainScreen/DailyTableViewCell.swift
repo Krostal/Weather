@@ -145,7 +145,7 @@ final class DailyTableViewCell: UITableViewCell {
 
 extension DailyTableViewCell: Configurable {
     
-    func configure(with timePeriod: DailyTimePeriod, at index: Int) {
+    func configure(with timePeriod: DailyTimePeriod, at index: Int, at part: Int? = nil, at row: Int? = nil) {
         
         let sortedDailyForecast = timePeriod.dailyForecast.sorted { $0.key < $1.key }
         
@@ -160,11 +160,13 @@ extension DailyTableViewCell: Configurable {
         let dailyForecast = sortedDailyForecast[index].value
         if dailyForecast.count > 1,
            let forecast = dailyForecast[1].timePeriodData?.next6HoursForecast {
-            dateLabel.text = dateFormatter.formattedStringDate(date: dateKey, dateFormat: "dd/MM")
+            dateLabel.text = dateFormatter.formattedDateToString(date: dateKey, dateFormat: "dd/MM", locale: nil)
             precipitationIcon.image = UIImage(named: forecast.symbolCode ?? "xmark.icloud")
             precipitationLabel.text = "\(forecast.precipitationAmount)%"
-            infoLabel.text = forecast.symbolCode
+            infoLabel.text = CurrentWeatherDescription(symbolCode: forecast.symbolCode ?? "cloud")?.description
             temperatureLabel.text = "\(forecast.airTemperatureMin)° - \(forecast.airTemperatureMax)°"
+            
+            
         }
     }
 }

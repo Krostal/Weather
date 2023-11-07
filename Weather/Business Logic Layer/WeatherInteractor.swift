@@ -2,28 +2,33 @@ import Foundation
 import CoreData
 
 protocol WeatherInteractorProtocol {
-    func fetchFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void)
+    func fetchWeatherFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void)
     func getWeatherFromCoreData(withPredicate predicate: NSPredicate?, completion: @escaping ([Weather]) -> Void)
+    func fetchAirQualityFromNetwork(completion: @escaping (Result<AirQualityJsonModel, Error>) -> Void)
+    func getAirQualityFromCoreData(completion: @escaping ([AirQuality]) -> Void)
+    func fetchAstronomyFromNetwork(completion: @escaping (Result<AstronomyJsonModel, Error>) -> Void)
+    func getAstronomyFromCoreData(withPredicate predicate: NSPredicate?, completion: @escaping ([Astronomy]) -> Void)
     func checkPermission(completion: @escaping (Bool) -> Void)
+    func isDetermined() -> Bool
 }
 
 final class WeatherInteractor: WeatherInteractorProtocol {
-    
+
     private let defaultValue: Float = 3.33
-    private let fetchDataService: FetchDataService<WeatherJsonModel>
+    private let fetchDataService: FetchDataService
     private let coreDataService: CoreDataService
-    private let locationService: LocationService
+    private var locationService: LocationService
     private let context = CoreDataService.shared.setContext()
     private var locationName: String?
     
-    init(fetchDataService: FetchDataService<WeatherJsonModel>, coreDataService: CoreDataService, locationService: LocationService) {
+    init(fetchDataService: FetchDataService, coreDataService: CoreDataService, locationService: LocationService) {
         self.fetchDataService = fetchDataService
         self.coreDataService = CoreDataService.shared
         self.locationService = locationService
     }
     
-    func fetchFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void) {
-
+    func fetchWeatherFromNetwork(completion: @escaping (Result<WeatherJsonModel, Error>) -> Void) {
+        
         guard let coordinates = locationService.currentCoordinates else {
             return
         }
@@ -31,11 +36,11 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         locationService.getLocationName { [weak self] name in
             guard let self else { return }
             self.locationName = name
-            self.fetchDataService.fetchData(coordinates: (coordinates.latitude, coordinates.longitude)) { result in
+            self.fetchDataService.fetchWeatherData(coordinates: (coordinates.latitude, coordinates.longitude)) { result in
                 print(coordinates)
                 switch result {
                 case .success(let weatherJsonModel):
-                    self.saveToCoreData(weatherJsonModel) { result in
+                    self.saveWeatherToCoreData(weatherJsonModel) { result in
                         switch result {
                         case .success:
                             completion(.success(weatherJsonModel))
@@ -48,13 +53,98 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                     print("Error fetching data from the network: \(error)")
                     completion(.failure(error))
                 }
+            }
+        }
+    }
+    
+    func fetchAirQualityFromNetwork(completion: @escaping (Result<AirQualityJsonModel, Error>) -> Void) {
+        
+        guard let coordinates = locationService.currentCoordinates else {
+            return
+        }
+        
+        self.fetchDataService.fetchAirQualityData(coordinates: (coordinates.latitude, coordinates.longitude)) { result in
+            switch result {
+            case .success(let airQualityJsonModel):
+                self.saveAirQualityToCoreData(airQualityJsonModel) { result in
+                    switch result {
+                    case .success:
+                        completion(.success(airQualityJsonModel))
+                    case .failure(let error):
+                        print("Error saving data to Core Data: \(error.localizedDescription)")
+                        completion(.failure(error))
+                    }
+                }
+            case .failure(let error):
+                print("Error fetching data from the network: \(error)")
+                completion(.failure(error))
                 
+            }
+        }
+    }
+    
+    func fetchAstronomyFromNetwork(completion: @escaping (Result<AstronomyJsonModel, Error>) -> Void) {
+        
+        guard let coordinates = locationService.currentCoordinates else {
+            return
+        }
+        let currentDate = CustomDateFormatter().formattedCurrentDate(dateFormat: "yyyy-MM-dd", locale: nil, timeZone: nil)
+        
+        guard let location = locationName else { return }
+        
+        if coreDataService.isAstronomyDataAlreadyExist(start: currentDate, locationName: location) {
+            print("Astronomy data with matching start date already exists and no new data request required")
+            return
+        } else {
+            self.fetchDataService.fetchAstronomyData(coordinates: (coordinates.latitude, coordinates.longitude)) { result in
+                switch result {
+                case .success(let astronomyJsonModel):
+                    self.saveAstronomyToCoreData(astronomyJsonModel) { result in
+                        switch result {
+                        case .success:
+                            completion(.success(astronomyJsonModel))
+                        case .failure(let error):
+                            print("Error saving data to Core Data: \(error.localizedDescription)")
+                            completion(.failure(error))
+                        }
+                    }
+                case .failure(let error):
+                    print("Error fetching data from the network: \(error)")
+                    completion(.failure(error))
+                    
+                }
             }
         }
     }
     
     func getWeatherFromCoreData(withPredicate predicate: NSPredicate?, completion: @escaping ([Weather]) -> Void) {
         let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        
+        if let predicate = predicate {
+            request.predicate = predicate
+        }
+        
+        do {
+            let results = try self.context.fetch(request)
+            completion(results)
+        } catch {
+            print("Error fetching weather data: \(error.localizedDescription)")
+        }
+    }
+    
+    func getAirQualityFromCoreData(completion: @escaping ([AirQuality]) -> Void) {
+        let request: NSFetchRequest<AirQuality> = AirQuality.fetchRequest()
+        
+        do {
+            let results = try self.context.fetch(request)
+            completion(results)
+        } catch {
+            print("Error fetching weather data: \(error.localizedDescription)")
+        }
+    }
+    
+    func getAstronomyFromCoreData(withPredicate predicate: NSPredicate?, completion: @escaping ([Astronomy]) -> Void) {
+        let request: NSFetchRequest<Astronomy> = Astronomy.fetchRequest()
         
         if let predicate = predicate {
             request.predicate = predicate
@@ -76,12 +166,16 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         }
     }
     
-    private func saveToCoreData(_ weather: WeatherJsonModel, completion: @escaping (Result<Void, Error>) -> Void) {
+    func isDetermined() -> Bool {
+        locationService.isDetermined
+    }
+    
+    private func saveWeatherToCoreData(_ weather: WeatherJsonModel, completion: @escaping (Result<Void, Error>) -> Void) {
         
         let updatedAt = weather.properties.meta.updatedAt
         
         if let location = locationName {
-            if coreDataService.isAlreadyExist(updatedAt: updatedAt, locationName: location) {
+            if coreDataService.isWeatherAlreadyExist(updatedAt: updatedAt, locationName: location) {
                 print("Weather with matching updatedAt already exists")
                 completion(.success(()))
                 return
@@ -212,7 +306,76 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         
         do {
             try self.context.save()
-            print("Data saved to Core Data successfully.")
+            print("Weather data saved to Core Data successfully.")
+            completion(.success(()))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    
+    private func saveAirQualityToCoreData(_ airQuality: AirQualityJsonModel, completion: @escaping (Result<Void, Error>) -> Void) {
+        
+        if let location = locationName {
+            coreDataService.deleteExistingAirQualityModel(locationName: location)
+        }
+        
+        let airQualityCoreDataModel = AirQuality(context: self.context)
+        let coordinates = AirQualityCoordinates(context: self.context)
+        
+        let city = airQuality.data.city
+        coordinates.lat = city.geo[0]
+        coordinates.long = city.geo[1]
+        coordinates.city = locationName
+        airQualityCoreDataModel.coordinates = coordinates
+     
+        let forecast = airQuality.data.forecast.daily
+        for dailyValue in forecast.pm25 {
+            let airQualityForecast = AirQualityForecast(context: self.context)
+            airQualityForecast.day = dailyValue.day
+            airQualityForecast.index = Int64(dailyValue.avg)
+            airQualityCoreDataModel.addToAirQualityForecast(airQualityForecast)
+        }
+        
+        do {
+            try self.context.save()
+            print("Air quality data saved to Core Data successfully.")
+            completion(.success(()))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    
+    private func saveAstronomyToCoreData(_ astronomy: AstronomyJsonModel, completion: @escaping (Result<Void, Error>) -> Void) {
+        
+        let start = astronomy.meta.start
+        
+        if let location = locationName {
+            if coreDataService.isAstronomyDataAlreadyExist(start: start, locationName: location) {
+                print("Astronomy data with matching start date already exists")
+                completion(.success(()))
+                return
+            }
+        }
+        
+        let astronomyCoreDataModel = Astronomy(context: self.context)
+        astronomyCoreDataModel.start = astronomy.meta.start
+        astronomyCoreDataModel.locationName = locationName
+        
+        let forecast = astronomy.data
+        for dailyData in forecast {
+            let astronomyForecast = AstronomyForecast(context: self.context)
+            astronomyForecast.time = dailyData.time
+            astronomyForecast.moonPhase = dailyData.moonPhase.current.value
+            astronomyForecast.moonrise = dailyData.moonrise
+            astronomyForecast.moonset = dailyData.moonset
+            astronomyForecast.sunrise = dailyData.sunrise
+            astronomyForecast.sunset = dailyData.sunset
+            astronomyCoreDataModel.addToAstronomyForecast(astronomyForecast)
+        }
+        
+        do {
+            try self.context.save()
+            print("Astronomy data saved to Core Data successfully.")
             completion(.success(()))
         } catch {
             completion(.failure(error))

@@ -29,8 +29,8 @@ struct DailyTimePeriod {
         let timePeriodForNextDays = timePeriod.filter {
             if let time = $0.time {
                 if let savedTime = ISO8601DateFormatter().date(from: time) {
-                    let formattedTime = dateFormatter.formattedStringDate(date: savedTime, dateFormat: "yyyy-MM-dd")
-                    return dateFormatter.formattedStringDate(date: Date(), dateFormat: "yyyy-MM-dd") != formattedTime
+                    let formattedTime = dateFormatter.formattedDateToString(date: savedTime, dateFormat: "yyyy-MM-dd", locale: nil)
+                    return dateFormatter.formattedDateToString(date: Date(), dateFormat: "yyyy-MM-dd", locale: nil) != formattedTime
                 }
             }
             return true

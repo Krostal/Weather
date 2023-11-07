@@ -13,16 +13,16 @@ final class InfoCollectionViewCell: UICollectionViewCell {
         infoStackView.spacing = 0
         infoStackView.alignment = .center
         infoStackView.distribution = .fillEqually
-        infoStackView.addArrangedSubview(precipitationIcon)
+        infoStackView.addArrangedSubview(weatherIcon)
         infoStackView.addArrangedSubview(precipitationLabel)
         return infoStackView
     }()
     
-    private lazy var precipitationIcon: UIImageView = {
-        let precipitationIcon = UIImageView(image: UIImage(systemName: "cloud.rain"))
-        precipitationIcon.translatesAutoresizingMaskIntoConstraints = false
-        precipitationIcon.contentMode = .scaleAspectFit
-        return precipitationIcon
+    private lazy var weatherIcon: UIImageView = {
+        let weatherIcon = UIImageView()
+        weatherIcon.translatesAutoresizingMaskIntoConstraints = false
+        weatherIcon.contentMode = .scaleAspectFit
+        return weatherIcon
     }()
     
     private lazy var precipitationLabel: UILabel = {
@@ -30,7 +30,6 @@ final class InfoCollectionViewCell: UICollectionViewCell {
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         dateLabel.font = .systemFont(ofSize: 10, weight: .regular)
         dateLabel.textColor = .black
-        dateLabel.text = "50%"
         return dateLabel
     }()
     
@@ -55,5 +54,12 @@ final class InfoCollectionViewCell: UICollectionViewCell {
             infoStackView.topAnchor.constraint(equalTo: topAnchor),
             infoStackView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
+    }
+}
+
+extension InfoCollectionViewCell: Configurable {
+    func configure(with timePeriod: ThreeHoursForecast, at index: Int, at part: Int? = nil, at row: Int? = nil) {
+        weatherIcon.image = UIImage(named: timePeriod.next1HoursForecast.symbolCode ?? "xmark.icloud")
+        precipitationLabel.text = "\(Int(timePeriod.instantData.relativeHumidity))%"
     }
 }

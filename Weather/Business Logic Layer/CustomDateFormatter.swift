@@ -13,9 +13,10 @@ struct CustomDateFormatter {
         return formattedDate
     }
     
-    func formattedStringDate(date: Date, dateFormat: String) -> String {
+    func formattedDateToString(date: Date, dateFormat: String, locale: Locale?) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = dateFormat
+        dateFormatter.locale = locale
         dateFormatter.timeZone = .current
         return dateFormatter.string(from: date)
     }
@@ -29,5 +30,27 @@ struct CustomDateFormatter {
             return dateFormatter.string(from: localDate)
         }
         return nil
+    }
+    
+    func formattedStringToString(date: String, dateFormat: String, locale: Locale?) -> String? {
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.timeZone =  TimeZone.current
+        
+        if let utcDate = dateFormatter.date(from: date) {
+            let secondDateFormatter = DateFormatter()
+            secondDateFormatter.dateFormat = dateFormat
+            secondDateFormatter.locale = locale
+            secondDateFormatter.timeZone = .current
+            let localDate = secondDateFormatter.string(from: utcDate)
+            return localDate
+        }
+        return nil
+    }
+    
+    func formattedStringToDate(date: String, dateFormat: String) -> Date? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = dateFormat
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        return dateFormatter.date(from: date)
     }
 }

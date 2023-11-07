@@ -2,9 +2,19 @@
 
 import UIKit
 
+protocol DatesTableViewCellDelegate: AnyObject {
+    func showForecastForSelectedDate(date: Date, index: Int)
+}
+
 final class DatesTableViewCell: UITableViewCell {
     
     static let id = "DatesTableViewCell"
+    
+    weak var delegate: DatesTableViewCellDelegate?
+    
+    var dailyTimePeriod: DailyTimePeriod?
+    
+    var selectedIndex: Int?
     
     private lazy var collectionView: UICollectionView = {
         let viewLayout = UICollectionViewFlowLayout()
@@ -31,6 +41,7 @@ final class DatesTableViewCell: UITableViewCell {
         contentView.addSubview(collectionView)
         collectionView.dataSource = self
         collectionView.delegate = self
+        scrollToSelectedItem()
     }
     
     private func setupConstraints() {
@@ -44,19 +55,32 @@ final class DatesTableViewCell: UITableViewCell {
         ])
     }
     
+    private func scrollToSelectedItem() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            if let index = selectedIndex {
+                let indexPath = IndexPath(item: index, section: 0)
+                self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+            }
+        }
+    }
 }
 
 extension DatesTableViewCell: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        10
+        dailyTimePeriod?.dailyForecast.keys.count ?? 7
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DatesCollectionViewCell.id, for: indexPath) as? DatesCollectionViewCell else {
             return UICollectionViewCell()
         }
-
+        if let timePeriod = dailyTimePeriod {
+            cell.configure(with: timePeriod, at: indexPath.item)
+        }
+        cell.contentView.backgroundColor = indexPath.item == selectedIndex ? .systemYellow : .systemBlue.withAlphaComponent(0.1)
+        
         return cell
     }
 }
@@ -85,4 +109,21 @@ extension DatesTableViewCell: UICollectionViewDelegateFlowLayout {
         return 10
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        if let cell = collectionView.cellForItem(at: indexPath) as? DatesCollectionViewCell {
+            selectedIndex = indexPath.item
+            guard let timePeriod = dailyTimePeriod else { return }
+            let sortedDailyForecast = timePeriod.dailyForecast.sorted { $0.key < $1.key }
+            let dateKeys = sortedDailyForecast.map { $0.key }
+            if indexPath.row >= dateKeys.count {
+                return
+            }
+            let dateKey = dateKeys[indexPath.row]
+            delegate?.showForecastForSelectedDate(date: dateKey, index: indexPath.item)
+            cell.contentView.backgroundColor = .systemYellow
+        }
+    }
 }
+
+

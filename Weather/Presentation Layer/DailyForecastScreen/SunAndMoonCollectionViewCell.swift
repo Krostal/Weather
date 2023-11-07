@@ -37,10 +37,10 @@ final class SunAndMoonCollectionViewCell: UICollectionViewCell {
     }()
 
     private lazy var icon: UIImageView = {
-        let weatherIcon = UIImageView()
-        weatherIcon.translatesAutoresizingMaskIntoConstraints = false
-        weatherIcon.tintColor = .systemYellow
-        return weatherIcon
+        let icon = UIImageView()
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.tintColor = .systemYellow
+        return icon
     }()
     
     private lazy var durationLabel: UILabel = {
@@ -132,18 +132,59 @@ final class SunAndMoonCollectionViewCell: UICollectionViewCell {
         ])
     }
     
-    func configureSunInfo() {
-        icon.image = UIImage(systemName: "sun.max.fill")
-        durationLabel.text = "12 ч 47 мин"
-        riseTimeLabel.text = "05:45"
-        setTimeLabel.text = "18:32"
+    private func calculateDuration(rise: String, set: String) -> String {
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.timeZone = TimeZone(identifier: "UTC")
+        
+        if let startDate = dateFormatter.date(from: rise),
+           let endDate = dateFormatter.date(from: set) {
+            
+            let calendar = Calendar.current
+            let components = calendar.dateComponents([.hour, .minute], from: startDate, to: endDate)
+            
+            let hours = abs(components.hour ?? 0)
+            let minutes = abs(components.minute ?? 0)
+            
+            return String(format: "%02d ч %02d мин", hours, minutes)
+        }
+        return "не определено"
     }
-    
-    func configureMoonInfo() {
-        icon.image = UIImage(systemName: "moon.fill")
-        durationLabel.text = "11 ч 13 мин"
-        riseTimeLabel.text = "18:32"
-        setTimeLabel.text = "05:45"
+}
+
+extension SunAndMoonCollectionViewCell: Configurable {
+    func configure(with model: Astronomy, at index: Int, at section: Int? = nil, at row: Int?) {
+        guard let forecastSet = model.astronomyForecast,
+              let forecast = Array(forecastSet) as? [AstronomyForecast] else {
+            return
+        }
+        
+        let filteredForecast = Array(forecast.dropFirst())
+        
+        if index < filteredForecast.count {
+            if row == 0 {
+                icon.image = UIImage(systemName: "sun.max.fill")
+                
+                if let sunrise = filteredForecast[index].sunrise,
+                   let sunset = filteredForecast[index].sunset {
+                    riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil)
+                    setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil)
+                    durationLabel.text = calculateDuration(rise: sunrise, set: sunset)
+                }
+            } else if row == 1 {
+                icon.image = UIImage(systemName: "moon.fill")
+                
+                if let moonrise = filteredForecast[index].moonrise,
+                   let moonset = filteredForecast[index].moonset {
+                    riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonrise, dateFormat: "HH:mm", locale: nil)
+                    setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonset, dateFormat: "HH:mm", locale: nil)
+                    durationLabel.text = calculateDuration(rise: moonrise, set: moonset)
+                }
+            }
+        } else {
+            icon.image = UIImage(systemName: "moon.zzz")
+            riseTimeLabel.text = "?"
+            setTimeLabel.text = "?"
+            durationLabel.text = ""
+        }
     }
-    
 }
