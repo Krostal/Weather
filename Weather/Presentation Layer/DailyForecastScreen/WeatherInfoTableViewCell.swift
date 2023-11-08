@@ -119,7 +119,7 @@ extension WeatherInfoTableViewCell: Configurable {
         case 3:
             iconImage.image = UIImage(systemName: "sun.min")
             categorylabel.text = "УФ  индекс"
-            valueLabel.text = "\(forecast.ultravioletIndexClearSky) \(UVIndex(ultraVioletIndex: forecast.ultravioletIndexClearSky).rawValue)"
+            valueLabel.text = "\(forecast.ultravioletIndexClearSky), \(UVIndex(ultraVioletIndex: forecast.ultravioletIndexClearSky).rawValue)"
         case 4:
             iconImage.image = UIImage(named: "precipitation")
             categorylabel.text = "Атмосферные осадки"

@@ -4,7 +4,7 @@ import CoreData
 
 protocol MainViewDelegate: AnyObject {
     func showHourlyForecast(with selectedHour: Int?)
-    func showDailyForecast(forDate date: Date, dateIndex: Int)
+    func showDailyForecast(forDate date: Date, dateIndex: Int, astronomy: Astronomy?)
     
 }
 
@@ -143,7 +143,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return
             }
             let dateKey = dateKeys[indexPath.row]
-            delegate?.showDailyForecast(forDate: dateKey, dateIndex: indexPath.row)
+            delegate?.showDailyForecast(forDate: dateKey, dateIndex: indexPath.row, astronomy: astronomy)
         }
     }
     

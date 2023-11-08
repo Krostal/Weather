@@ -84,7 +84,7 @@ final class CoreDataService {
             let result = try setContext().fetch(request)
             
             if result.count <= 1 {
-                 return true
+                 return false
             }
 
             if let existingAstronomy = result.first,

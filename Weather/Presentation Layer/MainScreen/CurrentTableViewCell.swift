@@ -8,7 +8,7 @@ final class CurrentTableViewCell: UITableViewCell {
         static let horizontalPadding: CGFloat = 16.0
         static let verticalSpacing: CGFloat = 12.0
         static let halfCircleHorizontalPadding: CGFloat = 33.0
-        static let iconSize: CGFloat = 25.0
+        static let iconSize: CGFloat = 20.0
     }
     
     static let id = "CurrentTableViewCell"
@@ -39,6 +39,25 @@ final class CurrentTableViewCell: UITableViewCell {
         currentTemp.font = .systemFont(ofSize: 36, weight: .semibold)
         currentTemp.textColor = .white
         return currentTemp
+    }()
+    
+    private lazy var infoStackView: UIStackView = {
+        let infoStackView = UIStackView()
+        infoStackView.translatesAutoresizingMaskIntoConstraints = false
+        infoStackView.axis = .horizontal
+        infoStackView.spacing = 5
+        infoStackView.alignment = .center
+        infoStackView.distribution = .equalSpacing
+        infoStackView.addArrangedSubview(infoIcon)
+        infoStackView.addArrangedSubview(infoLabel)
+        return infoStackView
+    }()
+    
+    private lazy var infoIcon: UIImageView = {
+        let infoIcon = UIImageView()
+        infoIcon.image = UIImage()
+        infoIcon.translatesAutoresizingMaskIntoConstraints = false
+        return infoIcon
     }()
     
     private lazy var infoLabel: UILabel = {
@@ -74,7 +93,7 @@ final class CurrentTableViewCell: UITableViewCell {
     
     private lazy var precipitationIcon: UIImageView = {
         let precipitationIcon = UIImageView()
-        precipitationIcon.image = UIImage(named: "precipitation")
+        precipitationIcon.image = UIImage(named: "precipitationAmount")
         precipitationIcon.translatesAutoresizingMaskIntoConstraints = false
         precipitationIcon.tintColor = .black
         return precipitationIcon
@@ -100,7 +119,7 @@ final class CurrentTableViewCell: UITableViewCell {
     
     private lazy var windIcon: UIImageView = {
         let windIcon = UIImageView()
-        windIcon.image = UIImage(named: "wind")
+        windIcon.image = UIImage(named: "windSpeed")
         windIcon.translatesAutoresizingMaskIntoConstraints = false
         windIcon.tintColor = .white
         return windIcon
@@ -126,7 +145,7 @@ final class CurrentTableViewCell: UITableViewCell {
     
     private lazy var humidityIcon: UIImageView = {
         let humidityIcon = UIImageView()
-        humidityIcon.image = UIImage(named: "humidity")
+        humidityIcon.image = UIImage(named: "humidityPercent")
         humidityIcon.translatesAutoresizingMaskIntoConstraints = false
         return humidityIcon
     }()
@@ -194,7 +213,7 @@ final class CurrentTableViewCell: UITableViewCell {
         addSemicircle()
         containerView.addSubview(tempRangeLabel)
         containerView.addSubview(currentTemp)
-        containerView.addSubview(infoLabel)
+        containerView.addSubview(infoStackView)
         containerView.addSubview(currentWeatherStackView)
         containerView.addSubview(currentTimeLabel)
         containerView.addSubview(sunriseIcon)
@@ -217,13 +236,13 @@ final class CurrentTableViewCell: UITableViewCell {
             currentTemp.topAnchor.constraint(equalTo: tempRangeLabel.bottomAnchor, constant: 5),
             currentTemp.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             
-            infoLabel.topAnchor.constraint(equalTo: currentTemp.bottomAnchor, constant: 5),
-            infoLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            infoStackView.topAnchor.constraint(equalTo: currentTemp.bottomAnchor, constant: 5),
+            infoStackView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             
-            currentWeatherStackView.topAnchor.constraint(equalTo: infoLabel.bottomAnchor, constant: 8),
+            currentWeatherStackView.topAnchor.constraint(equalTo: infoStackView.bottomAnchor, constant: 8),
             currentWeatherStackView.heightAnchor.constraint(equalToConstant: 30),
-            currentWeatherStackView.leadingAnchor.constraint(lessThanOrEqualTo: leadingAnchor, constant: 78),
-            currentWeatherStackView.trailingAnchor.constraint(greaterThanOrEqualTo: trailingAnchor, constant: -78),
+            currentWeatherStackView.leadingAnchor.constraint(lessThanOrEqualTo: sunriseIcon.trailingAnchor, constant: 5),
+            currentWeatherStackView.trailingAnchor.constraint(greaterThanOrEqualTo: sunsetIcon.leadingAnchor, constant: -5),
             currentWeatherStackView.centerXAnchor.constraint(equalTo: centerXAnchor),
             
             currentTimeLabel.topAnchor.constraint(equalTo: currentWeatherStackView.bottomAnchor, constant: 10),
@@ -240,6 +259,9 @@ final class CurrentTableViewCell: UITableViewCell {
             
             sunsetTimeLabel.topAnchor.constraint(equalTo: sunsetIcon.bottomAnchor, constant: 1),
             sunsetTimeLabel.centerXAnchor.constraint(equalTo: sunsetIcon.centerXAnchor),
+            
+            infoIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            infoIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize),
             
             precipitationIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
             precipitationIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize),
@@ -327,7 +349,7 @@ extension CurrentTableViewCell: Configurable {
         }
         
         if let symbolCode = timePeriod.next1HoursForecast.symbolCode {
-            precipitationIcon.image = UIImage(named: symbolCode)
+            infoIcon.image = UIImage(named: symbolCode)
             let currentWeatherDescription = CurrentWeatherDescription(symbolCode: symbolCode)
             infoLabel.text = currentWeatherDescription?.description
         }
