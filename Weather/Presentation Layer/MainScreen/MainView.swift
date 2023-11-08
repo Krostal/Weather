@@ -4,7 +4,7 @@ import CoreData
 
 protocol MainViewDelegate: AnyObject {
     func showHourlyForecast(with selectedHour: Int?)
-    func showDailyForecast(forDate date: Date, dateIndex: Int)
+    func showDailyForecast(forDate date: Date, dateIndex: Int, astronomy: Astronomy?)
     
 }
 
@@ -20,6 +20,7 @@ final class MainView: UIView {
     
     private var numberOfDays: Int = 7
     private var isDailyToggleOn = false
+    private var settings = SettingsManager.shared.settings
 
     private var selectedDate: Date?
     
@@ -105,9 +106,9 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             guard let currentCell = tableView.dequeueReusableCell(withIdentifier: CurrentTableViewCell.id, for: indexPath) as? CurrentTableViewCell else {
                 return UITableViewCell()
             }
-            currentCell.configure(with: currentTimePeriod, at: indexPath.row)
+            currentCell.configure(with: currentTimePeriod, units: settings, at: indexPath.row)
             if let astronomyModel = astronomy {
-                currentCell.sunData(with: astronomyModel)
+                currentCell.sunData(with: astronomyModel, units: settings)
             }
             currentCell.selectionStyle = .none
             return currentCell
@@ -126,7 +127,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
             
             dailyCell.accessoryType = .disclosureIndicator
             
-            dailyCell.configure(with: dailyTimePeriod, at: indexPath.row)
+            dailyCell.configure(with: dailyTimePeriod, units: settings, at: indexPath.row)
             
             return dailyCell
         }
@@ -142,7 +143,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return
             }
             let dateKey = dateKeys[indexPath.row]
-            delegate?.showDailyForecast(forDate: dateKey, dateIndex: indexPath.row)
+            delegate?.showDailyForecast(forDate: dateKey, dateIndex: indexPath.row, astronomy: astronomy)
         }
     }
     

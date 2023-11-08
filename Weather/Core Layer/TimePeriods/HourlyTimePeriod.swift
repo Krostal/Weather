@@ -4,13 +4,15 @@ import Foundation
 
 struct HourlyTimePeriod {
     
-    let time: String
+    let time24Format: String
+    let time12Format: String
     let instantData: InstantData
     let next1HoursForecast: Next1HoursForecast
     let timeStringFullInUTC: String
     
     init() {
-        self.time = ""
+        self.time24Format = ""
+        self.time12Format = ""
         self.instantData = InstantData()
         self.next1HoursForecast = Next1HoursForecast()
         self.timeStringFullInUTC = ""
@@ -27,7 +29,8 @@ struct HourlyTimePeriod {
             return nil
         }
 
-        self.time = CustomDateFormatter().formattedDateToString(date: savedTime, dateFormat: "HH:mm", locale: nil)
+        self.time24Format = CustomDateFormatter().formattedDateToString(date: savedTime, dateFormat: "HH:mm", locale: nil)
+        self.time12Format = CustomDateFormatter().formattedDateToString(date: savedTime, dateFormat: "hha", locale: nil)
         self.instantData = currentData
         self.next1HoursForecast = next1Hoursforecast
         self.timeStringFullInUTC = time

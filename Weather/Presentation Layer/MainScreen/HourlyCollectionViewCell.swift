@@ -78,10 +78,24 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
 }
 
 extension HourlyCollectionViewCell: Configurable {
-    func configure(with timePeriod: HourlyTimePeriod, at index: Int, at part: Int? = nil, at row: Int? = nil) {
-        hourLabel.text = timePeriod.time
+    func configure(with timePeriod: HourlyTimePeriod, units: Settings, at index: Int, at part: Int? = nil, at row: Int? = nil) {
+        
+        switch units.temperatureUnit {
+        case .celsius:
+            tempLabel.text = UnitsFormatter.celsius.format(timePeriod.instantData.airTemperature)
+        case .fahrenheit:
+            tempLabel.text = UnitsFormatter.fahrenheit.format(timePeriod.instantData.airTemperature)
+        }
+        
+        switch units.timeFormat {
+        case .twelveHour:
+            hourLabel.text = timePeriod.time12Format
+        case .twentyFourHour:
+            hourLabel.text = timePeriod.time24Format
+        }
+        
         weatherIcon.image = UIImage(named: timePeriod.next1HoursForecast.symbolCode ?? "")
-        tempLabel.text = "\(timePeriod.instantData.airTemperature)°"
+    
     }
 }
 

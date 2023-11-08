@@ -12,6 +12,8 @@ final class DatesTableViewCell: UITableViewCell {
     
     weak var delegate: DatesTableViewCellDelegate?
     
+    private var settings = SettingsManager.shared.settings
+    
     var dailyTimePeriod: DailyTimePeriod?
     
     var selectedIndex: Int?
@@ -77,7 +79,7 @@ extension DatesTableViewCell: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         if let timePeriod = dailyTimePeriod {
-            cell.configure(with: timePeriod, at: indexPath.item)
+            cell.configure(with: timePeriod, units: settings, at: indexPath.item)
         }
         cell.contentView.backgroundColor = indexPath.item == selectedIndex ? .systemYellow : .systemBlue.withAlphaComponent(0.1)
         

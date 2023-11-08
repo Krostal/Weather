@@ -49,7 +49,7 @@ final class DatesCollectionViewCell: UICollectionViewCell {
 
 extension DatesCollectionViewCell: Configurable {
     
-    func configure(with timePeriod: DailyTimePeriod, at index: Int, at part: Int? = nil, at row: Int? = nil) {
+    func configure(with timePeriod: DailyTimePeriod, units: Settings, at index: Int, at part: Int? = nil, at row: Int? = nil) {
         let sortedDailyForecast = timePeriod.dailyForecast.sorted { $0.key < $1.key }
         let dateKeys = sortedDailyForecast.map { $0.key }
         if index >= dateKeys.count {

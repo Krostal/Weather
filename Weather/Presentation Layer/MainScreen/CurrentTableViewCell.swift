@@ -8,7 +8,7 @@ final class CurrentTableViewCell: UITableViewCell {
         static let horizontalPadding: CGFloat = 16.0
         static let verticalSpacing: CGFloat = 12.0
         static let halfCircleHorizontalPadding: CGFloat = 33.0
-        static let iconSize: CGFloat = 25.0
+        static let iconSize: CGFloat = 20.0
     }
     
     static let id = "CurrentTableViewCell"
@@ -39,6 +39,25 @@ final class CurrentTableViewCell: UITableViewCell {
         currentTemp.font = .systemFont(ofSize: 36, weight: .semibold)
         currentTemp.textColor = .white
         return currentTemp
+    }()
+    
+    private lazy var infoStackView: UIStackView = {
+        let infoStackView = UIStackView()
+        infoStackView.translatesAutoresizingMaskIntoConstraints = false
+        infoStackView.axis = .horizontal
+        infoStackView.spacing = 5
+        infoStackView.alignment = .center
+        infoStackView.distribution = .equalSpacing
+        infoStackView.addArrangedSubview(infoIcon)
+        infoStackView.addArrangedSubview(infoLabel)
+        return infoStackView
+    }()
+    
+    private lazy var infoIcon: UIImageView = {
+        let infoIcon = UIImageView()
+        infoIcon.image = UIImage()
+        infoIcon.translatesAutoresizingMaskIntoConstraints = false
+        return infoIcon
     }()
     
     private lazy var infoLabel: UILabel = {
@@ -74,7 +93,7 @@ final class CurrentTableViewCell: UITableViewCell {
     
     private lazy var precipitationIcon: UIImageView = {
         let precipitationIcon = UIImageView()
-        precipitationIcon.image = UIImage(named: "precipitation")
+        precipitationIcon.image = UIImage(named: "precipitationAmount")
         precipitationIcon.translatesAutoresizingMaskIntoConstraints = false
         precipitationIcon.tintColor = .black
         return precipitationIcon
@@ -100,7 +119,7 @@ final class CurrentTableViewCell: UITableViewCell {
     
     private lazy var windIcon: UIImageView = {
         let windIcon = UIImageView()
-        windIcon.image = UIImage(named: "wind")
+        windIcon.image = UIImage(named: "windSpeed")
         windIcon.translatesAutoresizingMaskIntoConstraints = false
         windIcon.tintColor = .white
         return windIcon
@@ -126,7 +145,7 @@ final class CurrentTableViewCell: UITableViewCell {
     
     private lazy var humidityIcon: UIImageView = {
         let humidityIcon = UIImageView()
-        humidityIcon.image = UIImage(named: "humidity")
+        humidityIcon.image = UIImage(named: "humidityPercent")
         humidityIcon.translatesAutoresizingMaskIntoConstraints = false
         return humidityIcon
     }()
@@ -144,7 +163,6 @@ final class CurrentTableViewCell: UITableViewCell {
         currentTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         currentTimeLabel.font = .systemFont(ofSize: 16, weight: .regular)
         currentTimeLabel.textColor = .systemYellow
-        currentTimeLabel.text = dateFormatter.formattedCurrentDate(dateFormat: "HH:mm, E d MMMM", locale: Locale(identifier: "ru_RU"), timeZone: nil)
         return currentTimeLabel
     }()
     
@@ -195,7 +213,7 @@ final class CurrentTableViewCell: UITableViewCell {
         addSemicircle()
         containerView.addSubview(tempRangeLabel)
         containerView.addSubview(currentTemp)
-        containerView.addSubview(infoLabel)
+        containerView.addSubview(infoStackView)
         containerView.addSubview(currentWeatherStackView)
         containerView.addSubview(currentTimeLabel)
         containerView.addSubview(sunriseIcon)
@@ -218,13 +236,13 @@ final class CurrentTableViewCell: UITableViewCell {
             currentTemp.topAnchor.constraint(equalTo: tempRangeLabel.bottomAnchor, constant: 5),
             currentTemp.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             
-            infoLabel.topAnchor.constraint(equalTo: currentTemp.bottomAnchor, constant: 5),
-            infoLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            infoStackView.topAnchor.constraint(equalTo: currentTemp.bottomAnchor, constant: 5),
+            infoStackView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             
-            currentWeatherStackView.topAnchor.constraint(equalTo: infoLabel.bottomAnchor, constant: 8),
+            currentWeatherStackView.topAnchor.constraint(equalTo: infoStackView.bottomAnchor, constant: 8),
             currentWeatherStackView.heightAnchor.constraint(equalToConstant: 30),
-            currentWeatherStackView.leadingAnchor.constraint(lessThanOrEqualTo: leadingAnchor, constant: 78),
-            currentWeatherStackView.trailingAnchor.constraint(greaterThanOrEqualTo: trailingAnchor, constant: -78),
+            currentWeatherStackView.leadingAnchor.constraint(lessThanOrEqualTo: sunriseIcon.trailingAnchor, constant: 5),
+            currentWeatherStackView.trailingAnchor.constraint(greaterThanOrEqualTo: sunsetIcon.leadingAnchor, constant: -5),
             currentWeatherStackView.centerXAnchor.constraint(equalTo: centerXAnchor),
             
             currentTimeLabel.topAnchor.constraint(equalTo: currentWeatherStackView.bottomAnchor, constant: 10),
@@ -241,6 +259,9 @@ final class CurrentTableViewCell: UITableViewCell {
             
             sunsetTimeLabel.topAnchor.constraint(equalTo: sunsetIcon.bottomAnchor, constant: 1),
             sunsetTimeLabel.centerXAnchor.constraint(equalTo: sunsetIcon.centerXAnchor),
+            
+            infoIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
+            infoIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize),
             
             precipitationIcon.widthAnchor.constraint(equalToConstant: Constants.iconSize),
             precipitationIcon.heightAnchor.constraint(equalToConstant: Constants.iconSize),
@@ -274,31 +295,65 @@ final class CurrentTableViewCell: UITableViewCell {
         containerView.layer.addSublayer(semicircleLine)
     }
     
-    func sunData(with model: Astronomy) {
+    func sunData(with model: Astronomy, units: Settings) {
         guard let forecastSet = model.astronomyForecast,
               let forecast = Array(forecastSet) as? [AstronomyForecast] else {
             return
         }
         if let sunrise = forecast.first?.sunrise,
            let sunset = forecast.first?.sunset {
-            sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil)
-            sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil)
+            
+            switch units.timeFormat {
+            case .twelveHour:
+                sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "hh:mm", locale: nil)
+                sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "hh:mm", locale: nil)
+            case .twentyFourHour:
+                sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil)
+                sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil)
+            }
         }
     }
 }
 
 extension CurrentTableViewCell: Configurable {
-    func configure(with timePeriod: CurrentTimePeriod, at index: Int, at part: Int? = nil, at row: Int? = nil) {
+    func configure(with timePeriod: CurrentTimePeriod, units: Settings, at index: Int, at part: Int? = nil, at row: Int? = nil) {
         
-        tempRangeLabel.text = "\(timePeriod.next6HoursForecast.airTemperatureMin)° / \(timePeriod.next6HoursForecast.airTemperatureMax)°"
-        currentTemp.text = "\(timePeriod.instantData.airTemperature)°"
+        switch units.temperatureUnit {
+        case .celsius:
+            tempRangeLabel.text = "\(UnitsFormatter.celsius.format(timePeriod.next6HoursForecast.airTemperatureMin)) / \(UnitsFormatter.celsius.format(timePeriod.next6HoursForecast.airTemperatureMax))"
+            currentTemp.text = UnitsFormatter.celsius.format(timePeriod.instantData.airTemperature)
+        case .fahrenheit:
+            tempRangeLabel.text = "\(UnitsFormatter.fahrenheit.format(timePeriod.next6HoursForecast.airTemperatureMin)) / \(UnitsFormatter.fahrenheit.format(timePeriod.next6HoursForecast.airTemperatureMax))"
+            currentTemp.text = UnitsFormatter.fahrenheit.format(timePeriod.instantData.airTemperature)
+        }
+        
+        switch units.windSpeedUnit {
+        case .metersPerSecond:
+            windSpeedLabel.text = UnitsFormatter.metersPerSecond.format(timePeriod.instantData.windSpeed)
+        case .milesPerHour:
+            windSpeedLabel.text = UnitsFormatter.milesPerHour.format(timePeriod.instantData.windSpeed)
+        }
+        
+        switch units.timeFormat {
+        case .twelveHour:
+            currentTimeLabel.text = dateFormatter.formattedCurrentDate(dateFormat: "hh:mm, E d MMMM", locale: Locale(identifier: "ru_RU"), timeZone: nil)
+        case .twentyFourHour:
+            currentTimeLabel.text = dateFormatter.formattedCurrentDate(dateFormat: "HH:mm, E d MMMM", locale: Locale(identifier: "ru_RU"), timeZone: nil)
+        }
+        
+        switch units.precipitationUnit {
+        case .inches:
+            precipitationAmountLabel.text = UnitsFormatter.inches.format(timePeriod.next1HoursForecast.precipitationAmount)
+        case .millimeters:
+            precipitationAmountLabel.text = UnitsFormatter.millimeters.format(timePeriod.next1HoursForecast.precipitationAmount)
+        }
+        
         if let symbolCode = timePeriod.next1HoursForecast.symbolCode {
-            precipitationIcon.image = UIImage(named: symbolCode)
+            infoIcon.image = UIImage(named: symbolCode)
             let currentWeatherDescription = CurrentWeatherDescription(symbolCode: symbolCode)
             infoLabel.text = currentWeatherDescription?.description
         }
-        precipitationAmountLabel.text = "\(timePeriod.next1HoursForecast.precipitationAmount) мм"
-        windSpeedLabel.text = "\(timePeriod.instantData.windSpeed) м/с"
+        
         humidityLabel.text = "\(timePeriod.instantData.relativeHumidity)%"
     }
 }

@@ -40,11 +40,20 @@ final class TemperatureСhartTableViewCell: UITableViewCell {
         ])
     }
     
-    func setupChartData(timePeriod: [ThreeHoursForecast]) {
+    func setupChartData(timePeriod: [ThreeHoursForecast], units: Settings) {
         timePeriod.forEach {
-            let time = $0.time
             let index = Double($0.index)
-            let temperature = Double($0.instantData.airTemperature)
+            let time = $0.time
+            
+            var temperature: Double = 0
+            
+            switch units.temperatureUnit {
+            case .celsius:
+                temperature = Double($0.instantData.airTemperature)
+            case .fahrenheit:
+                temperature = Double($0.instantData.airTemperature * 9/5 + 32)
+            }
+            
             guard let hour = Double(time) else { return }
             
             let chartWeatherData = ChartDataEntry(x: index, y: temperature)

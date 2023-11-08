@@ -15,6 +15,8 @@ final class HourlyTableViewCell: UITableViewCell {
     var weather: Weather?
     var hourlyTimePeriod: HourlyTimePeriod?
     
+    private var settings = SettingsManager.shared.settings
+    
     lazy var collectionView: UICollectionView = {
         let viewLayout = UICollectionViewFlowLayout()
         viewLayout.scrollDirection = .horizontal
@@ -73,7 +75,7 @@ extension HourlyTableViewCell: UICollectionViewDataSource {
         if let model = weather {
             hourlyTimePeriod = HourlyTimePeriod(model: model, index: indexPath.item)
             if let timePeriod = hourlyTimePeriod {
-                cell.configure(with: timePeriod, at: indexPath.item)
+                cell.configure(with: timePeriod, units: settings, at: indexPath.item)
                 
                 let isCurrentTimeCell = isCellRepresentingCurrentTime(timePeriod)
                 cell.contentView.backgroundColor = isCurrentTimeCell ? .systemBlue.withAlphaComponent(0.1) : .clear
@@ -110,7 +112,7 @@ extension HourlyTableViewCell: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        if let cell = collectionView.cellForItem(at: indexPath) as? HourlyCollectionViewCell {
+        if collectionView.cellForItem(at: indexPath) is HourlyCollectionViewCell {
             delegate?.showSelectedHourForecast(at: indexPath.item)
         }
     }

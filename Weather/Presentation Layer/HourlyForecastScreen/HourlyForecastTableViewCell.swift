@@ -374,14 +374,39 @@ final class HourlyForecastTableViewCell: UITableViewCell {
 }
 
 extension HourlyForecastTableViewCell: Configurable {
-    func configure(with timePeriod: HourlyTimePeriod, at index: Int, at part: Int? = nil, at row: Int? = nil) {
+    func configure(with timePeriod: HourlyTimePeriod, units: Settings, at index: Int, at part: Int? = nil, at row: Int? = nil) {
+        
+        switch units.temperatureUnit {
+        case .celsius:
+            temperatureLabel.text = UnitsFormatter.celsius.format(timePeriod.instantData.airTemperature)
+        case .fahrenheit:
+            temperatureLabel.text = UnitsFormatter.fahrenheit.format(timePeriod.instantData.airTemperature)
+        }
+        
+        switch units.windSpeedUnit {
+        case .metersPerSecond:
+            windSpeedLabel.text = "\(UnitsFormatter.metersPerSecond.format(timePeriod.instantData.windSpeed)), \(WindDirection(degrees: timePeriod.instantData.windFromDirection).rawValue)"
+        case .milesPerHour:
+            windSpeedLabel.text = "\(UnitsFormatter.milesPerHour.format(timePeriod.instantData.windSpeed)), \(WindDirection(degrees: timePeriod.instantData.windFromDirection).rawValue)"
+        }
+        
+        switch units.timeFormat {
+        case .twelveHour:
+            timeLabel.text = timePeriod.time12Format
+        case .twentyFourHour:
+            timeLabel.text = timePeriod.time24Format
+        }
+        
+        switch units.precipitationUnit {
+        case .inches:
+            precipitationAmountLabel.text = UnitsFormatter.inches.format(timePeriod.next1HoursForecast.precipitationAmount)
+        case .millimeters:
+            precipitationAmountLabel.text = UnitsFormatter.millimeters.format(timePeriod.next1HoursForecast.precipitationAmount)
+        }
+        
         dateLabel.text = CustomDateFormatter().formattedStringToString(date: timePeriod.timeStringFullInUTC, dateFormat: "EEEE, d MMMM yyyy", locale: Locale(identifier: "ru_RU"))
-        timeLabel.text = timePeriod.time
-        temperatureLabel.text = "\(timePeriod.instantData.airTemperature)°"
         weatherIcon.image = UIImage(named: timePeriod.next1HoursForecast.symbolCode ?? "xmark.icloud")
         weatherLabel.text = CurrentWeatherDescription(symbolCode: timePeriod.next1HoursForecast.symbolCode ?? "cloud")?.description
-        windSpeedLabel.text = "\(timePeriod.instantData.windSpeed) м/с, \(WindDirection(degrees: timePeriod.instantData.windFromDirection).rawValue)"
-        precipitationAmountLabel.text = "\(timePeriod.next1HoursForecast.precipitationAmount) мм"
         relativeHumidityLabel.text = "\(timePeriod.instantData.relativeHumidity)%"
         cloudyAmountLabel.text = "\(timePeriod.instantData.cloudAreaFraction)%"
     }

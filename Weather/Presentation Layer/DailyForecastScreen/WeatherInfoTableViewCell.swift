@@ -83,7 +83,7 @@ final class WeatherInfoTableViewCell: UITableViewCell {
     
 extension WeatherInfoTableViewCell: Configurable {
     
-    func configure(with timePeriod: DailyTimePeriod, at index: Int, at section: Int?, at row: Int?) {
+    func configure(with timePeriod: DailyTimePeriod, units: Settings, at index: Int, at section: Int?, at row: Int?) {
         
         let sortedDailyForecast = timePeriod.dailyForecast.sorted { $0.key < $1.key }
         
@@ -110,15 +110,26 @@ extension WeatherInfoTableViewCell: Configurable {
         case 2:
             iconImage.image = UIImage(named: "wind")
             categorylabel.text = "Ветер"
-            valueLabel.text = "\(forecast.windSpeed) м/с, \(WindDirection(degrees: forecast.windFromDirection).rawValue)"
+            switch units.windSpeedUnit {
+            case .metersPerSecond:
+                valueLabel.text = "\(UnitsFormatter.metersPerSecond.format(forecast.windSpeed)), \(WindDirection(degrees: forecast.windFromDirection).rawValue)"
+            case .milesPerHour:
+                valueLabel.text = "\(UnitsFormatter.milesPerHour.format(forecast.windSpeed)), \(WindDirection(degrees: forecast.windFromDirection).rawValue)"
+            }
         case 3:
             iconImage.image = UIImage(systemName: "sun.min")
             categorylabel.text = "УФ  индекс"
-            valueLabel.text = "\(forecast.ultravioletIndexClearSky) \(UVIndex(ultraVioletIndex: forecast.ultravioletIndexClearSky).rawValue)"
+            valueLabel.text = "\(forecast.ultravioletIndexClearSky), \(UVIndex(ultraVioletIndex: forecast.ultravioletIndexClearSky).rawValue)"
         case 4:
             iconImage.image = UIImage(named: "precipitation")
             categorylabel.text = "Атмосферные осадки"
-            valueLabel.text = "\(forecastNext6Hour.precipitationAmount) мм"
+            
+            switch units.precipitationUnit {
+            case .inches:
+                valueLabel.text = UnitsFormatter.inches.format(forecastNext6Hour.precipitationAmount)
+            case .millimeters:
+                valueLabel.text = UnitsFormatter.millimeters.format(forecastNext6Hour.precipitationAmount)
+            }
         case 5:
             iconImage.image = UIImage(named: "clouds")
             categorylabel.text = "Облачность"

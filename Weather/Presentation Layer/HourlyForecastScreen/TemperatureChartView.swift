@@ -8,6 +8,8 @@ final class TemperatureChartView: UIView {
     var weather: Weather?
     private var threeHoursForecast: [ThreeHoursForecast]?
     
+    private var settings = SettingsManager.shared.settings
+    
     private enum Constants {
         static let spacing: CGFloat = 5
     }
@@ -197,7 +199,7 @@ extension TemperatureChartView: UICollectionViewDataSource {
             threeHoursForecast = HourlyTimePeriod.createForEveryThirdIndex(from: model)
             if let threeHoursTimePeriod = threeHoursForecast {
                let forecast = threeHoursTimePeriod[indexPath.row]
-                cell.configure(with: forecast, at: indexPath.row)
+                cell.configure(with: forecast, units: settings, at: indexPath.row)
             }
         }
 
@@ -223,11 +225,12 @@ extension TemperatureChartView: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return 0
     }
-    
 }
 
 class CustomXAxisValueFormatter: DGCharts.AxisValueFormatter {
     let hours: [Double]
+    
+    let settings = SettingsManager.shared.settings
 
     init(hours: [Double]) {
         self.hours = hours
@@ -237,7 +240,16 @@ class CustomXAxisValueFormatter: DGCharts.AxisValueFormatter {
         let index = Int(value)/3
         if index >= 0 && index < hours.count {
             let hour = Int(hours[index])
-            return " \(hour):00"
+            switch settings.timeFormat {
+            case .twelveHour:
+                if hour - 12 >= 0 {
+                    return " \(hour-12) PM"
+                } else {
+                    return " \(hour) AM"
+                }
+            case .twentyFourHour:
+                return " \(hour):00"
+            }
         } else {
             return ""
         }
@@ -247,6 +259,11 @@ class CustomXAxisValueFormatter: DGCharts.AxisValueFormatter {
 extension TemperatureChartView: ValueFormatter {
     func stringForValue(_ value: Double, entry: ChartDataEntry, dataSetIndex: Int, viewPortHandler: ViewPortHandler?) -> String {
         let roundedValue = String(format: "%.1f", value)
-        return "\(roundedValue)°"
+        switch settings.temperatureUnit {
+        case .celsius:
+            return "\(roundedValue)°"
+        case .fahrenheit:
+            return "\(roundedValue)F"
+        }
     }
 }

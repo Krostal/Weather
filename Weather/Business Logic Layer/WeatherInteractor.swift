@@ -6,7 +6,7 @@ protocol WeatherInteractorProtocol {
     func getWeatherFromCoreData(withPredicate predicate: NSPredicate?, completion: @escaping ([Weather]) -> Void)
     func fetchAirQualityFromNetwork(completion: @escaping (Result<AirQualityJsonModel, Error>) -> Void)
     func getAirQualityFromCoreData(completion: @escaping ([AirQuality]) -> Void)
-    func fetchAstronomyFromNetwork(completion: @escaping (Result<AstronomyJsonModel, Error>) -> Void)
+    func fetchAstronomyFromNetwork(completion: @escaping (Result<Void, Error>) -> Void)
     func getAstronomyFromCoreData(withPredicate predicate: NSPredicate?, completion: @escaping ([Astronomy]) -> Void)
     func checkPermission(completion: @escaping (Bool) -> Void)
     func isDetermined() -> Bool
@@ -83,7 +83,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         }
     }
     
-    func fetchAstronomyFromNetwork(completion: @escaping (Result<AstronomyJsonModel, Error>) -> Void) {
+    func fetchAstronomyFromNetwork(completion: @escaping (Result<Void, Error>) -> Void) {
         
         guard let coordinates = locationService.currentCoordinates else {
             return
@@ -93,8 +93,8 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         guard let location = locationName else { return }
         
         if coreDataService.isAstronomyDataAlreadyExist(start: currentDate, locationName: location) {
-            print("Astronomy data with matching start date already exists and no new data request required")
-            return
+            print("Текущая модель Astronomy актуальна и не требует обновления")
+            completion(.success(Void()))
         } else {
             self.fetchDataService.fetchAstronomyData(coordinates: (coordinates.latitude, coordinates.longitude)) { result in
                 switch result {
@@ -102,7 +102,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                     self.saveAstronomyToCoreData(astronomyJsonModel) { result in
                         switch result {
                         case .success:
-                            completion(.success(astronomyJsonModel))
+                            completion(.success(Void()))
                         case .failure(let error):
                             print("Error saving data to Core Data: \(error.localizedDescription)")
                             completion(.failure(error))
@@ -176,7 +176,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         
         if let location = locationName {
             if coreDataService.isWeatherAlreadyExist(updatedAt: updatedAt, locationName: location) {
-                print("Weather with matching updatedAt already exists")
+                print("Текущая модель Weather актуальна и не требует обновления")
                 completion(.success(()))
                 return
             }
@@ -306,7 +306,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         
         do {
             try self.context.save()
-            print("Weather data saved to Core Data successfully.")
+            print("Полученная модель Weather успешно сохранена в Core Data")
             completion(.success(()))
         } catch {
             completion(.failure(error))
@@ -338,7 +338,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         
         do {
             try self.context.save()
-            print("Air quality data saved to Core Data successfully.")
+            print("Полученная модель AirQuality успешно сохранена в Core Data")
             completion(.success(()))
         } catch {
             completion(.failure(error))
@@ -351,7 +351,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         
         if let location = locationName {
             if coreDataService.isAstronomyDataAlreadyExist(start: start, locationName: location) {
-                print("Astronomy data with matching start date already exists")
+                print("Текущая модель Astronomy актуальна и не требует обновления")
                 completion(.success(()))
                 return
             }
@@ -375,7 +375,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         
         do {
             try self.context.save()
-            print("Astronomy data saved to Core Data successfully.")
+            print("Полученная модель Astronomy успешно сохранена в Core Data")
             completion(.success(()))
         } catch {
             completion(.failure(error))

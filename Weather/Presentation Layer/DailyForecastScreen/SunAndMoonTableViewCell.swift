@@ -7,6 +7,8 @@ final class SunAndMoonTableViewCell: UITableViewCell {
     var dateIndex: Int?
     var astronomy: Astronomy?
     
+    private var settings = SettingsManager.shared.settings
+    
     static let id = "SunAndMoonTableViewCell"
     
     private enum Constants {
@@ -130,7 +132,7 @@ extension SunAndMoonTableViewCell: UICollectionViewDataSource {
         }
         if let astronomyModel = astronomy,
         let index = dateIndex {
-            cell.configure(with: astronomyModel, at: index, at: nil, at: indexPath.item)
+            cell.configure(with: astronomyModel, units: settings, at: index, at: nil, at: indexPath.item)
         }
         return cell
     }
@@ -161,7 +163,7 @@ extension SunAndMoonTableViewCell: UICollectionViewDelegateFlowLayout {
 }
 
 extension SunAndMoonTableViewCell: Configurable {
-    func configure(with model: Astronomy, at index: Int, at section: Int? = nil, at row: Int? = nil) {
+    func configure(with model: Astronomy, units: Settings, at index: Int, at section: Int? = nil, at row: Int? = nil) {
         guard let forecastSet = model.astronomyForecast,
               let forecast = Array(forecastSet) as? [AstronomyForecast] else {
             return

@@ -2,6 +2,10 @@
 
 import UIKit
 
+protocol SettingsViewDelegate: AnyObject {
+    func setUnits(temperatureUnit: String, windSpeedUnit: String, timeFormat: String, precipitationUnit: String)
+}
+
 final class SettingsView: UIView {
     
     private enum Constants {
@@ -9,6 +13,15 @@ final class SettingsView: UIView {
         static let verticalSpacing: CGFloat = 25
         static let stackViewWidth: CGFloat = 80
     }
+    
+    weak var delegate: SettingsViewDelegate?
+    
+    var settings = SettingsManager.shared.settings
+    
+    var selectedTemperatureUnit: String = "°"
+    var selectedWindSpeedUnit: String = "м/с"
+    var selectedTimeFormat: String = "24"
+    var selectedPrecipitationUnit: String = "мм"
     
     private lazy var cloud1View: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "cloud1"))
@@ -76,18 +89,24 @@ final class SettingsView: UIView {
         celsiusLabel.backgroundColor = .systemBlue
         celsiusLabel.textAlignment = .center
         celsiusLabel.text = "C°"
+        celsiusLabel.isUserInteractionEnabled = true
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(celsiusLabelTapped))
+        celsiusLabel.addGestureRecognizer(tapGestureRecognizer)
         return celsiusLabel
     }()
     
     private lazy var fahrenheitLabel: UILabel = {
-        let celsiusLabel = UILabel()
-        celsiusLabel.translatesAutoresizingMaskIntoConstraints = false
-        celsiusLabel.font = .systemFont(ofSize: 16, weight: .regular)
-        celsiusLabel.textColor = .black
-        celsiusLabel.backgroundColor = .white
-        celsiusLabel.textAlignment = .center
-        celsiusLabel.text = "F"
-        return celsiusLabel
+        let fahrenheitLabel = UILabel()
+        fahrenheitLabel.translatesAutoresizingMaskIntoConstraints = false
+        fahrenheitLabel.font = .systemFont(ofSize: 16, weight: .regular)
+        fahrenheitLabel.textColor = .black
+        fahrenheitLabel.backgroundColor = .white
+        fahrenheitLabel.textAlignment = .center
+        fahrenheitLabel.text = "F"
+        fahrenheitLabel.isUserInteractionEnabled = true
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(fahrenheitLabelTapped))
+        fahrenheitLabel.addGestureRecognizer(tapGestureRecognizer)
+        return fahrenheitLabel
     }()
     
     private lazy var windSpeedLabel: UILabel = {
@@ -107,7 +126,7 @@ final class SettingsView: UIView {
         windSpeedStackView.layer.cornerRadius = 5
         windSpeedStackView.clipsToBounds = true
         windSpeedStackView.addArrangedSubview(milesLabel)
-        windSpeedStackView.addArrangedSubview(kmLabel)
+        windSpeedStackView.addArrangedSubview(metersLabel)
         return windSpeedStackView
     }()
     
@@ -119,18 +138,24 @@ final class SettingsView: UIView {
         milesLabel.backgroundColor = .systemBlue
         milesLabel.textAlignment = .center
         milesLabel.text = "Mi"
+        milesLabel.isUserInteractionEnabled = true
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(milesLabelTapped))
+        milesLabel.addGestureRecognizer(tapGestureRecognizer)
         return milesLabel
     }()
     
-    private lazy var kmLabel: UILabel = {
-        let kmLabel = UILabel()
-        kmLabel.translatesAutoresizingMaskIntoConstraints = false
-        kmLabel.font = .systemFont(ofSize: 16, weight: .regular)
-        kmLabel.textColor = .black
-        kmLabel.backgroundColor = .white
-        kmLabel.textAlignment = .center
-        kmLabel.text = "Km"
-        return kmLabel
+    private lazy var metersLabel: UILabel = {
+        let metresLabel = UILabel()
+        metresLabel.translatesAutoresizingMaskIntoConstraints = false
+        metresLabel.font = .systemFont(ofSize: 16, weight: .regular)
+        metresLabel.textColor = .black
+        metresLabel.backgroundColor = .white
+        metresLabel.textAlignment = .center
+        metresLabel.text = "m"
+        metresLabel.isUserInteractionEnabled = true
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(metersLabelTapped))
+        metresLabel.addGestureRecognizer(tapGestureRecognizer)
+        return metresLabel
     }()
     
     private lazy var timeFormatLabel: UILabel = {
@@ -162,6 +187,9 @@ final class SettingsView: UIView {
         twelveLabel.backgroundColor = .systemBlue
         twelveLabel.textAlignment = .center
         twelveLabel.text = "12"
+        twelveLabel.isUserInteractionEnabled = true
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(twelveLabelTapped))
+        twelveLabel.addGestureRecognizer(tapGestureRecognizer)
         return twelveLabel
     }()
     
@@ -173,6 +201,9 @@ final class SettingsView: UIView {
         twentyFourLabel.backgroundColor = .white
         twentyFourLabel.textAlignment = .center
         twentyFourLabel.text = "24"
+        twentyFourLabel.isUserInteractionEnabled = true
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(twentyFourLabelTapped))
+        twentyFourLabel.addGestureRecognizer(tapGestureRecognizer)
         return twentyFourLabel
     }()
     
@@ -181,42 +212,48 @@ final class SettingsView: UIView {
         notificationLabel.translatesAutoresizingMaskIntoConstraints = false
         notificationLabel.font = .systemFont(ofSize: 16, weight: .regular)
         notificationLabel.textColor = .systemGray
-        notificationLabel.text = "Уведомления"
+        notificationLabel.text = "Количество осадков"
         return notificationLabel
     }()
     
-    private lazy var notificationStackView: UIStackView = {
-        let notificationStackView = UIStackView()
-        notificationStackView.translatesAutoresizingMaskIntoConstraints = false
-        notificationStackView.axis = .horizontal
-        notificationStackView.spacing = 0
-        notificationStackView.layer.cornerRadius = 5
-        notificationStackView.clipsToBounds = true
-        notificationStackView.addArrangedSubview(onLabel)
-        notificationStackView.addArrangedSubview(offLabel)
-        return notificationStackView
+    private lazy var precipitationStackView: UIStackView = {
+        let precipitationStackView = UIStackView()
+        precipitationStackView.translatesAutoresizingMaskIntoConstraints = false
+        precipitationStackView.axis = .horizontal
+        precipitationStackView.spacing = 0
+        precipitationStackView.layer.cornerRadius = 5
+        precipitationStackView.clipsToBounds = true
+        precipitationStackView.addArrangedSubview(inchLabel)
+        precipitationStackView.addArrangedSubview(mmLabel)
+        return precipitationStackView
     }()
     
-    private lazy var onLabel: UILabel = {
-        let onLabel = UILabel()
-        onLabel.translatesAutoresizingMaskIntoConstraints = false
-        onLabel.font = .systemFont(ofSize: 16, weight: .regular)
-        onLabel.textColor = .white
-        onLabel.backgroundColor = .systemBlue
-        onLabel.textAlignment = .center
-        onLabel.text = "On"
-        return onLabel
+    private lazy var inchLabel: UILabel = {
+        let inchLabel = UILabel()
+        inchLabel.translatesAutoresizingMaskIntoConstraints = false
+        inchLabel.font = .systemFont(ofSize: 16, weight: .regular)
+        inchLabel.textColor = .white
+        inchLabel.backgroundColor = .systemBlue
+        inchLabel.textAlignment = .center
+        inchLabel.text = "in"
+        inchLabel.isUserInteractionEnabled = true
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(inchLabelTapped))
+        inchLabel.addGestureRecognizer(tapGestureRecognizer)
+        return inchLabel
     }()
     
-    private lazy var offLabel: UILabel = {
-        let offLabel = UILabel()
-        offLabel.translatesAutoresizingMaskIntoConstraints = false
-        offLabel.font = .systemFont(ofSize: 16, weight: .regular)
-        offLabel.textColor = .black
-        offLabel.backgroundColor = .white
-        offLabel.textAlignment = .center
-        offLabel.text = "Off"
-        return offLabel
+    private lazy var mmLabel: UILabel = {
+        let mmLabel = UILabel()
+        mmLabel.translatesAutoresizingMaskIntoConstraints = false
+        mmLabel.font = .systemFont(ofSize: 16, weight: .regular)
+        mmLabel.textColor = .black
+        mmLabel.backgroundColor = .white
+        mmLabel.textAlignment = .center
+        mmLabel.text = "mm"
+        mmLabel.isUserInteractionEnabled = true
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(mmLabelTapped))
+        mmLabel.addGestureRecognizer(tapGestureRecognizer)
+        return mmLabel
     }()
     
     private lazy var setButton: UIButton = {
@@ -245,6 +282,28 @@ final class SettingsView: UIView {
     
     private func setupView() {
         backgroundColor = .systemBlue
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            celsiusLabel.textColor = settings.temperatureUnit == .celsius ? .white : .black
+            celsiusLabel.backgroundColor = settings.temperatureUnit == .celsius ? .systemBlue : .white
+            fahrenheitLabel.textColor = settings.temperatureUnit == .fahrenheit ? .white : .black
+            fahrenheitLabel.backgroundColor = settings.temperatureUnit == .fahrenheit ? .systemBlue : .white
+            
+            metersLabel.textColor = settings.windSpeedUnit == .metersPerSecond ? .white : .black
+            metersLabel.backgroundColor = settings.windSpeedUnit == .metersPerSecond ? .systemBlue : .white
+            milesLabel.textColor = settings.windSpeedUnit == .milesPerHour ? .white : .black
+            milesLabel.backgroundColor = settings.windSpeedUnit == .milesPerHour ? .systemBlue : .white
+            
+            twelveLabel.textColor = settings.timeFormat == .twelveHour ? .white : .black
+            twelveLabel.backgroundColor = settings.timeFormat == .twelveHour ? .systemBlue : .white
+            twentyFourLabel.textColor = settings.timeFormat == .twentyFourHour ? .white : .black
+            twentyFourLabel.backgroundColor = settings.timeFormat == .twentyFourHour ? .systemBlue : .white
+            
+            inchLabel.textColor = settings.precipitationUnit == .inches ? .white : .black
+            inchLabel.backgroundColor = settings.precipitationUnit == .inches ? .systemBlue : .white
+            mmLabel.textColor = settings.precipitationUnit == .millimeters ? .white : .black
+            mmLabel.backgroundColor = settings.precipitationUnit == .millimeters ? .systemBlue : .white
+        }
     }
     
     private func addSubviews() {
@@ -260,7 +319,7 @@ final class SettingsView: UIView {
         settingsView.addSubview(timeFormatLabel)
         settingsView.addSubview(timeFormatStackView)
         settingsView.addSubview(notificationLabel)
-        settingsView.addSubview(notificationStackView)
+        settingsView.addSubview(precipitationStackView)
         settingsView.addSubview(setButton)
     }
     
@@ -302,7 +361,7 @@ final class SettingsView: UIView {
             windSpeedStackView.trailingAnchor.constraint(equalTo: settingsView.trailingAnchor, constant: -Constants.horizontalSpacing),
             windSpeedStackView.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth),
             milesLabel.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth / 2),
-            kmLabel.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth / 2),
+            metersLabel.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth / 2),
             
             timeFormatLabel.topAnchor.constraint(equalTo: windSpeedLabel.bottomAnchor, constant: Constants.verticalSpacing),
             timeFormatLabel.leadingAnchor.constraint(equalTo: settingsView.leadingAnchor, constant: Constants.horizontalSpacing),
@@ -316,11 +375,11 @@ final class SettingsView: UIView {
             notificationLabel.topAnchor.constraint(equalTo: timeFormatLabel.bottomAnchor, constant: Constants.verticalSpacing),
             notificationLabel.leadingAnchor.constraint(equalTo: settingsView.leadingAnchor, constant: Constants.horizontalSpacing),
             
-            notificationStackView.centerYAnchor.constraint(equalTo: notificationLabel.centerYAnchor),
-            notificationStackView.trailingAnchor.constraint(equalTo: settingsView.trailingAnchor, constant: -Constants.horizontalSpacing),
-            notificationStackView.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth),
-            onLabel.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth / 2),
-            offLabel.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth / 2),
+            precipitationStackView.centerYAnchor.constraint(equalTo: notificationLabel.centerYAnchor),
+            precipitationStackView.trailingAnchor.constraint(equalTo: settingsView.trailingAnchor, constant: -Constants.horizontalSpacing),
+            precipitationStackView.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth),
+            inchLabel.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth / 2),
+            mmLabel.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth / 2),
 
             setButton.bottomAnchor.constraint(equalTo: settingsView.bottomAnchor, constant: -Constants.verticalSpacing),
             setButton.leadingAnchor.constraint(equalTo: settingsView.leadingAnchor, constant: 25),
@@ -330,11 +389,70 @@ final class SettingsView: UIView {
     }
     
     @objc func agreeButtonTapped() {
+        selectedTemperatureUnit = celsiusLabel.backgroundColor == .systemBlue ? "°" : "F"
+        selectedWindSpeedUnit = milesLabel.backgroundColor == .systemBlue ? "mph" : "м/с"
+        selectedTimeFormat = twelveLabel.backgroundColor == .systemBlue ? "12" : "24"
+        selectedPrecipitationUnit = inchLabel.backgroundColor == .systemBlue ? "'" : "мм"
         
+        delegate?.setUnits(temperatureUnit: selectedTemperatureUnit, windSpeedUnit: selectedWindSpeedUnit, timeFormat: selectedTimeFormat, precipitationUnit: selectedPrecipitationUnit)
     }
     
-    @objc func denyButtonTapped() {
-        
+    @objc func celsiusLabelTapped() {
+        celsiusLabel.textColor = .white
+        celsiusLabel.backgroundColor = .systemBlue
+        fahrenheitLabel.textColor = .black
+        fahrenheitLabel.backgroundColor = .white
     }
+    
+    @objc func fahrenheitLabelTapped() {
+        fahrenheitLabel.textColor = .white
+        fahrenheitLabel.backgroundColor = .systemBlue
+        celsiusLabel.textColor = .black
+        celsiusLabel.backgroundColor = .white
+    }
+
+    @objc func metersLabelTapped() {
+        metersLabel.textColor = .white
+        metersLabel.backgroundColor = .systemBlue
+        milesLabel.textColor = .black
+        milesLabel.backgroundColor = .white
+    }
+    
+    @objc func milesLabelTapped() {
+        milesLabel.textColor = .white
+        milesLabel.backgroundColor = .systemBlue
+        metersLabel.textColor = .black
+        metersLabel.backgroundColor = .white
+    }
+    
+    @objc func twelveLabelTapped() {
+        twelveLabel.textColor = .white
+        twelveLabel.backgroundColor = .systemBlue
+        twentyFourLabel.textColor = .black
+        twentyFourLabel.backgroundColor = .white
+    }
+    
+    @objc func twentyFourLabelTapped() {
+        twentyFourLabel.textColor = .white
+        twentyFourLabel.backgroundColor = .systemBlue
+        twelveLabel.textColor = .black
+        twelveLabel.backgroundColor = .white
+    }
+    
+    @objc func inchLabelTapped() {
+        inchLabel.textColor = .white
+        inchLabel.backgroundColor = .systemBlue
+        mmLabel.textColor = .black
+        mmLabel.backgroundColor = .white
+    }
+    
+    @objc func mmLabelTapped() {
+        mmLabel.textColor = .white
+        mmLabel.backgroundColor = .systemBlue
+        inchLabel.textColor = .black
+        inchLabel.backgroundColor = .white
+    }
+    
+    
     
 }

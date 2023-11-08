@@ -20,6 +20,7 @@ final class DailyForecastView: UIView {
     private var selectedDate: Date
     private let airQuality: AirQuality
     private let astronomy: Astronomy?
+    private var settings = SettingsManager.shared.settings
     
     private var numberOfSections: Int = 0
     
@@ -132,7 +133,7 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
             sunAndMoonCell.dateIndex = dateIndex
             if let astronomyModel = astronomy {
                 sunAndMoonCell.astronomy = astronomyModel
-                sunAndMoonCell.configure(with: astronomyModel, at: dateIndex)
+                sunAndMoonCell.configure(with: astronomyModel, units: settings, at: dateIndex)
             }
             return sunAndMoonCell
         } else if indexPath.section == numberOfSections - 1 {
@@ -140,7 +141,7 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             airQualityCell.selectionStyle = .none
-            airQualityCell.configure(with: airQuality, at: dateIndex)
+            airQualityCell.configure(with: airQuality, units: settings, at: dateIndex)
             return airQualityCell
         } else {
             if indexPath.row == 0 {
@@ -148,14 +149,14 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
                     return UITableViewCell()
                 }
                 partOfTheDayCell.selectionStyle = .none
-                partOfTheDayCell.configure(with: dailyTimePeriod, at: dateIndex, at: indexPath.section)
+                partOfTheDayCell.configure(with: dailyTimePeriod, units: settings, at: dateIndex, at: indexPath.section)
                 return partOfTheDayCell
             } else {
                 guard let weatherInfoCell = tableView.dequeueReusableCell(withIdentifier: WeatherInfoTableViewCell.id, for: indexPath) as? WeatherInfoTableViewCell else {
                     return UITableViewCell()
                 }
                 weatherInfoCell.selectionStyle = .none
-                weatherInfoCell.configure(with: dailyTimePeriod, at: dateIndex, at: indexPath.section, at: indexPath.row)
+                weatherInfoCell.configure(with: dailyTimePeriod, units: settings, at: dateIndex, at: indexPath.section, at: indexPath.row)
                 return weatherInfoCell
             }
         }

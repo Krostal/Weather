@@ -8,6 +8,8 @@ final class HourlyForecastView: UIView {
     private let weather: Weather
     private var selectedHour: Int?
     private var hourlyTimePeriod: HourlyTimePeriod?
+    
+    private var settings = SettingsManager.shared.settings
         
     private enum Constants {
         static let spacing: CGFloat = 0
@@ -92,7 +94,7 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
         if section == 0 {
             return 1
         } else {
-            return hourlyTimePeriod?.time.count ?? 24
+            return hourlyTimePeriod?.time24Format.count ?? 24
         }
     }
     
@@ -108,7 +110,7 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
             
             let threeHoursForecast = HourlyTimePeriod.createForEveryThirdIndex(from: weather)
 
-            tempChartCell.setupChartData(timePeriod: threeHoursForecast)
+            tempChartCell.setupChartData(timePeriod: threeHoursForecast, units: settings)
 
             return tempChartCell
     
@@ -120,7 +122,7 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
             hourlyTimePeriod = HourlyTimePeriod(model: weather, index: indexPath.row)
             
             if let timePeriod = hourlyTimePeriod {
-                hourlyForecastCell.configure(with: timePeriod, at: indexPath.row)
+                hourlyForecastCell.configure(with: timePeriod, units: settings, at: indexPath.row)
             }
             
             return hourlyForecastCell

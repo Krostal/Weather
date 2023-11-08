@@ -152,7 +152,7 @@ final class SunAndMoonCollectionViewCell: UICollectionViewCell {
 }
 
 extension SunAndMoonCollectionViewCell: Configurable {
-    func configure(with model: Astronomy, at index: Int, at section: Int? = nil, at row: Int?) {
+    func configure(with model: Astronomy, units: Settings, at index: Int, at section: Int? = nil, at row: Int?) {
         guard let forecastSet = model.astronomyForecast,
               let forecast = Array(forecastSet) as? [AstronomyForecast] else {
             return
@@ -166,8 +166,14 @@ extension SunAndMoonCollectionViewCell: Configurable {
                 
                 if let sunrise = filteredForecast[index].sunrise,
                    let sunset = filteredForecast[index].sunset {
-                    riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil)
-                    setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil)
+                    switch units.timeFormat {
+                    case .twelveHour:
+                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunrise, dateFormat: "hh:mm a", locale: nil)
+                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunset, dateFormat: "hh:mm a", locale: nil)
+                    case .twentyFourHour:
+                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil)
+                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil)
+                    }
                     durationLabel.text = calculateDuration(rise: sunrise, set: sunset)
                 }
             } else if row == 1 {
@@ -175,8 +181,14 @@ extension SunAndMoonCollectionViewCell: Configurable {
                 
                 if let moonrise = filteredForecast[index].moonrise,
                    let moonset = filteredForecast[index].moonset {
-                    riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonrise, dateFormat: "HH:mm", locale: nil)
-                    setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonset, dateFormat: "HH:mm", locale: nil)
+                    switch units.timeFormat {
+                    case .twelveHour:
+                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonrise, dateFormat: "hh:mm a", locale: nil)
+                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonset, dateFormat: "hh:mm a", locale: nil)
+                    case .twentyFourHour:
+                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonrise, dateFormat: "HH:mm", locale: nil)
+                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonset, dateFormat: "HH:mm", locale: nil)
+                    }
                     durationLabel.text = calculateDuration(rise: moonrise, set: moonset)
                 }
             }

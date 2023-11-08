@@ -106,7 +106,7 @@ final class PartOfTheDayTableViewCell: UITableViewCell {
 
 extension PartOfTheDayTableViewCell: Configurable {
     
-    func configure(with timePeriod: DailyTimePeriod, at index: Int, at part: Int?, at row: Int? = nil) {
+    func configure(with timePeriod: DailyTimePeriod, units: Settings, at index: Int, at part: Int?, at row: Int? = nil) {
         
         let sortedDailyForecast = timePeriod.dailyForecast.sorted { $0.key < $1.key }
         
@@ -143,8 +143,15 @@ extension PartOfTheDayTableViewCell: Configurable {
         
         if let instantData = instantData,
            let next6Hours = next6Hours {
+            
+            switch units.temperatureUnit {
+            case .celsius:
+                tempLabel.text = UnitsFormatter.celsius.format(instantData.airTemperature)
+            case .fahrenheit:
+                tempLabel.text = UnitsFormatter.fahrenheit.format(instantData.airTemperature)
+            }
+            
             weatherIcon.image = UIImage(named: next6Hours.symbolCode ?? "xmark.icloud")
-            tempLabel.text = "\(instantData.airTemperature)°"
             weatherLabel.text = CurrentWeatherDescription(symbolCode: next6Hours.symbolCode ?? "cloud")?.description
         }
     }

@@ -114,7 +114,7 @@ final class AirQualityTableViewCell: UITableViewCell {
 }
 
 extension AirQualityTableViewCell: Configurable {
-    func configure(with model: AirQuality, at index: Int, at section: Int? = nil, at row: Int? = nil) {
+    func configure(with model: AirQuality, units: Settings, at index: Int, at section: Int? = nil, at row: Int? = nil) {
         guard let forecastSet = model.airQualityForecast,
               let forecast = Array(forecastSet) as? [AirQualityForecast] else {
             return
