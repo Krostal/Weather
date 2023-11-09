@@ -178,7 +178,6 @@ final class CurrentTableViewCell: UITableViewCell {
         sunriseTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         sunriseTimeLabel.font = .systemFont(ofSize: 14, weight: .semibold)
         sunriseTimeLabel.textColor = .white
-        sunriseTimeLabel.text = "05:45"
         return sunriseTimeLabel
     }()
     
@@ -194,7 +193,6 @@ final class CurrentTableViewCell: UITableViewCell {
         sunsetTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         sunsetTimeLabel.font = .systemFont(ofSize: 14, weight: .semibold)
         sunsetTimeLabel.textColor = .white
-        sunsetTimeLabel.text = "17:58"
         return sunsetTimeLabel
     }()
     

@@ -29,9 +29,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
     
     func fetchWeatherFromNetwork(completion: @escaping (Result<Void, Error>) -> Void) {
         
-        guard let coordinates = locationService.currentCoordinates else {
-            return
-        }
+        guard let coordinates = locationService.currentCoordinates else { return }
         
         locationService.getLocationName { [weak self] name in
             guard let self else { return }
@@ -47,6 +45,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
             dispatchGroup.enter()
             self.fetchDataService.fetchWeatherData(coordinates: (coordinates.latitude, coordinates.longitude)) { [weak self] result in
                 guard let self else { return }
+      
                 switch result {
                 case .success(let weatherJsonModel):
                     self.weatherJsonModel = weatherJsonModel
@@ -58,40 +57,42 @@ final class WeatherInteractor: WeatherInteractorProtocol {
             
             dispatchGroup.enter()
             guard let location = locationName else { return }
-            self.fetchDataService.fetchAstronomyData(coordinates: (coordinates.latitude, coordinates.longitude)) { [weak self] result in
-                guard let self else { return }
-                switch result {
-                case .success(let astronomyJsonModel):
-                    self.astronomyJsonModel = astronomyJsonModel
-                case .failure(let error):
-                    print("Error fetching weather data: \(error.description)")
-                }
-                dispatchGroup.leave()
-            }
-            
-            dispatchGroup.enter()
+ 
             if !coreDataService.isAstronomyDataAlreadyExist(start: currentDate, locationName: location) {
-                self.fetchDataService.fetchAirQualityData(coordinates: (coordinates.latitude, coordinates.longitude)) { [weak self] result in
+                self.fetchDataService.fetchAstronomyData(coordinates: (coordinates.latitude, coordinates.longitude)) { [weak self] result in
                     guard let self else { return }
                     switch result {
-                    case .success(let airQualityJsonModel):
-                        self.airQualityJsonModel = airQualityJsonModel
+                    case .success(let astronomyJsonModel):
+                        self.astronomyJsonModel = astronomyJsonModel
                     case .failure(let error):
                         print("Error fetching weather data: \(error.description)")
                     }
                     dispatchGroup.leave()
                 }
-            } else {
-                dispatchGroup.leave()
             }
             
-            self.saveWeatherToCoreData() { result in
+            dispatchGroup.enter()
+            
+            self.fetchDataService.fetchAirQualityData(coordinates: (coordinates.latitude, coordinates.longitude)) { [weak self] result in
+                guard let self else { return }
                 switch result {
-                case .success:
-                    completion(.success(()))
+                case .success(let airQualityJsonModel):
+                    self.airQualityJsonModel = airQualityJsonModel
                 case .failure(let error):
-                    print("Error saving Weather to Core Data: \(error)")
-                    completion(.failure(error))
+                    print("Error fetching weather data: \(error.description)")
+                }
+                dispatchGroup.leave()
+            }
+
+            dispatchGroup.notify(queue: .main) {
+                self.saveWeatherToCoreData() { result in
+                    switch result {
+                    case .success:
+                        completion(.success(()))
+                    case .failure(let error):
+                        print("Error saving Weather to Core Data: \(error)")
+                        completion(.failure(error))
+                    }
                 }
             }
         }

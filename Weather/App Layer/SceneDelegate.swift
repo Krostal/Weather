@@ -13,13 +13,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let mainViewController = MainViewController()
         let navigationController = UINavigationController(rootViewController: mainViewController)
-        self.window?.rootViewController = navigationController
-        self.window?.makeKeyAndVisible()
-        
-        if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let databaseURL = documentsDirectory.appendingPathComponent(".sqlite")
-            print("Путь к базе данных: \(databaseURL.path)")
-        }
+        window?.rootViewController = navigationController
+        window?.makeKeyAndVisible()
         
     }
 
