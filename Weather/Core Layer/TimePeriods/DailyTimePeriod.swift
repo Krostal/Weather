@@ -12,9 +12,10 @@ struct DailyTimePeriod {
         self.dailyForecast = [:]
     }
         
-    init?(model: Weather) {
+    init?(weather: Weather) {
         self.dailyForecast = [:]
-        guard let timePeriodSet = model.timePeriod,
+        guard let weatherData = weather.weatherData,
+              let timePeriodSet = weatherData.timePeriod,
               let timePeriod = Array(timePeriodSet) as? [TimePeriod]
         else {
             return nil

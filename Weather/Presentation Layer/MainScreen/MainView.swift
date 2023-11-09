@@ -4,7 +4,7 @@ import CoreData
 
 protocol MainViewDelegate: AnyObject {
     func showHourlyForecast(with selectedHour: Int?)
-    func showDailyForecast(forDate date: Date, dateIndex: Int, astronomy: Astronomy?)
+    func showDailyForecast(forDate date: Date, dateIndex: Int)
     
 }
 
@@ -25,7 +25,6 @@ final class MainView: UIView {
     private var selectedDate: Date?
     
     let weather: Weather
-    let astronomy: Astronomy?
     let currentTimePeriod: CurrentTimePeriod
     let dailyTimePeriod: DailyTimePeriod
     
@@ -43,11 +42,10 @@ final class MainView: UIView {
         return tableView
     }()
     
-    init(frame: CGRect, weather: Weather, astronomy: Astronomy?) {
+    init(frame: CGRect, weather: Weather) {
         self.weather = weather
-        self.astronomy = astronomy
-        self.currentTimePeriod = CurrentTimePeriod(model: weather) ?? CurrentTimePeriod()
-        self.dailyTimePeriod = DailyTimePeriod(model: weather) ?? DailyTimePeriod()
+        self.currentTimePeriod = CurrentTimePeriod(weather: weather) ?? CurrentTimePeriod()
+        self.dailyTimePeriod = DailyTimePeriod(weather: weather) ?? DailyTimePeriod()
         super.init(frame: frame)
         setupView()
         addSubviews()
@@ -107,7 +105,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             currentCell.configure(with: currentTimePeriod, units: settings, at: indexPath.row)
-            if let astronomyModel = astronomy {
+            if let astronomyModel = weather.astronomy {
                 currentCell.sunData(with: astronomyModel, units: settings)
             }
             currentCell.selectionStyle = .none
@@ -143,7 +141,7 @@ extension MainView: UITableViewDataSource, UITableViewDelegate {
                 return
             }
             let dateKey = dateKeys[indexPath.row]
-            delegate?.showDailyForecast(forDate: dateKey, dateIndex: indexPath.row, astronomy: astronomy)
+            delegate?.showDailyForecast(forDate: dateKey, dateIndex: indexPath.row)
         }
     }
     

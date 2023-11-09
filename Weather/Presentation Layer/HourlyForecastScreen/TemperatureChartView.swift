@@ -195,8 +195,8 @@ extension TemperatureChartView: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        if let model = weather {
-            threeHoursForecast = HourlyTimePeriod.createForEveryThirdIndex(from: model)
+        if let weatherModel = weather {
+            threeHoursForecast = HourlyTimePeriod.createForEveryThirdIndex(weather: weatherModel)
             if let threeHoursTimePeriod = threeHoursForecast {
                let forecast = threeHoursTimePeriod[indexPath.row]
                 cell.configure(with: forecast, units: settings, at: indexPath.row)
@@ -227,7 +227,7 @@ extension TemperatureChartView: UICollectionViewDelegateFlowLayout {
     }
 }
 
-class CustomXAxisValueFormatter: DGCharts.AxisValueFormatter {
+final class CustomXAxisValueFormatter: DGCharts.AxisValueFormatter {
     let hours: [Double]
     
     let settings = SettingsManager.shared.settings

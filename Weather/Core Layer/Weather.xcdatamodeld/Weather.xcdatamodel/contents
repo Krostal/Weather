@@ -2,13 +2,7 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22225" systemVersion="23A344" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
     <entity name="AirQuality" representedClassName="AirQuality" syncable="YES" codeGenerationType="class">
         <relationship name="airQualityForecast" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="AirQualityForecast" inverseName="airQuality" inverseEntity="AirQualityForecast"/>
-        <relationship name="coordinates" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="AirQualityCoordinates" inverseName="airQuality" inverseEntity="AirQualityCoordinates"/>
-    </entity>
-    <entity name="AirQualityCoordinates" representedClassName="AirQualityCoordinates" syncable="YES" codeGenerationType="class">
-        <attribute name="city" optional="YES" attributeType="String"/>
-        <attribute name="lat" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="long" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <relationship name="airQuality" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="AirQuality" inverseName="coordinates" inverseEntity="AirQuality"/>
+        <relationship name="weather" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="airQuality" inverseEntity="Weather"/>
     </entity>
     <entity name="AirQualityForecast" representedClassName="AirQualityForecast" syncable="YES" codeGenerationType="class">
         <attribute name="day" optional="YES" attributeType="String"/>
@@ -16,9 +10,9 @@
         <relationship name="airQuality" optional="YES" maxCount="1" deletionRule="Nullify" ordered="YES" destinationEntity="AirQuality" inverseName="airQualityForecast" inverseEntity="AirQuality"/>
     </entity>
     <entity name="Astronomy" representedClassName="Astronomy" syncable="YES" codeGenerationType="class">
-        <attribute name="locationName" optional="YES" attributeType="String"/>
         <attribute name="start" optional="YES" attributeType="String"/>
         <relationship name="astronomyForecast" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="AstronomyForecast" inverseName="astronomy" inverseEntity="AstronomyForecast"/>
+        <relationship name="weather" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="astronomy" inverseEntity="Weather"/>
     </entity>
     <entity name="AstronomyForecast" representedClassName="AstronomyForecast" syncable="YES" codeGenerationType="class">
         <attribute name="moonPhase" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -49,13 +43,6 @@
         <attribute name="windSpeedPercentile90" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriodData" inverseName="instantData" inverseEntity="TimePeriodData"/>
     </entity>
-    <entity name="Location" representedClassName="Location" syncable="YES" codeGenerationType="class">
-        <attribute name="altitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="name" optional="YES" attributeType="String"/>
-        <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="location" inverseEntity="Weather"/>
-    </entity>
     <entity name="Next1HoursForecast" representedClassName="Next1HoursForecast" syncable="YES" codeGenerationType="class">
         <attribute name="precipitationAmount" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="precipitationAmountMax" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -83,7 +70,7 @@
     <entity name="TimePeriod" representedClassName="TimePeriod" syncable="YES" codeGenerationType="class">
         <attribute name="time" optional="YES" attributeType="String"/>
         <relationship name="timePeriodData" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="TimePeriodData" inverseName="timePeriod" inverseEntity="TimePeriodData"/>
-        <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="timePeriod" inverseEntity="Weather"/>
+        <relationship name="weatherData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="WeatherData" inverseName="timePeriod" inverseEntity="WeatherData"/>
     </entity>
     <entity name="TimePeriodData" representedClassName="TimePeriodData" syncable="YES" codeGenerationType="class">
         <relationship name="instantData" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="InstantData" inverseName="timePeriodData" inverseEntity="InstantData"/>
@@ -92,37 +79,17 @@
         <relationship name="next12HoursForecast" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Next12HoursForecast" inverseName="timePeriodData" inverseEntity="Next12HoursForecast"/>
         <relationship name="timePeriod" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TimePeriod" inverseName="timePeriodData" inverseEntity="TimePeriod"/>
     </entity>
-    <entity name="Unit" representedClassName="Unit" syncable="YES" codeGenerationType="class">
-        <attribute name="airPressureAtSeaLevel" optional="YES" attributeType="String"/>
-        <attribute name="airTemperature" optional="YES" attributeType="String"/>
-        <attribute name="airTemperatureMax" optional="YES" attributeType="String"/>
-        <attribute name="airTemperatureMin" optional="YES" attributeType="String"/>
-        <attribute name="airTemperaturePercentile10" optional="YES" attributeType="String"/>
-        <attribute name="airTemperaturePercentile90" optional="YES" attributeType="String"/>
-        <attribute name="cloudAreaFraction" optional="YES" attributeType="String"/>
-        <attribute name="cloudAreaFractionHigh" optional="YES" attributeType="String"/>
-        <attribute name="cloudAreaFractionLow" optional="YES" attributeType="String"/>
-        <attribute name="cloudAreaFractionMedium" optional="YES" attributeType="String"/>
-        <attribute name="dewPointTemperature" optional="YES" attributeType="String"/>
-        <attribute name="fogAreaFraction" optional="YES" attributeType="String"/>
-        <attribute name="precipitationAmount" optional="YES" attributeType="String"/>
-        <attribute name="precipitationAmountMax" optional="YES" attributeType="String"/>
-        <attribute name="precipitationAmountMin" optional="YES" attributeType="String"/>
-        <attribute name="probabilityOfPrecipitation" optional="YES" attributeType="String"/>
-        <attribute name="probabilityOfThunder" optional="YES" attributeType="String"/>
-        <attribute name="relativeHumidity" optional="YES" attributeType="String"/>
-        <attribute name="ultravioletIndexClearSky" optional="YES" attributeType="String"/>
-        <attribute name="windFromDirection" optional="YES" attributeType="String"/>
-        <attribute name="windSpeed" optional="YES" attributeType="String"/>
-        <attribute name="windSpeedOfGust" optional="YES" attributeType="String"/>
-        <attribute name="windSpeedPercentile10" optional="YES" attributeType="String"/>
-        <attribute name="windSpeedPercentile90" optional="YES" attributeType="String"/>
-        <relationship name="weather" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="unit" inverseEntity="Weather"/>
-    </entity>
     <entity name="Weather" representedClassName="Weather" syncable="YES" codeGenerationType="class">
+        <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="locationName" optional="YES" attributeType="String"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="airQuality" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="AirQuality" inverseName="weather" inverseEntity="AirQuality"/>
+        <relationship name="astronomy" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Astronomy" inverseName="weather" inverseEntity="Astronomy"/>
+        <relationship name="weatherData" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="WeatherData" inverseName="weather" inverseEntity="WeatherData"/>
+    </entity>
+    <entity name="WeatherData" representedClassName="WeatherData" syncable="YES" codeGenerationType="class">
         <attribute name="updatedAt" attributeType="String"/>
-        <relationship name="location" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Location" inverseName="weather" inverseEntity="Location"/>
-        <relationship name="timePeriod" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="TimePeriod" inverseName="weather" inverseEntity="TimePeriod"/>
-        <relationship name="unit" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Unit" inverseName="weather" inverseEntity="Unit"/>
+        <relationship name="timePeriod" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="TimePeriod" inverseName="weatherData" inverseEntity="TimePeriod"/>
+        <relationship name="weather" maxCount="1" deletionRule="Nullify" destinationEntity="Weather" inverseName="weatherData" inverseEntity="Weather"/>
     </entity>
 </model>

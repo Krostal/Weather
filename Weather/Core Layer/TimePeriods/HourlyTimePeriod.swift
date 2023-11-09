@@ -18,8 +18,9 @@ struct HourlyTimePeriod {
         self.timeStringFullInUTC = ""
     }
 
-    init?(model: Weather, index: Int) {
-        guard let timePeriodSet = model.timePeriod,
+    init?(weather: Weather, index: Int) {
+        guard let weatherData = weather.weatherData,
+              let timePeriodSet = weatherData.timePeriod,
               let timePeriodArray = Array(timePeriodSet.prefix(24)) as? [TimePeriod],
               index < timePeriodArray.count,
               let currentData = timePeriodArray[index].timePeriodData?.instantData,
@@ -39,8 +40,9 @@ struct HourlyTimePeriod {
 
 extension HourlyTimePeriod {
     
-    static func createForEveryThirdIndex(from model: Weather) -> [ThreeHoursForecast] {
-        guard let timePeriodSet = model.timePeriod,
+    static func createForEveryThirdIndex(weather: Weather) -> [ThreeHoursForecast] {
+        guard let weatherData = weather.weatherData,
+              let timePeriodSet = weatherData.timePeriod,
               let timePeriodArray = Array(timePeriodSet.prefix(24)) as? [TimePeriod] else {
             return []
         }

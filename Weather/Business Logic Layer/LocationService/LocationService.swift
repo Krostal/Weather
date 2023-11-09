@@ -2,21 +2,19 @@
 
 import CoreLocation
 
-class LocationService: NSObject {
+final class LocationService: NSObject {
     
     private let locationManager = CLLocationManager()
     private let geocoder = CLGeocoder()
     private var currentLocation: CLLocation?
     var isLocationAuthorized: Bool = false
     var isDetermined: Bool = false
-    var currentCoordinates: (latitude: Double, longitude: Double)?    
+    var currentCoordinates: (latitude: Double, longitude: Double)?
+    var placeName: String?
+    var locationRequestCompletion: ((Bool) -> Void)?
     
     override init() {
         super.init()
-        updateLocation()
-    }
-    
-    func updateLocation() {
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
@@ -36,7 +34,28 @@ class LocationService: NSObject {
                 }
                 
                 let placeName = "\(placemark.locality ?? ""), \(placemark.country ?? "")"
+                self.placeName = placeName
                 completion(placeName)
+            }
+        }
+    }
+    
+    func getCoordinates(addressString : String, completion: @escaping(CLLocationCoordinate2D?) -> Void ) {
+        geocoder.geocodeAddressString(addressString) { (placemarks, error) in
+            if let error = error {
+                print("Ошибка геокодирования: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            if let placemark = placemarks?.first,
+               let location = placemark.location {
+                let coordinates = location.coordinate
+                self.currentCoordinates = (latitude: coordinates.latitude, longitude: coordinates.longitude)
+                self.placeName = "\(placemark.locality ?? ""), \(placemark.country ?? "")"
+                completion(coordinates)
+            } else {
+                completion(nil)
             }
         }
     }

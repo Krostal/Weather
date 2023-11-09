@@ -14,8 +14,9 @@ struct CurrentTimePeriod {
         self.next6HoursForecast = Next6HoursForecast()
     }
 
-    init?(model: Weather) {
-        guard let timePeriodSet = model.timePeriod,
+    init?(weather: Weather) {
+        guard let weatherData = weather.weatherData,
+              let timePeriodSet = weatherData.timePeriod,
               let timePeriodArray = Array(timePeriodSet) as? [TimePeriod],
               let currentTimePeriod = timePeriodArray.first(where: { timePeriod in
                   if let currentTime = timePeriod.time?.prefix(13) {

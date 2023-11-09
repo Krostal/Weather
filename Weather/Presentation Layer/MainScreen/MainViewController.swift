@@ -8,10 +8,9 @@ final class MainViewController: UIViewController {
     
     private var onboardingView: OnboardingView?
     
-    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService(), coreDataService: CoreDataService.shared, locationService: LocationService())
-    
     private var weather: Weather?
-    private var astronomy: Astronomy?
+    
+    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService(), coreDataService: CoreDataService.shared, locationService: LocationService())
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,7 +19,6 @@ final class MainViewController: UIViewController {
         } else {
             setupView()
             fetchWeather()
-            fetchAirQuality()
         }
     }
     
@@ -38,31 +36,9 @@ final class MainViewController: UIViewController {
             if let model = weatherArray.last {
                 self.weather = model
                 guard let weatherModel = self.weather else { return }
-                interactor.fetchAstronomyFromNetwork { result in
-                    switch result {
-                    case .success(_ ):
-                        print("Астрономические данные успешно получены")
-                        self.interactor.getAstronomyFromCoreData(withPredicate: nil) { astronomyArray in
-                            if let model = astronomyArray.last {
-                                self.astronomy = model
-                                print ("Астрономическая модель загружена из CoreData")
-                                DispatchQueue.main.async {
-                                    self.createAndShowMainView(withWeather: weatherModel, astronomy: self.astronomy)
-                                }
-                            } else {
-                                print("в CoreData отсутствует модель Astronomy")
-                                DispatchQueue.main.async {
-                                    self.createAndShowMainView(withWeather: weatherModel, astronomy: self.astronomy)
-                                }
-                            }
-                        }
-                    case .failure(let error):
-                        print("Astronomy error \(error.localizedDescription)")
-                        
-                        DispatchQueue.main.async {
-                            self.createAndShowMainView(withWeather: weatherModel, astronomy: self.astronomy)
-                        }
-                    }
+                
+                DispatchQueue.main.async {
+                    self.createAndShowMainView(with: weatherModel)
                 }
             } else {
                 self.onboardingView = OnboardingView()
@@ -74,8 +50,8 @@ final class MainViewController: UIViewController {
         }
     }
     
-    private func createAndShowMainView(withWeather weather: Weather, astronomy: Astronomy?) {
-        mainView = MainView(frame: self.view.bounds, weather: weather, astronomy: astronomy)
+    private func createAndShowMainView(with weather: Weather) {
+        mainView = MainView(frame: self.view.bounds, weather: weather)
         mainView?.delegate = self
         mainView?.tableView.refreshControl = UIRefreshControl()
         mainView?.tableView.refreshControl?.addTarget(self, action: #selector(self.refreshWeatherData), for: .valueChanged)
@@ -98,8 +74,8 @@ final class MainViewController: UIViewController {
     }
     
     private func updateNavigationBarTitle() {
-        if let weatherModel = self.weather {
-            if let locationName = weatherModel.location?.name {
+        if let weather = self.weather {
+            if let locationName = weather.locationName {
                 DispatchQueue.main.async {
                     self.navigationItem.title = locationName
                 }
@@ -108,7 +84,7 @@ final class MainViewController: UIViewController {
             interactor.getWeatherFromCoreData(withPredicate: nil) { [weak self] weatherArray in
                 guard let self else { return }
                 if let weather = weatherArray.last {
-                    if let locationName = weather.location?.name {
+                    if let locationName = weather.locationName {
                         DispatchQueue.main.async {
                             self.navigationItem.title = locationName
                         }
@@ -125,7 +101,6 @@ final class MainViewController: UIViewController {
         mainView.tableView.refreshControl?.beginRefreshing()
         interactor.fetchWeatherFromNetwork { [weak self] result in
             guard let self = self else { return }
-//            fetchAstronomy()
             DispatchQueue.main.async {
                 switch result {
                 case .success(_ ):
@@ -135,28 +110,6 @@ final class MainViewController: UIViewController {
                     print("FetchWeather error \(error.localizedDescription)")
                     mainView.tableView.refreshControl?.endRefreshing()
                 }
-            }
-        }
-    }
-    
-    private func fetchAirQuality() {
-        interactor.fetchAirQualityFromNetwork { result in
-            switch result {
-            case .success(_ ):
-                print("Данные о качестве воздуха успешно получены")
-            case .failure(let error):
-                print("AirQuality error \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    private func fetchAstronomy() {
-        interactor.fetchAstronomyFromNetwork { result in
-            switch result {
-            case .success(_ ):
-                print("Астрономические данные успешно получены")
-            case .failure(let error):
-                print("Astronomy error \(error.localizedDescription)")
             }
         }
     }
@@ -233,10 +186,8 @@ final class MainViewController: UIViewController {
     
     @objc private func refreshWeatherData() {
         checkLocationPermission()
-        fetchAirQuality()
         interactor.fetchWeatherFromNetwork { [weak self] result in
             guard let self = self else { return }
-//            fetchAstronomy()
             DispatchQueue.main.async {
                 switch result {
                 case .success(_ ):
@@ -268,19 +219,21 @@ final class MainViewController: UIViewController {
 
 extension MainViewController: MainViewDelegate {
     func showHourlyForecast(with selectedHour: Int?) {
-        guard let weatherModel = self.weather else { return }
-        let hourlyForecastViewController = HourlyForecastViewController(headerTitle: navigationItem.title ?? "", weatherModel: weatherModel, selectedHour: selectedHour ?? 0)
+        guard let weatherModel = self.weather else {
+            return
+        }
+        let hourlyForecastViewController = HourlyForecastViewController(headerTitle: navigationItem.title ?? "", weather: weatherModel, selectedHour: selectedHour ?? 0)
         navigationController?.pushViewController(hourlyForecastViewController, animated: true)
     }
     
-    func showDailyForecast(forDate date: Date, dateIndex: Int, astronomy: Astronomy?) {
-        guard let weather = weather,
-              let dailyTimePeriod = DailyTimePeriod(model: weather)
+    func showDailyForecast(forDate date: Date, dateIndex: Int) {
+        guard let weatherModel = weather,
+              let dailyTimePeriod = DailyTimePeriod(weather: weatherModel)
         else {
             return
         }
         
-        let dailyForecastViewController = DailyForecastViewController(dailyTimePeriod: dailyTimePeriod, astronomy: astronomy, dateIndex: dateIndex, selectedDate: date)
+        let dailyForecastViewController = DailyForecastViewController(weather: weatherModel, dailyTimePeriod: dailyTimePeriod, dateIndex: dateIndex, selectedDate: date)
         let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"))
         dailyForecastViewController.navigationItem.title = dateString
         
