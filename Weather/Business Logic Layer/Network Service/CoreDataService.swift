@@ -26,7 +26,22 @@ final class CoreDataService {
         persistentContainer.viewContext
     }
     
-    func isWeatherAlreadyExist(updatedAt: String, locationName: String) -> Bool {
+    func getWeatherModel(locationName: String) -> Weather? {
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        let predicate = NSPredicate(format: "locationName == %@", locationName)
+        request.predicate = predicate
+        
+        do {
+            let results = try setContext().fetch(request)
+            return results.first
+        } catch {
+            print("Error fetching weather data: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    
+    func isWeatherDataAlreadyExist(updatedAt: String, locationName: String) -> Bool {
         let request: NSFetchRequest<Weather> = Weather.fetchRequest()
         request.predicate = NSPredicate(format: "locationName == %@", locationName)
 

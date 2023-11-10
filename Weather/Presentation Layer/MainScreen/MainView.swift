@@ -80,6 +80,7 @@ final class MainView: UIView {
             tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -Constants.spacing)
         ])
     }
+    
 }
 
 extension MainView: UITableViewDataSource, UITableViewDelegate {

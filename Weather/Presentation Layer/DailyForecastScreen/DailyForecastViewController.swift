@@ -2,7 +2,7 @@ import UIKit
 
 final class DailyForecastViewController: UIViewController {
     
-    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService(), coreDataService: CoreDataService.shared, locationService: LocationService())
+    private let interactor: WeatherInteractorProtocol = WeatherInteractor()
     
     private let weather: Weather
     private let dailyTimePeriod: DailyTimePeriod

@@ -4,6 +4,7 @@ import UIKit
 
 protocol OnboardingViewDelegate: AnyObject {
     func requestLocationWhenInUseAuthorization()
+    func showEmptyScreen()
 }
 
 final class OnboardingView: UIView {
@@ -139,7 +140,8 @@ final class OnboardingView: UIView {
     }
     
     @objc func denyButtonTapped() {
-        
+        delegate?.showEmptyScreen()
+        denyButton.isEnabled = false
     }
     
 }

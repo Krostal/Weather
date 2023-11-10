@@ -6,16 +6,18 @@ final class MainViewController: UIViewController {
     
     private var mainView: MainView?
     
+    private var emptyView: EmptyView?
+    
     private var onboardingView: OnboardingView?
     
     private var weather: Weather?
     
-    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService(), coreDataService: CoreDataService.shared, locationService: LocationService())
+    private let interactor: WeatherInteractorProtocol = WeatherInteractor()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         if interactor.isDetermined() {
-            self.refreshWeatherData()
+            refreshWeatherData()
         } else {
             setupView()
             fetchWeather()
@@ -31,7 +33,7 @@ final class MainViewController: UIViewController {
     
     private func setupView() {
         
-        interactor.getWeatherFromCoreData(withPredicate: nil) { [weak self] weatherArray in
+        interactor.getWeatherFromCoreData() { [weak self] weatherArray in
             guard let self = self else { return }
             if let model = weatherArray.last {
                 self.weather = model
@@ -57,6 +59,7 @@ final class MainViewController: UIViewController {
         mainView?.tableView.refreshControl?.addTarget(self, action: #selector(self.refreshWeatherData), for: .valueChanged)
         view = self.mainView
         setupNavigationBar()
+        updateNavigationBarTitle()
     }
     
     private func setupNavigationBar() {
@@ -70,7 +73,6 @@ final class MainViewController: UIViewController {
         navigationItem.leftBarButtonItem?.tintColor = .black
         navigationItem.rightBarButtonItem?.tintColor = .black
         
-        updateNavigationBarTitle()
     }
     
     private func updateNavigationBarTitle() {
@@ -81,7 +83,7 @@ final class MainViewController: UIViewController {
                 }
             }
         } else {
-            interactor.getWeatherFromCoreData(withPredicate: nil) { [weak self] weatherArray in
+            interactor.getWeatherFromCoreData() { [weak self] weatherArray in
                 guard let self else { return }
                 if let weather = weatherArray.last {
                     if let locationName = weather.locationName {
@@ -130,7 +132,7 @@ final class MainViewController: UIViewController {
         }
     }
     
-    func showLocationServicesAlert(message: String) {
+    private func showLocationServicesAlert(message: String) {
         let alertController = UIAlertController(
             title: "Разрешение местоположения",
             message: message,
@@ -157,31 +159,22 @@ final class MainViewController: UIViewController {
         present(alertController, animated: true, completion: nil)
     }
     
-    func showLocationSettingsAlert(message: String) {
-        let alertController = UIAlertController(
-            title: "Настройки геолокации",
-            message: message,
-            preferredStyle: .alert
-        )
-
-        let settingsAction = UIAlertAction(
-            title: "Настройки",
-            style: .default
-        ) { _ in
-            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(settingsURL)
-            }
+    private func showSearchBar() {
+        let searchLocationViewController = SearchLocationViewController()
+        searchLocationViewController.delegate = self
+        navigationController?.modalPresentationStyle = .fullScreen
+        navigationController?.modalTransitionStyle = .partialCurl
+        navigationController?.present(searchLocationViewController, animated: true)
+    }
+    
+    private func showEmptyView() {
+        emptyView = EmptyView()
+        emptyView?.delegate = self
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            view = emptyView
+            setupNavigationBar()
         }
-
-        let cancelAction = UIAlertAction(
-            title: "Отмена",
-            style: .cancel
-        )
-
-        alertController.addAction(settingsAction)
-        alertController.addAction(cancelAction)
-
-        present(alertController, animated: true, completion: nil)
     }
     
     @objc private func refreshWeatherData() {
@@ -193,7 +186,6 @@ final class MainViewController: UIViewController {
                 case .success(_ ):
                     self.mainView?.tableView.reloadData()
                     self.setupView()
-                    self.updateNavigationBarTitle()
                 case .failure(let error):
                     print("FetchWeather error \(error.localizedDescription)")
                 }
@@ -245,6 +237,10 @@ extension MainViewController: MainViewDelegate {
 }
 
 extension MainViewController: OnboardingViewDelegate {
+    func showEmptyScreen() {
+        self.showEmptyView()
+    }
+    
     func requestLocationWhenInUseAuthorization() {
         self.refreshWeatherData()
     }
@@ -254,4 +250,20 @@ extension MainViewController: SettingsViewControllerDelegate {
     func updatedSettings() {
         self.refreshWeatherData()
     }
+}
+
+extension MainViewController: EmptyViewDelegate {
+    func addLocationAction() {
+        showSearchBar()
+    }
+}
+
+extension MainViewController: SearchLocationViewControllerDelegate {
+    
+    func fetchCoordinates(coordinates: (latitude: Double, longitude: Double)) {
+        interactor.updateCoordinates(with: coordinates)
+        emptyView?.showActivityIndicator()
+        refreshWeatherData()
+    }
+    
 }

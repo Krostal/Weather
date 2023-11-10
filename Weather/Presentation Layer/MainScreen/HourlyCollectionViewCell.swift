@@ -38,6 +38,9 @@ final class HourlyCollectionViewCell: UICollectionViewCell {
         tempLabel.translatesAutoresizingMaskIntoConstraints = false
         tempLabel.font = .systemFont(ofSize: 16, weight: .regular)
         tempLabel.textColor = .black
+        tempLabel.textAlignment = .center
+        tempLabel.adjustsFontSizeToFitWidth = true
+        tempLabel.minimumScaleFactor = 0.7
         return tempLabel
     }()
     

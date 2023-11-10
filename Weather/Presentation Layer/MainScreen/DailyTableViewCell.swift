@@ -95,6 +95,8 @@ final class DailyTableViewCell: UITableViewCell {
         temperatureLabel.translatesAutoresizingMaskIntoConstraints = false
         temperatureLabel.font = .systemFont(ofSize: 18, weight: .regular)
         temperatureLabel.textColor = .black
+        temperatureLabel.adjustsFontSizeToFitWidth = true
+        temperatureLabel.minimumScaleFactor = 0.7
         return temperatureLabel
     }()
     
