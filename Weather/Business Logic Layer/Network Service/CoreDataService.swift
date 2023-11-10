@@ -39,7 +39,7 @@ final class CoreDataService {
                     return true
                 } else {
                     setContext().delete(weatherData)
-                    print("Существующая модель Weather для данной локации \(locationName) удалена")
+                    print("Существующая модель WeatherData для данной локации \(locationName) удалена")
                     do {
                         try setContext().save()
                     } catch {

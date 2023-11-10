@@ -69,6 +69,8 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                     }
                     dispatchGroup.leave()
                 }
+            } else {
+                dispatchGroup.leave()
             }
             
             dispatchGroup.enter()
@@ -226,6 +228,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                     timePeriod.timePeriodData = timePeriodData
                     
                     weatherDataCoreDataModel.addToTimePeriod(timePeriod)
+                    print("Модель WeatherData для локации \(location) обновлена")
                 }
                 
                 weatherCoreDataModel.weatherData = weatherDataCoreDataModel
@@ -246,6 +249,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                     }
                     
                     weatherCoreDataModel.airQuality = airQualityCoreDataModel
+                    print("Модель AirQuality для локации \(location) обновлена")
                 }
                 
                 if let astronomy = astronomyJsonModel {
@@ -269,6 +273,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                             astronomyCoreDataModel.addToAstronomyForecast(astronomyForecast)
                         }
                         weatherCoreDataModel.astronomy = astronomyCoreDataModel
+                        print("Модель Astronomy для локации \(location) обновлена")
                     }
                 }
                 

@@ -135,6 +135,7 @@ final class OnboardingView: UIView {
     
     @objc func agreeButtonTapped() {
         delegate?.requestLocationWhenInUseAuthorization()
+        agreeButton.isEnabled = false
     }
     
     @objc func denyButtonTapped() {
