@@ -93,9 +93,6 @@ final class DailyForecastView: UIView {
         numberOfSections = count + 3
     }
     
-    private func updateViewWithSelectedDate() {
-        
-    }
 }
 
 extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {

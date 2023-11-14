@@ -3,7 +3,7 @@
 import UIKit
 
 protocol OnboardingViewDelegate: AnyObject {
-    func requestLocationWhenInUseAuthorization()
+    func showMainScreen()
     func showEmptyScreen()
 }
 
@@ -135,7 +135,7 @@ final class OnboardingView: UIView {
     }
     
     @objc func agreeButtonTapped() {
-        delegate?.requestLocationWhenInUseAuthorization()
+        delegate?.showMainScreen()
         agreeButton.isEnabled = false
     }
     

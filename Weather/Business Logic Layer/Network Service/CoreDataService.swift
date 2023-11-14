@@ -26,7 +26,7 @@ final class CoreDataService {
         persistentContainer.viewContext
     }
     
-    func getWeatherModel(locationName: String) -> Weather? {
+    func getWeatherData(locationName: String) -> Weather? {
         let request: NSFetchRequest<Weather> = Weather.fetchRequest()
         let predicate = NSPredicate(format: "locationName == %@", locationName)
         request.predicate = predicate
@@ -37,6 +37,18 @@ final class CoreDataService {
         } catch {
             print("Error fetching weather data: \(error.localizedDescription)")
             return nil
+        }
+    }
+    
+    func getWeather() -> [Weather] {
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        
+        do {
+            let results = try setContext().fetch(request)
+            return results
+        } catch {
+            print("Error fetching weather data: \(error.localizedDescription)")
+            return []
         }
     }
 

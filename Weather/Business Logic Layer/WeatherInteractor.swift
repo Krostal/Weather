@@ -4,9 +4,11 @@ import CoreData
 protocol WeatherInteractorProtocol {
     func fetchWeatherFromNetwork(completion: @escaping (Result<Void, Error>) -> Void)
     func getWeatherFromCoreData(completion: @escaping ([Weather]) -> Void)
+    func getCitiesWithWeatherData(completion: @escaping (Result<[Weather], Error>) -> Void)
     func checkPermission(completion: @escaping (Bool) -> Void)
-    func isDetermined() -> Bool
+    func isDetermind() -> Bool
     func updateCoordinates(with coordinates: (latitude: Double, longitude: Double))
+    func updateWeatherInCoreData(coordinates: (latitude: Double, longitude: Double), locationName: String?, completion: @escaping (Result<Weather, Error>) -> Void)
 }
 
 final class WeatherInteractor: WeatherInteractorProtocol {
@@ -23,12 +25,73 @@ final class WeatherInteractor: WeatherInteractorProtocol {
     private var astronomyJsonModel: AstronomyJsonModel?
     private var airQualityJsonModel: AirQualityJsonModel?
     
-    init() {
-    }
-    
     func updateCoordinates(with coordinates: (latitude: Double, longitude: Double)) {
         locationService.currentCoordinates = coordinates
         locationService.withCurrentLocation = false
+    }
+    
+    func updateWeatherInCoreData(coordinates: (latitude: Double, longitude: Double), locationName: String?, completion: @escaping (Result<Weather, Error>) -> Void) {
+        
+        let currentDate = CustomDateFormatter().formattedCurrentDate(dateFormat: "yyyy-MM-dd", locale: nil, timeZone: nil)
+        
+        self.locationName = locationName
+        
+        let dispatchGroup = DispatchGroup()
+        
+        dispatchGroup.enter()
+        self.fetchDataService.fetchWeatherData(coordinates: (coordinates.latitude, coordinates.longitude)) { [weak self] result in
+            print(locationName)
+            guard let self else { return }
+            
+            switch result {
+            case .success(let weatherJsonModel):
+                self.weatherJsonModel = weatherJsonModel
+            case .failure(let error):
+                print("Error fetching weather data: \(error.description)")
+            }
+            dispatchGroup.leave()
+        }
+        
+        dispatchGroup.enter()
+        if let location = locationName,
+           !coreDataService.isAstronomyDataAlreadyExist(start: currentDate, locationName: location) {
+            self.fetchDataService.fetchAstronomyData(coordinates: (coordinates.latitude, coordinates.longitude)) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let astronomyJsonModel):
+                    self.astronomyJsonModel = astronomyJsonModel
+                case .failure(let error):
+                    print("Error fetching weather data: \(error.description)")
+                }
+                dispatchGroup.leave()
+            }
+        } else {
+            dispatchGroup.leave()
+        }
+        
+        dispatchGroup.enter()
+        
+        self.fetchDataService.fetchAirQualityData(coordinates: (coordinates.latitude, coordinates.longitude)) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let airQualityJsonModel):
+                self.airQualityJsonModel = airQualityJsonModel
+            case .failure(let error):
+                print("Error fetching weather data: \(error.description)")
+            }
+            dispatchGroup.leave()
+        }
+        
+        dispatchGroup.notify(queue: .main) {
+            self.saveWeatherToCoreData { result in
+                switch result {
+                case .success(let weather):
+                    completion(.success((weather)))
+                case .failure(_ ):
+                    completion(.failure(CoreDataError.savingError))
+                }
+            }
+        }
     }
     
     func fetchWeatherFromNetwork(completion: @escaping (Result<Void, Error>) -> Void) {
@@ -38,9 +101,6 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         locationService.getLocationName { [weak self] name in
             guard let self else { return }
             self.locationName = name
-            
-            print(coordinates)
-            print(locationName)
             
             let currentDate = CustomDateFormatter().formattedCurrentDate(dateFormat: "yyyy-MM-dd", locale: nil, timeZone: nil)
             
@@ -118,6 +178,15 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         }
     }
     
+    func getCitiesWithWeatherData(completion: @escaping (Result<[Weather], Error>) -> Void) {
+        let weatherArray = coreDataService.getWeather()
+        if weatherArray.isEmpty {
+            print("No data available in Core Data")
+        } else {
+            completion(.success(weatherArray))
+        }
+    }
+    
     func checkPermission(completion: @escaping (Bool) -> Void) {
         if locationService.isLocationAuthorized {
             completion(true)
@@ -126,22 +195,22 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         }
     }
     
-    func isDetermined() -> Bool {
-        locationService.isDetermined
+    func isDetermind() -> Bool {
+        return (locationService.isDetermined)
     }
     
-    private func saveWeatherToCoreData(completion: @escaping (Result<Void, Error>) -> Void) {
+    private func saveWeatherToCoreData(completion: @escaping (Result<Weather, Error>) -> Void) {
         
         guard let locationName,
               let weather = weatherJsonModel
         else {
             return
         }
-        if let existingWeatherModel = coreDataService.getWeatherModel(locationName: locationName) {
+        if let existingWeatherModel = coreDataService.getWeatherData(locationName: locationName) {
             let updatedAt = weather.properties.meta.updatedAt
             if coreDataService.isWeatherDataAlreadyExist(updatedAt: updatedAt, locationName: locationName) {
-                print("Текущая модель Weather актуальна и не требует обновления")
-                completion(.success(()))
+                print("Текущая модель Weather для \(locationName) актуальна и не требует обновления")
+                completion(.success((existingWeatherModel)))
                 return
             } else {
                 if let existingWeatherData = existingWeatherModel.weatherData {
@@ -280,7 +349,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                 do {
                     try self.context.save()
                     print("Модель Weather для локации \(locationName) обновлена и успешно сохранена в Core Data")
-                    completion(.success(()))
+                    completion(.success((existingWeatherModel)))
                 } catch {
                     completion(.failure(error))
                 }
@@ -419,8 +488,8 @@ final class WeatherInteractor: WeatherInteractorProtocol {
             
             do {
                 try self.context.save()
-                print("Полученная модель Weather успешно сохранена в Core Data")
-                completion(.success(()))
+                print("Полученная модель Weather для \(locationName) успешно сохранена в Core Data")
+                completion(.success((weatherCoreDataModel)))
             } catch {
                 completion(.failure(error))
             }

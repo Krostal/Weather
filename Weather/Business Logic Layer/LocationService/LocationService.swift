@@ -9,7 +9,7 @@ final class LocationService: NSObject {
     private var locationUpdateCallback: (() -> Void)?
     
     private let geocoder = CLGeocoder()
-    //    private var currentLocation: CLLocation?
+    var currentLocation: CLLocation?
     var isLocationAuthorized: Bool = false
     var isDetermined: Bool = false
     var withCurrentLocation: Bool = true
@@ -48,27 +48,8 @@ final class LocationService: NSObject {
             completion(placeName)
         }
     }
-}
     
-//    func getCoordinates(addressString : String, completion: @escaping(CLLocationCoordinate2D?) -> Void ) {
-//        geocoder.geocodeAddressString(addressString) { (placemarks, error) in
-//            if let error = error {
-//                print("Ошибка геокодирования: \(error.localizedDescription)")
-//                completion(nil)
-//                return
-//            }
-//            
-//            if let placemark = placemarks?.first,
-//               let location = placemark.location {
-//                let coordinates = location.coordinate
-//                self.currentCoordinates = (latitude: coordinates.latitude, longitude: coordinates.longitude)
-//                self.placeName = "\(placemark.locality ?? ""), \(placemark.country ?? "")"
-//                completion(coordinates)
-//            } else {
-//                completion(nil)
-//            }
-//        }
-//    }
+}
 
 extension LocationService: CLLocationManagerDelegate {
     
@@ -77,6 +58,7 @@ extension LocationService: CLLocationManagerDelegate {
             locationManager.stopUpdatingLocation()
             
             if let currentLocation = locations.first {
+                self.currentLocation = currentLocation
                 self.currentCoordinates = (currentLocation.coordinate.latitude, currentLocation.coordinate.longitude)
             }
             
