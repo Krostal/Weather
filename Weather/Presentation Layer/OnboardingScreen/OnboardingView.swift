@@ -55,7 +55,7 @@ final class OnboardingView: UIView {
         return choiceLabel
     }()
     
-    private lazy var agreeButton: UIButton = {
+    lazy var agreeButton: UIButton = {
         let agreeButton = UIButton(type: .system)
         agreeButton.translatesAutoresizingMaskIntoConstraints = false
         agreeButton.setTitle("ИСПОЛЬЗОВАТЬ МЕСТОПОЛОЖЕНИЕ УСТРОЙСТВА", for: .normal)
@@ -136,7 +136,7 @@ final class OnboardingView: UIView {
     
     @objc func agreeButtonTapped() {
         delegate?.showMainScreen()
-        agreeButton.isEnabled = false
+//        agreeButton.isEnabled = false
     }
     
     @objc func denyButtonTapped() {

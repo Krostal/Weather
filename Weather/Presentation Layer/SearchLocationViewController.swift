@@ -107,12 +107,9 @@ extension SearchLocationViewController: UITableViewDelegate {
             guard let self,
                   let response = response,
                   let firstPlacemark = response.mapItems.first?.placemark else {
-                // Обработка ошибки
                 print("Error during local search: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
-            
-            // Получаем координаты из первого найденного места
             let coordinates = firstPlacemark.coordinate
 
             print("Selected coordinates: \(coordinates)")

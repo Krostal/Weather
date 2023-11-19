@@ -3,8 +3,9 @@
 import UIKit
 
 protocol PageViewControllerUpdateDelegate: AnyObject {
-    func updateCurrentPage(index: Int)
-    func updateWeatherData(index: Int)
+    func removeTitle()
+    func updateTitle(with weather: Weather)
+    func updateCurrentPage(with weather: Weather, at index: Int)
 }
 
 class PageViewController: UIPageViewController {
@@ -12,26 +13,24 @@ class PageViewController: UIPageViewController {
     weak var updateDelegate: PageViewControllerUpdateDelegate?
     
     var cities: [Weather]
-    var mainView: MainView
-    
-    private var pages: [MainViewController] = []
-    private var currentIndex: Int = 0
-    
-    private let interactor: WeatherInteractorProtocol = WeatherInteractor()
-    
+    var mainView: MainView?
+    var emptyView: EmptyView?
+    var isLastPageAdded: Bool = false
+    var mainViewController: MainViewController?
+    var pages: [MainViewController] = []
+        
     private lazy var pageControl: UIPageControl = {
         let pageControl = UIPageControl()
         pageControl.translatesAutoresizingMaskIntoConstraints = false
-        pageControl.numberOfPages = cities.count
+        pageControl.numberOfPages = cities.count + 1
         pageControl.currentPage = 0
         pageControl.currentPageIndicatorTintColor = .systemBlue
         pageControl.pageIndicatorTintColor = .systemGray
         return pageControl
     }()
     
-    init(cities: [Weather], mainView: MainView) {
+    init(cities: [Weather]) {
         self.cities = cities
-        self.mainView = mainView
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
     }
     
@@ -49,66 +48,69 @@ class PageViewController: UIPageViewController {
         dataSource = self
         delegate = self
         
-        if let viewController = contentViewController(at: index) {
-            setViewControllers([viewController], direction: .forward, animated: true, completion: nil)
+        if cities.isEmpty {
+            if let additionalViewController = additionalViewController() {
+                setViewControllers([additionalViewController], direction: .forward, animated: true, completion: nil)
+                isLastPageAdded = true
+            }
+        } else {
+            if let cityViewController = contentViewController(at: index) {
+                pages[index].isPageUpdated = true
+                setViewControllers([cityViewController], direction: .forward, animated: true, completion: nil)
+            }
         }
+    }
+    
+    private func additionalViewController() -> MainViewController? {
+                
+        mainViewController = MainViewController()
+        let lastIndex = cities.count
+        
+        if isLastPageAdded {
+            return pages[lastIndex]
+        }
+        
+        guard let mainViewController = mainViewController else { return nil }
+        configureAdditionalViewController(mainViewController) { [weak self] in
+            guard let self else { return }
+            pages.append(mainViewController)
+            mainViewController.pageViewController = self
+        }
+        return mainViewController
     }
     
     private func contentViewController(at index: Int) -> MainViewController? {
         
-        print(index, "эта цифра")
-        
         guard index >= 0, index < cities.count else {
             return nil
         }
-        
-        currentIndex = index
-        
+                
         if index < pages.count {
-            print("уже есть")
-            return(pages[index])
+            return pages[index]
         }
         
-        let newMainViewController = MainViewController()
-        configureMainViewController(newMainViewController, at: index) { [weak self] in
+        mainViewController = MainViewController()
+        
+        guard let mainViewController = mainViewController else { return nil}
+        configureMainViewController(mainViewController, at: index) { [weak self] in
             guard let self else { return }
-            pages.append(newMainViewController)
-            print("создан новый")
+            pages.insert(mainViewController, at: index)
+            mainViewController.pageViewController = self
         }
-        return newMainViewController
+        return mainViewController
     }
     
-    //    private func contentViewController(at index: Int, completion: @escaping (MainViewController?) -> Void) {
-    //
-    //        print(index, "эта цифра")
-    //
-    //        guard index >= 0, index < cities.count else {
-    //            completion(nil)
-    //            return
-    //        }
-    //
-    //        currentIndex = index
-    //
-    //        if index < pages.count {
-    //            print("уже есть")
-    //            completion(pages[index])
-    //        }
-    //
-    //        let newMainViewController = MainViewController()
-    //        configureMainViewController(newMainViewController, at: index) { [weak self] in
-    //            guard let self else { return }
-    //            pages.append(newMainViewController)
-    //            print("создан новый")
-    //            completion(newMainViewController)
-    //        }
-    //    }
+    private func configureAdditionalViewController(_ additionalViewController: MainViewController, completion: @escaping () -> Void) {
+        emptyView = EmptyView(frame: self.view.bounds)
+        emptyView?.delegate = additionalViewController
+        additionalViewController.view = emptyView
+        completion()
+    }
     
     private func configureMainViewController(_ mainViewController: MainViewController, at index: Int, completion: @escaping () -> Void) {
         mainView = MainView(frame: self.view.bounds, weather: cities[index])
-        mainView.delegate = mainViewController
+        mainView?.delegate = mainViewController
         mainViewController.weather = cities[index]
-        mainViewController.mainView = mainView
-        mainViewController.currentIndex = currentIndex
         mainViewController.view = mainView
         completion()
     }
@@ -122,36 +124,40 @@ class PageViewController: UIPageViewController {
         ])
     }
     
-    func updateCurrentPageView(at index: Int, with cities: [Weather]) {
-        guard index >= 0,
-              index < cities.count,
-              index < pages.count
-        else {
-            return
-        }
-        
-        self.cities = cities
+    func updateCurrentPage(with weather: Weather, at index: Int) {
+        cities[index] = weather
         let currentViewController = pages[index]
-        currentViewController.weather = cities[index]
-        currentViewController.markPageAsUpdated()
-        
-        DispatchQueue.main.async { [weak self] in
+        configureMainViewController(currentViewController, at: index) { [weak self] in
             guard let self else { return }
-            mainView.tableView.reloadData()
             pages[index] = currentViewController
+            setViewControllers([currentViewController], direction: .forward, animated: false)
         }
     }
     
-    func reloadPageViewController() {
-        DispatchQueue.main.async { [weak self] in
+    func newCityAdded(city: Weather) {
+        
+        cities.append(city)
+        let indexToInsert = cities.count - 1
+        mainViewController = MainViewController()
+        
+        guard let mainViewController = mainViewController else { return }
+
+        mainViewController.isPageUpdated = true
+        configureMainViewController(mainViewController, at: indexToInsert) { [weak self] in
             guard let self else { return }
-            pages = []
-            mainView.tableView.reloadData()
-            removeFromParent()
-            setupView(at: 0)
-            currentIndex = 0
-            pageControl.currentPage = 0
-            
+            pages.insert(mainViewController, at: indexToInsert)
+            print(pages[indexToInsert], "‼️")
+            pageControl.numberOfPages = cities.count + 1
+            pageControl.currentPage = cities.count - 1
+            setViewControllers([mainViewController], direction: .forward, animated: false)
+            updateDelegate?.updateTitle(with: city)
+        }
+    }
+    
+    func reloadPages(cities: [Weather]) {
+        self.cities = cities
+        DispatchQueue.main.async {
+            // перезагрузить pageViewController
         }
     }
 }
@@ -159,51 +165,47 @@ class PageViewController: UIPageViewController {
 extension PageViewController: UIPageViewControllerDataSource {
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         guard let currentIndex = cities.firstIndex(where: { $0 === (viewController as? MainViewController)?.weather }),
-              currentIndex > 0 else {
+              currentIndex > 0 
+        else {
             return nil
         }
         
         let previousIndex = currentIndex - 1
-        
+        print(contentViewController(at: previousIndex), "‼️")
         return contentViewController(at: previousIndex)
     }
-
+    
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
         guard let currentIndex = cities.firstIndex(where: { $0 === (viewController as? MainViewController)?.weather }),
-              currentIndex < cities.count - 1 else {
+              currentIndex < cities.count 
+        else {
             return nil
         }
-
-        let nextIndex = currentIndex + 1
         
-        return contentViewController(at: nextIndex)
+        if currentIndex < cities.count - 1 {
+            let nextIndex = currentIndex + 1
+            
+            return contentViewController(at: nextIndex)
+        } else {
+            return additionalViewController()
+        }
     }
 }
 
 extension PageViewController: UIPageViewControllerDelegate {
     
-
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         guard let currentViewController = pageViewController.viewControllers?.first as? MainViewController,
-              let currentIndex = cities.firstIndex(where: { $0 === currentViewController.weather }) else {
+              let weather = currentViewController.weather,
+              let currentIndex = cities.firstIndex(where: { $0 === weather }) else {
+            pageControl.currentPage = pages.count
+            isLastPageAdded = true
+            updateDelegate?.removeTitle()
             return
         }
         
-        self.currentIndex = currentIndex
-        print("текущий индекс", currentIndex)
-        print("текущий pages", pages.count)
-        print("текущий cities", cities.count)
-        print(cities[currentIndex].latitude, cities[currentIndex].longitude)
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            self.pageControl.currentPage = currentIndex
-            self.updateDelegate?.updateCurrentPage(index: currentIndex)
-            if !currentViewController.isPageUpdated {
-                self.updateDelegate?.updateWeatherData(index: currentIndex)
-            }
-        }
+        pageControl.currentPage = currentIndex
+        updateDelegate?.updateCurrentPage(with: weather, at: currentIndex)
     }
 }
-
 

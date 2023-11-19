@@ -4,9 +4,10 @@ import CoreData
 protocol WeatherInteractorProtocol {
     func fetchWeatherFromNetwork(completion: @escaping (Result<Void, Error>) -> Void)
     func getWeatherFromCoreData(completion: @escaping ([Weather]) -> Void)
-    func getCitiesWithWeatherData(completion: @escaping (Result<[Weather], Error>) -> Void)
+    func getCitiesWithWeatherData(completion: @escaping ([Weather]) -> Void)
     func checkPermission(completion: @escaping (Bool) -> Void)
     func isDetermind() -> Bool
+    func isAuthorizedToUseLocation() -> Bool
     func updateCoordinates(with coordinates: (latitude: Double, longitude: Double))
     func updateWeatherInCoreData(coordinates: (latitude: Double, longitude: Double), locationName: String?, completion: @escaping (Result<Weather, Error>) -> Void)
 }
@@ -178,13 +179,9 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         }
     }
     
-    func getCitiesWithWeatherData(completion: @escaping (Result<[Weather], Error>) -> Void) {
+    func getCitiesWithWeatherData(completion: @escaping ([Weather]) -> Void) {
         let weatherArray = coreDataService.getWeather()
-        if weatherArray.isEmpty {
-            print("No data available in Core Data")
-        } else {
-            completion(.success(weatherArray))
-        }
+        completion(weatherArray)
     }
     
     func checkPermission(completion: @escaping (Bool) -> Void) {
@@ -196,7 +193,11 @@ final class WeatherInteractor: WeatherInteractorProtocol {
     }
     
     func isDetermind() -> Bool {
-        return (locationService.isDetermined)
+        return locationService.isDetermined
+    }
+    
+    func isAuthorizedToUseLocation() -> Bool {
+        return locationService.isLocationAuthorized
     }
     
     private func saveWeatherToCoreData(completion: @escaping (Result<Weather, Error>) -> Void) {
@@ -207,8 +208,11 @@ final class WeatherInteractor: WeatherInteractorProtocol {
             return
         }
         if let existingWeatherModel = coreDataService.getWeatherData(locationName: locationName) {
+            print(locationName)
             let updatedAt = weather.properties.meta.updatedAt
+            print(updatedAt)
             if coreDataService.isWeatherDataAlreadyExist(updatedAt: updatedAt, locationName: locationName) {
+                print(coreDataService.isWeatherDataAlreadyExist(updatedAt: updatedAt, locationName: locationName))
                 print("Текущая модель Weather для \(locationName) актуальна и не требует обновления")
                 completion(.success((existingWeatherModel)))
                 return
