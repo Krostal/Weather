@@ -6,8 +6,9 @@ protocol WeatherInteractorProtocol {
     func getWeatherFromCoreData(completion: @escaping ([Weather]) -> Void)
     func getCitiesWithWeatherData(completion: @escaping ([Weather]) -> Void)
     func checkPermission(completion: @escaping (Bool) -> Void)
-    func isDetermind() -> Bool
+    func isDetermined(completion: @escaping (Bool) -> Void)
     func isAuthorizedToUseLocation() -> Bool
+    func updateAuthorizationStatus(completion: @escaping (Bool) -> Void)
     func updateCoordinates(with coordinates: (latitude: Double, longitude: Double))
     func updateWeatherInCoreData(coordinates: (latitude: Double, longitude: Double), locationName: String?, completion: @escaping (Result<Weather, Error>) -> Void)
 }
@@ -25,6 +26,16 @@ final class WeatherInteractor: WeatherInteractorProtocol {
     private var weatherJsonModel: WeatherJsonModel?
     private var astronomyJsonModel: AstronomyJsonModel?
     private var airQualityJsonModel: AirQualityJsonModel?
+    
+    func updateAuthorizationStatus(completion: @escaping (Bool) -> Void) {
+        locationService.updateLocationStatus { success in
+            if success {
+                completion(true)
+            } else {
+                completion(false)
+            }
+        }
+    }
     
     func updateCoordinates(with coordinates: (latitude: Double, longitude: Double)) {
         locationService.currentCoordinates = coordinates
@@ -192,8 +203,8 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         }
     }
     
-    func isDetermind() -> Bool {
-        return locationService.isDetermined
+    func isDetermined(completion: @escaping (Bool) -> Void) {
+        completion(locationService.isDetermined)
     }
     
     func isAuthorizedToUseLocation() -> Bool {

@@ -19,7 +19,7 @@ class PageViewController: UIPageViewController {
     var mainViewController: MainViewController?
     var pages: [MainViewController] = []
         
-    private lazy var pageControl: UIPageControl = {
+    lazy var pageControl: UIPageControl = {
         let pageControl = UIPageControl()
         pageControl.translatesAutoresizingMaskIntoConstraints = false
         pageControl.numberOfPages = cities.count + 1
@@ -43,7 +43,7 @@ class PageViewController: UIPageViewController {
         setupPageControl()
         setupView(at: 0)
     }
-    
+     
     private func setupView(at index: Int) {
         dataSource = self
         delegate = self
@@ -138,6 +138,7 @@ class PageViewController: UIPageViewController {
         
         cities.append(city)
         let indexToInsert = cities.count - 1
+        
         mainViewController = MainViewController()
         
         guard let mainViewController = mainViewController else { return }
@@ -146,7 +147,6 @@ class PageViewController: UIPageViewController {
         configureMainViewController(mainViewController, at: indexToInsert) { [weak self] in
             guard let self else { return }
             pages.insert(mainViewController, at: indexToInsert)
-            print(pages[indexToInsert], "‼️")
             pageControl.numberOfPages = cities.count + 1
             pageControl.currentPage = cities.count - 1
             setViewControllers([mainViewController], direction: .forward, animated: false)
@@ -171,7 +171,6 @@ extension PageViewController: UIPageViewControllerDataSource {
         }
         
         let previousIndex = currentIndex - 1
-        print(contentViewController(at: previousIndex), "‼️")
         return contentViewController(at: previousIndex)
     }
     

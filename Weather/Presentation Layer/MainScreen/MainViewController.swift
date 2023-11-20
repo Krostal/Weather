@@ -14,11 +14,10 @@ final class MainViewController: UIViewController {
 
     var mainView: MainView?
     var emptyView: EmptyView?
-    private var onboardingView: OnboardingView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        start()
+        configurePageViewController()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -26,14 +25,6 @@ final class MainViewController: UIViewController {
         let backButton = UIBarButtonItem()
         backButton.title = "Назад"
         navigationItem.backBarButtonItem = backButton
-    }
-    
-    private func start() {
-        if interactor.isDetermind() {
-            configurePageViewController()
-        } else {
-            showOnboardingScreen()
-        }
     }
     
     private func configurePageViewController() {
@@ -82,8 +73,6 @@ final class MainViewController: UIViewController {
                 guard let self else { return }
                 switch result {
                 case .success(let updatedWeather):
-                    print("Обновление:", cities.count, index)
-                    print(self, "‼️‼️")
                     cities[index] = updatedWeather
                     pageViewController.cities[index] = updatedWeather
                     isPageUpdated = true
@@ -105,6 +94,15 @@ final class MainViewController: UIViewController {
     }
     
     private func createNewPageViewController() {
+        if let existingPageViewController = pageViewController {
+            print("❌", existingPageViewController.children)
+            print("❌", view.subviews)
+            existingPageViewController.removeFromParent()
+            existingPageViewController.view.removeFromSuperview()
+            print("✅", existingPageViewController.children)
+            print("✅", view.subviews)
+        }
+        
         let newPageViewController = PageViewController(cities: cities)
         newPageViewController.updateDelegate = self
         addChild(newPageViewController)
@@ -138,64 +136,12 @@ final class MainViewController: UIViewController {
         }
     }
     
-    
-    private func showOnboardingScreen() {
-        onboardingView = OnboardingView()
-        onboardingView?.delegate = self
-        view = onboardingView
-    }
-    
     private func showSearchBar() {
         let searchLocationViewController = SearchLocationViewController()
         searchLocationViewController.delegate = self
         navigationController?.modalPresentationStyle = .fullScreen
         navigationController?.modalTransitionStyle = .coverVertical
         navigationController?.present(searchLocationViewController, animated: true)
-    }
-
-    private func updateCity(at index: Int, with allWeatherModels: [Weather], completion: @escaping () -> Void) {
-        
-        var array = allWeatherModels
-        let model = array[index]
-        
-        interactor.updateWeatherInCoreData(coordinates: (latitude: model.latitude, longitude: model.longitude), locationName: model.locationName) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let city):
-                array[index] = city
-                self.cities = array
-                completion()
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }
-    }
-    
-    private func showLocationServicesAlert(message: String) {
-        let alertController = UIAlertController(
-            title: "Разрешение местоположения",
-            message: message,
-            preferredStyle: .alert
-        )
-
-        let settingsAction = UIAlertAction(
-            title: "Настройки приложения",
-            style: .default
-        ) { _ in
-            if let bundleIdentifier = Bundle.main.bundleIdentifier, let settingsURL = URL(string: UIApplication.openSettingsURLString + bundleIdentifier) {
-                UIApplication.shared.open(settingsURL, options: [:], completionHandler: nil)
-            }
-        }
-
-        let cancelAction = UIAlertAction(
-            title: "Отмена",
-            style: .cancel
-        )
-
-        alertController.addAction(settingsAction)
-        alertController.addAction(cancelAction)
-
-        present(alertController, animated: true, completion: nil)
     }
     
     @objc private func showSettings(_ sender: UIBarButtonItem) {
@@ -207,10 +153,10 @@ final class MainViewController: UIViewController {
     }
     
     @objc private func showLocation(_ sender: UIBarButtonItem) {
-        let onboardingViewController = OnboardingViewController()
-        navigationController?.modalPresentationStyle = .automatic
-        navigationController?.modalTransitionStyle = .coverVertical
-        navigationController?.present(onboardingViewController, animated: true)
+//        let onboardingViewController = OnboardingViewController()
+//        navigationController?.modalPresentationStyle = .automatic
+//        navigationController?.modalTransitionStyle = .coverVertical
+//        navigationController?.present(onboardingViewController, animated: true)
     }
 }
 
@@ -241,22 +187,6 @@ extension MainViewController: MainViewDelegate {
 
 }
 
-extension MainViewController: OnboardingViewDelegate {
-    func showEmptyScreen() {
-        fetchAndShowExistingWeatherData()
-    }
-    
-    func showMainScreen() {
-        if interactor.isAuthorizedToUseLocation() {
-            fetchAndShowWeatherForCurrentLocation()
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.showLocationServicesAlert(message: "Для использования местоположения необходимо разрешение. Пожалуйста, разрешите в настройках приложения.")
-            }
-        }
-    }
-}
-
 extension MainViewController: EmptyViewDelegate {
     func addLocationAction() {
         showSearchBar()
@@ -265,8 +195,14 @@ extension MainViewController: EmptyViewDelegate {
 
 extension MainViewController: SettingsViewControllerDelegate {
     func updatedSettings() {
+        guard let pageViewController = pageViewController else { return }
+        let index = pageViewController.pageControl.currentPage
+        print(index)
         DispatchQueue.main.async {
-            // перезагрузить pageViewController и показать ранее открытую страницу
+            pageViewController.pages[index].mainView?.tableView.reloadData()
+            if let weather = pageViewController.pages[index].weather {
+                pageViewController.updateCurrentPage(with: weather, at: index)
+            }
         }
     }
 }
@@ -283,12 +219,12 @@ extension MainViewController: SearchLocationViewControllerDelegate {
             }
             switch result {
             case .success():
-                interactor.getWeatherFromCoreData { weatherArray in
-                    if let weather = weatherArray.first {
-                        DispatchQueue.main.async {
-                            if pageViewController.cities.isEmpty {
-                                // перезапустить mainViewController
-                            } else {
+                if pageViewController.cities.isEmpty {
+                    fetchAndShowExistingWeatherData()
+                } else {
+                    interactor.getWeatherFromCoreData { weatherArray in
+                        if let weather = weatherArray.first {
+                            DispatchQueue.main.async {
                                 pageViewController.newCityAdded(city: weather)
                             }
                         }

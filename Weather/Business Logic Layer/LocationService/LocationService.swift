@@ -49,6 +49,16 @@ final class LocationService: NSObject {
         }
     }
     
+    func updateLocationStatus(completion: @escaping (Bool) -> Void) {
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
+        if isLocationAuthorized {
+            completion(true)
+        } else {
+            completion(false)
+        }
+    }
+    
 }
 
 extension LocationService: CLLocationManagerDelegate {
