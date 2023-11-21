@@ -7,11 +7,13 @@ struct CurrentTimePeriod {
     let instantData: InstantData
     let next1HoursForecast: Next1HoursForecast
     let next6HoursForecast: Next6HoursForecast
+    let timeZone: String?
     
     init() {
         self.instantData = InstantData()
         self.next1HoursForecast = Next1HoursForecast()
         self.next6HoursForecast = Next6HoursForecast()
+        self.timeZone = nil
     }
 
     init?(weather: Weather) {
@@ -33,5 +35,6 @@ struct CurrentTimePeriod {
         self.instantData = instantData
         self.next1HoursForecast = next1Hoursforecast
         self.next6HoursForecast = next6Hoursforecast
+        self.timeZone = weather.timeZone
     }
 }

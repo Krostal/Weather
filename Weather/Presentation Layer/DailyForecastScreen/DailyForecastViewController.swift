@@ -44,7 +44,7 @@ extension DailyForecastViewController: DailyForecastViewDelegate {
         selectedDate = date
         dateIndex = index
         setupView()
-        navigationItem.title = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"))
+        navigationItem.title = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"), timeZone: TimeZone(identifier: weather.timeZone ?? ""))
     }
 }
 

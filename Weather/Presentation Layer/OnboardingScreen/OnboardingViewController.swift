@@ -16,7 +16,7 @@ final class OnboardingViewController: UIViewController {
         return onboardingView
     }()
     
-    private let interactor: WeatherInteractorProtocol = WeatherInteractor()
+    private let locationService = LocationService.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,25 +52,27 @@ final class OnboardingViewController: UIViewController {
 }
 
 extension OnboardingViewController: OnboardingViewDelegate {
+    
     func locationAllowed() {
-        interactor.updateAuthorizationStatus { [weak self] isAuthorized in
-            guard let self else { return }
-            if isAuthorized {
-                DispatchQueue.main.async {
-                    self.delegate?.choiceIsMade()
-                }
-            } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    self.showLocationServicesAlert(message: "Для использования местоположения необходимо разрешение. Пожалуйста, разрешите в настройках приложения.")
-                }
+        if !locationService.isLocationAuthorized {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                guard let self else { return }
+                showLocationServicesAlert(message: "Для использования местоположения необходимо разрешение. Пожалуйста, разрешите в настройках приложения")
             }
+        } else {
+            delegate?.choiceIsMade()
         }
     }
     
     func locationDenied() {
-        delegate?.choiceIsMade()
+        if locationService.isLocationAuthorized {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                guard let self else { return }
+                showLocationServicesAlert(message: "Пожалуйста, отключите в настройках приложения разрешение на использование текущего местоположения")
+            }
+        } else {
+            delegate?.choiceIsMade()
+        }
     }
 }
-
-
 

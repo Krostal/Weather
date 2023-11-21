@@ -4,6 +4,7 @@ import UIKit
 
 protocol SettingsViewDelegate: AnyObject {
     func setUnits(temperatureUnit: String, windSpeedUnit: String, timeFormat: String, precipitationUnit: String)
+    func deleteButtonTapped()
 }
 
 final class SettingsView: UIView {
@@ -12,6 +13,8 @@ final class SettingsView: UIView {
         static let horizontalSpacing: CGFloat = 16
         static let verticalSpacing: CGFloat = 25
         static let stackViewWidth: CGFloat = 80
+        static let padding: CGFloat = 25
+        static let buttonHeight: CGFloat = 40
     }
     
     weak var delegate: SettingsViewDelegate?
@@ -268,6 +271,18 @@ final class SettingsView: UIView {
         return setButton
     }()
     
+    lazy var deleteButton: UIButton = {
+        let setButton = UIButton(type: .system)
+        setButton.translatesAutoresizingMaskIntoConstraints = false
+        setButton.setTitle("Удалить текущую страницу", for: .normal)
+        setButton.setTitleColor(.systemRed, for: .normal)
+        setButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        setButton.layer.cornerRadius = 10
+        setButton.backgroundColor = .white
+        setButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
+        return setButton
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -321,6 +336,7 @@ final class SettingsView: UIView {
         settingsView.addSubview(notificationLabel)
         settingsView.addSubview(precipitationStackView)
         settingsView.addSubview(setButton)
+        addSubview(deleteButton)
     }
     
     private func setupLayout() {
@@ -382,9 +398,14 @@ final class SettingsView: UIView {
             mmLabel.widthAnchor.constraint(equalToConstant: Constants.stackViewWidth / 2),
 
             setButton.bottomAnchor.constraint(equalTo: settingsView.bottomAnchor, constant: -Constants.verticalSpacing),
-            setButton.leadingAnchor.constraint(equalTo: settingsView.leadingAnchor, constant: 25),
-            setButton.trailingAnchor.constraint(equalTo: settingsView.trailingAnchor, constant: -25),
-            setButton.heightAnchor.constraint(equalToConstant: 40),
+            setButton.leadingAnchor.constraint(equalTo: settingsView.leadingAnchor, constant: Constants.padding),
+            setButton.trailingAnchor.constraint(equalTo: settingsView.trailingAnchor, constant: -Constants.padding),
+            setButton.heightAnchor.constraint(equalToConstant: Constants.buttonHeight),
+            
+            deleteButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -Constants.verticalSpacing),
+            deleteButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Constants.padding),
+            deleteButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Constants.padding),
+            deleteButton.heightAnchor.constraint(equalToConstant: Constants.buttonHeight),
         ])
     }
     
@@ -395,6 +416,10 @@ final class SettingsView: UIView {
         selectedPrecipitationUnit = inchLabel.backgroundColor == .systemBlue ? "'" : "мм"
         
         delegate?.setUnits(temperatureUnit: selectedTemperatureUnit, windSpeedUnit: selectedWindSpeedUnit, timeFormat: selectedTimeFormat, precipitationUnit: selectedPrecipitationUnit)
+    }
+    
+    @objc func deleteButtonTapped() {
+        delegate?.deleteButtonTapped()
     }
     
     @objc func celsiusLabelTapped() {

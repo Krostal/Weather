@@ -168,11 +168,11 @@ extension SunAndMoonCollectionViewCell: Configurable {
                    let sunset = filteredForecast[index].sunset {
                     switch units.timeFormat {
                     case .twelveHour:
-                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunrise, dateFormat: "hh:mm a", locale: nil)
-                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunset, dateFormat: "hh:mm a", locale: nil)
+                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunrise, dateFormat: "hh:mm a", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
+                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunset, dateFormat: "hh:mm a", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
                     case .twentyFourHour:
-                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil)
-                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil)
+                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
+                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
                     }
                     durationLabel.text = calculateDuration(rise: sunrise, set: sunset)
                 }
@@ -183,11 +183,11 @@ extension SunAndMoonCollectionViewCell: Configurable {
                    let moonset = filteredForecast[index].moonset {
                     switch units.timeFormat {
                     case .twelveHour:
-                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonrise, dateFormat: "hh:mm a", locale: nil)
-                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonset, dateFormat: "hh:mm a", locale: nil)
+                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonrise, dateFormat: "hh:mm a", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
+                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonset, dateFormat: "hh:mm a", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
                     case .twentyFourHour:
-                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonrise, dateFormat: "HH:mm", locale: nil)
-                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonset, dateFormat: "HH:mm", locale: nil)
+                        riseTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonrise, dateFormat: "HH:mm", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
+                        setTimeLabel.text = CustomDateFormatter().formattedStringToString(date: moonset, dateFormat: "HH:mm", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
                     }
                     durationLabel.text = calculateDuration(rise: moonrise, set: moonset)
                 }

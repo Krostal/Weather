@@ -111,9 +111,7 @@ extension SearchLocationViewController: UITableViewDelegate {
                 return
             }
             let coordinates = firstPlacemark.coordinate
-
-            print("Selected coordinates: \(coordinates)")
-            
+    
             searchBar.text = ""
             searchBar.text = selectedResult.title + " " + selectedResult.subtitle
             

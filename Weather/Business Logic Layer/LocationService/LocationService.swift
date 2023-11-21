@@ -5,8 +5,11 @@ import MapKit
 
 final class LocationService: NSObject {
     
+    static let shared = LocationService()
+    
     private let locationManager = CLLocationManager()
     private var locationUpdateCallback: (() -> Void)?
+    private var locationIsDeterminedCallback: ((Bool) -> Void)?
     
     private let geocoder = CLGeocoder()
     var currentLocation: CLLocation?
@@ -15,8 +18,9 @@ final class LocationService: NSObject {
     var withCurrentLocation: Bool = true
     var currentCoordinates: (latitude: Double, longitude: Double)?
     var placeName: String?
+    var placeTimeZone: String?
     
-    override init() {
+    private override init() {
         super.init()
         locationManager.delegate = self
         if withCurrentLocation {
@@ -30,11 +34,17 @@ final class LocationService: NSObject {
     }
     
     func getLocationName(completion: @escaping (String?) -> Void) {
-        guard let coordinates = currentCoordinates else { return }
+        
+        guard let coordinates = currentCoordinates else {
+            completion(nil)
+            return
+        }
+        
         let location = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
         geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
             guard let placemark = placemarks?.first
             else {
+                completion(nil)
                 return
             }
             if let error = error {
@@ -45,20 +55,19 @@ final class LocationService: NSObject {
             
             let placeName = "\(placemark.locality ?? ""), \(placemark.country ?? "")"
             self.placeName = placeName
+            
+            if let timeZone = placemark.timeZone?.identifier {
+                self.placeTimeZone = timeZone
+            }
+            
             completion(placeName)
         }
     }
     
-    func updateLocationStatus(completion: @escaping (Bool) -> Void) {
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
-        if isLocationAuthorized {
-            completion(true)
-        } else {
-            completion(false)
-        }
+    func checkIsDetermined(completion: @escaping (Bool) -> Void) {
+        self.locationIsDeterminedCallback = completion
+        completion(isDetermined)
     }
-    
 }
 
 extension LocationService: CLLocationManagerDelegate {
@@ -89,5 +98,8 @@ extension LocationService: CLLocationManagerDelegate {
         @unknown default:
             fatalError("Неизвестный статус разрешения использования местоположения")
         }
+        
+        locationIsDeterminedCallback?(isDetermined)
+        
     }
 }

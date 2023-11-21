@@ -2,7 +2,13 @@
 import UIKit
 import CoreData
 
+protocol MainViewControllerDelegate: AnyObject {
+    func showLocationSettings()
+}
+
 final class MainViewController: UIViewController {
+    
+    weak var delegate: MainViewControllerDelegate?
     
     private let interactor: WeatherInteractorProtocol = WeatherInteractor()
     
@@ -29,12 +35,8 @@ final class MainViewController: UIViewController {
     
     private func configurePageViewController() {
         if interactor.isAuthorizedToUseLocation() {
-            print("Есть разрешение на использование местоположения")
-            // запрос погоды для текущей локации и устанавливаем pageViewController
             fetchAndShowWeatherForCurrentLocation()
         } else {
-            print("Нет разрешения на использование местоположения")
-            // получаем сущестующие модели из Core Data и устанавливаем pageViewController
             fetchAndShowExistingWeatherData()
         }
     }
@@ -70,11 +72,10 @@ final class MainViewController: UIViewController {
         guard let pageViewController = pageViewController else { return }
         if !isPageUpdated {
             interactor.updateWeatherInCoreData(coordinates: (latitude: weather.latitude, longitude: weather.longitude), locationName: weather.locationName) { [weak self] result in
-                guard let self else { return }
+                guard let self, !cities.isEmpty else { return }
                 switch result {
                 case .success(let updatedWeather):
                     cities[index] = updatedWeather
-                    pageViewController.cities[index] = updatedWeather
                     isPageUpdated = true
                     DispatchQueue.main.async {
                         pageViewController.pages[index].mainView?.tableView.reloadData()
@@ -93,16 +94,30 @@ final class MainViewController: UIViewController {
         }
     }
     
-    private func createNewPageViewController() {
-        if let existingPageViewController = pageViewController {
-            print("❌", existingPageViewController.children)
-            print("❌", view.subviews)
-            existingPageViewController.removeFromParent()
-            existingPageViewController.view.removeFromSuperview()
-            print("✅", existingPageViewController.children)
-            print("✅", view.subviews)
+    private func refreshWeather(with weather: Weather, at index: Int) {
+        guard let pageViewController = pageViewController else { return }
+ 
+        interactor.updateWeatherInCoreData(coordinates: (latitude: weather.latitude, longitude: weather.longitude), locationName: weather.locationName) { [weak self] result in
+            guard let self, !cities.isEmpty, index < cities.count 
+            else {
+                pageViewController.mainView?.tableView.refreshControl?.endRefreshing()
+                return
+            }
+            switch result {
+            case .success(let updatedWeather):
+                cities[index] = updatedWeather
+                isPageUpdated = true
+                DispatchQueue.main.async {
+                    pageViewController.pages[index].mainView?.tableView.reloadData()
+                    pageViewController.updateCurrentPage(with: updatedWeather, at: index)
+                }
+            case .failure(let error):
+                print("FetchWeather error \(error.localizedDescription)")
+            }
         }
-        
+    }
+    
+    private func createNewPageViewController() {
         let newPageViewController = PageViewController(cities: cities)
         newPageViewController.updateDelegate = self
         addChild(newPageViewController)
@@ -147,16 +162,18 @@ final class MainViewController: UIViewController {
     @objc private func showSettings(_ sender: UIBarButtonItem) {
         let settingsViewController = SettingsViewController()
         settingsViewController.delegate = self
+        if let cities = pageViewController?.cities {
+            if cities.count < 2 {
+                settingsViewController.settingsView.deleteButton.isHidden = true
+            }
+        }
         navigationController?.modalPresentationStyle = .formSheet
         navigationController?.modalTransitionStyle = .flipHorizontal
         navigationController?.present(settingsViewController, animated: true)
     }
     
     @objc private func showLocation(_ sender: UIBarButtonItem) {
-//        let onboardingViewController = OnboardingViewController()
-//        navigationController?.modalPresentationStyle = .automatic
-//        navigationController?.modalTransitionStyle = .coverVertical
-//        navigationController?.present(onboardingViewController, animated: true)
+        delegate?.showLocationSettings()
     }
 }
 
@@ -177,7 +194,7 @@ extension MainViewController: MainViewDelegate {
         }
         
         let dailyForecastViewController = DailyForecastViewController(weather: weatherModel, dailyTimePeriod: dailyTimePeriod, dateIndex: dateIndex, selectedDate: date)
-        let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"))
+        let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"), timeZone: TimeZone(identifier: weather?.timeZone ?? ""))
         dailyForecastViewController.navigationItem.title = dateString
         
         dailyForecastViewController.headerTitle = weatherModel.locationName
@@ -194,16 +211,20 @@ extension MainViewController: EmptyViewDelegate {
 }
 
 extension MainViewController: SettingsViewControllerDelegate {
+    
     func updatedSettings() {
         guard let pageViewController = pageViewController else { return }
         let index = pageViewController.pageControl.currentPage
-        print(index)
         DispatchQueue.main.async {
             pageViewController.pages[index].mainView?.tableView.reloadData()
             if let weather = pageViewController.pages[index].weather {
                 pageViewController.updateCurrentPage(with: weather, at: index)
             }
         }
+    }
+    
+    func deleteButtonPressed() {
+        pageViewController?.removeCurrentPage()
     }
 }
 
@@ -219,11 +240,14 @@ extension MainViewController: SearchLocationViewControllerDelegate {
             }
             switch result {
             case .success():
-                if pageViewController.cities.isEmpty {
-                    fetchAndShowExistingWeatherData()
-                } else {
-                    interactor.getWeatherFromCoreData { weatherArray in
-                        if let weather = weatherArray.first {
+                interactor.getWeatherFromCoreData { weatherArray in
+                    if let weather = weatherArray.first {
+                        if pageViewController.cities.isEmpty {
+                            DispatchQueue.main.async {
+                                self.isPageUpdated = true
+                                pageViewController.restart(cities: [weather], at: 0)
+                            }
+                        } else {
                             DispatchQueue.main.async {
                                 pageViewController.newCityAdded(city: weather)
                             }
@@ -250,5 +274,9 @@ extension MainViewController: PageViewControllerUpdateDelegate {
     func updateCurrentPage(with weather: Weather, at index: Int) {
         updateTitle(with: weather.locationName)
         fetchWeatherForCurrentPage(with: weather, at: index)
+    }
+    
+    func refreshWeatherData(with weather: Weather, at index: Int) {
+        refreshWeather(with: weather, at: index)
     }
 }

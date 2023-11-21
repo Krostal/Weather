@@ -8,7 +8,6 @@ protocol WeatherInteractorProtocol {
     func checkPermission(completion: @escaping (Bool) -> Void)
     func isDetermined(completion: @escaping (Bool) -> Void)
     func isAuthorizedToUseLocation() -> Bool
-    func updateAuthorizationStatus(completion: @escaping (Bool) -> Void)
     func updateCoordinates(with coordinates: (latitude: Double, longitude: Double))
     func updateWeatherInCoreData(coordinates: (latitude: Double, longitude: Double), locationName: String?, completion: @escaping (Result<Weather, Error>) -> Void)
 }
@@ -18,7 +17,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
     private let defaultValue: Float = 3.33
     private let fetchDataService = FetchDataService()
     private let coreDataService = CoreDataService.shared
-    private let locationService = LocationService()
+    private let locationService = LocationService.shared
     private let context = CoreDataService.shared.setContext()
     private var locationName: String?
     var currentCoordinates: (latitude: Double, longitude: Double)?
@@ -26,16 +25,6 @@ final class WeatherInteractor: WeatherInteractorProtocol {
     private var weatherJsonModel: WeatherJsonModel?
     private var astronomyJsonModel: AstronomyJsonModel?
     private var airQualityJsonModel: AirQualityJsonModel?
-    
-    func updateAuthorizationStatus(completion: @escaping (Bool) -> Void) {
-        locationService.updateLocationStatus { success in
-            if success {
-                completion(true)
-            } else {
-                completion(false)
-            }
-        }
-    }
     
     func updateCoordinates(with coordinates: (latitude: Double, longitude: Double)) {
         locationService.currentCoordinates = coordinates
@@ -52,9 +41,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
         
         dispatchGroup.enter()
         self.fetchDataService.fetchWeatherData(coordinates: (coordinates.latitude, coordinates.longitude)) { [weak self] result in
-            print(locationName)
             guard let self else { return }
-            
             switch result {
             case .success(let weatherJsonModel):
                 self.weatherJsonModel = weatherJsonModel
@@ -219,11 +206,8 @@ final class WeatherInteractor: WeatherInteractorProtocol {
             return
         }
         if let existingWeatherModel = coreDataService.getWeatherData(locationName: locationName) {
-            print(locationName)
             let updatedAt = weather.properties.meta.updatedAt
-            print(updatedAt)
             if coreDataService.isWeatherDataAlreadyExist(updatedAt: updatedAt, locationName: locationName) {
-                print(coreDataService.isWeatherDataAlreadyExist(updatedAt: updatedAt, locationName: locationName))
                 print("Текущая модель Weather для \(locationName) актуальна и не требует обновления")
                 completion(.success((existingWeatherModel)))
                 return
@@ -382,6 +366,9 @@ final class WeatherInteractor: WeatherInteractorProtocol {
             weatherCoreDataModel.longitude = coordinates[0]
             weatherCoreDataModel.latitude = coordinates[1]
             weatherCoreDataModel.locationName = locationName
+            if let timeZone = locationService.placeTimeZone {
+                weatherCoreDataModel.timeZone = timeZone
+            }
             
             for timeSeries in weather.properties.timeseries {
                 let timePeriod = TimePeriod(context: self.context)
@@ -485,6 +472,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                 
                 let astronomyCoreDataModel = Astronomy(context: self.context)
                 astronomyCoreDataModel.start = astronomy.meta.start
+                astronomyCoreDataModel.timeZone = locationService.placeTimeZone
                 
                 let forecast = astronomy.data
                 for dailyData in forecast {

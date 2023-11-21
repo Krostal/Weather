@@ -170,7 +170,7 @@ extension DailyTableViewCell: Configurable {
                 temperatureLabel.text = "\(UnitsFormatter.fahrenheit.format(forecast.airTemperatureMin)) - \(UnitsFormatter.fahrenheit.format(forecast.airTemperatureMax))"
             }
             
-            dateLabel.text = dateFormatter.formattedDateToString(date: dateKey, dateFormat: "dd/MM", locale: nil)
+            dateLabel.text = dateFormatter.formattedDateToString(date: dateKey, dateFormat: "dd/MM", locale: nil, timeZone: TimeZone(identifier: timePeriod.timeZone ?? ""))
             precipitationIcon.image = UIImage(named: forecast.symbolCode ?? "xmark.icloud")
             precipitationLabel.text = "\(forecast.precipitationAmount)%"
             infoLabel.text = CurrentWeatherDescription(symbolCode: forecast.symbolCode ?? "cloud")?.description

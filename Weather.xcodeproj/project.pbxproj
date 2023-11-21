@@ -258,19 +258,9 @@
 			path = Coordinator;
 			sourceTree = "<group>";
 		};
-		098285172B0070F3005BA59C /* PageViewController */ = {
-			isa = PBXGroup;
-			children = (
-				098285182B007109005BA59C /* PageViewController.swift */,
-			);
-			path = PageViewController;
-			sourceTree = "<group>";
-		};
 		0985D3752AD3AE1F00063E87 /* Presentation Layer */ = {
 			isa = PBXGroup;
 			children = (
-				09967AD22AFE36DA0032C3CA /* SearchLocationViewController.swift */,
-				098285172B0070F3005BA59C /* PageViewController */,
 				09967AD42AFE774F0032C3CA /* OnboardingScreen */,
 				0957A7ED2AD70A7100B1DC36 /* Settings */,
 				0985D3762AD3AE3A00063E87 /* MainScreen */,
@@ -291,6 +281,8 @@
 			isa = PBXGroup;
 			children = (
 				09FB5B942AD1374500B46781 /* MainViewController.swift */,
+				098285182B007109005BA59C /* PageViewController.swift */,
+				09967AD22AFE36DA0032C3CA /* SearchLocationViewController.swift */,
 				09FB5B962AD1387A00B46781 /* MainView.swift */,
 				0981658D2AFDF9CE00ACE301 /* EmptyView.swift */,
 				09FB5B982AD139A100B46781 /* CurrentTableViewCell.swift */,

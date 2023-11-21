@@ -51,6 +51,26 @@ final class CoreDataService {
             return []
         }
     }
+    
+    func removeCurrentWeather(locationName: String) {
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        let predicate = NSPredicate(format: "locationName == %@", locationName)
+        request.predicate = predicate
+        do {
+            let results = try setContext().fetch(request)
+            if let existingWeather = results.first {
+                setContext().delete(existingWeather)
+                print("Существующая модель Weather для локации \(locationName) удалена")
+                do {
+                    try setContext().save()
+                } catch {
+                    print("Error saving context after deleting Weather model: \(error.localizedDescription)")
+                }
+            }
+        } catch {
+            print("Error checking existing weather data: \(error.localizedDescription)")
+        }
+    }
 
     
     func isWeatherDataAlreadyExist(updatedAt: String, locationName: String) -> Bool {
@@ -66,7 +86,7 @@ final class CoreDataService {
                     return true
                 } else {
                     setContext().delete(weatherData)
-                    print("Существующая модель WeatherData для данной локации \(locationName) удалена")
+                    print("Существующая модель WeatherData для локации \(locationName) удалена")
                     do {
                         try setContext().save()
                     } catch {

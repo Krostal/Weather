@@ -81,11 +81,11 @@ final class DailyForecastView: UIView {
     }
     
     private func calculateNumberOfSections(){
-        let selectedDay = CustomDateFormatter().formattedDateToString(date: selectedDate, dateFormat: "yyyy-MM-dd", locale: nil)
+        let selectedDay = CustomDateFormatter().formattedDateToString(date: selectedDate, dateFormat: "yyyy-MM-dd", locale: nil, timeZone: TimeZone(identifier: weather.timeZone ?? ""))
         
         var count: Int = 0
         for (date, timePeriods) in dailyTimePeriod.dailyForecast {
-            let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "yyyy-MM-dd", locale: nil)
+            let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "yyyy-MM-dd", locale: nil, timeZone: TimeZone(identifier: weather.timeZone ?? ""))
             if dateString == selectedDay {
                 count += timePeriods.count
             }

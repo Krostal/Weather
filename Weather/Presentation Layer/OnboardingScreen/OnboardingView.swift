@@ -140,7 +140,7 @@ final class OnboardingView: UIView {
     
     @objc func denyButtonTapped() {
         delegate?.locationDenied()
-        denyButton.isEnabled = false
+    
     }
     
 }

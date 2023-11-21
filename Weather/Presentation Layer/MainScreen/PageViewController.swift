@@ -6,6 +6,7 @@ protocol PageViewControllerUpdateDelegate: AnyObject {
     func removeTitle()
     func updateTitle(with weather: Weather)
     func updateCurrentPage(with weather: Weather, at index: Int)
+    func refreshWeatherData(with weather: Weather, at index: Int)
 }
 
 class PageViewController: UIPageViewController {
@@ -56,13 +57,14 @@ class PageViewController: UIPageViewController {
         } else {
             if let cityViewController = contentViewController(at: index) {
                 pages[index].isPageUpdated = true
+                cityViewController.cities = cities
                 setViewControllers([cityViewController], direction: .forward, animated: true, completion: nil)
             }
         }
     }
     
     private func additionalViewController() -> MainViewController? {
-                
+
         mainViewController = MainViewController()
         let lastIndex = cities.count
         
@@ -70,7 +72,10 @@ class PageViewController: UIPageViewController {
             return pages[lastIndex]
         }
         
-        guard let mainViewController = mainViewController else { return nil }
+        guard let mainViewController = mainViewController else {
+            return nil
+        }
+        
         configureAdditionalViewController(mainViewController) { [weak self] in
             guard let self else { return }
             pages.append(mainViewController)
@@ -81,7 +86,9 @@ class PageViewController: UIPageViewController {
     
     private func contentViewController(at index: Int) -> MainViewController? {
         
-        guard index >= 0, index < cities.count else {
+        guard index >= 0,
+              index < cities.count
+        else {
             return nil
         }
                 
@@ -91,7 +98,10 @@ class PageViewController: UIPageViewController {
         
         mainViewController = MainViewController()
         
-        guard let mainViewController = mainViewController else { return nil}
+        guard let mainViewController = mainViewController else {
+            return nil
+        }
+        
         configureMainViewController(mainViewController, at: index) { [weak self] in
             guard let self else { return }
             pages.insert(mainViewController, at: index)
@@ -110,6 +120,8 @@ class PageViewController: UIPageViewController {
     private func configureMainViewController(_ mainViewController: MainViewController, at index: Int, completion: @escaping () -> Void) {
         mainView = MainView(frame: self.view.bounds, weather: cities[index])
         mainView?.delegate = mainViewController
+        mainView?.tableView.refreshControl = UIRefreshControl()
+        mainView?.tableView.refreshControl?.addTarget(self, action: #selector(refreshWeatherData), for: .valueChanged)
         mainViewController.weather = cities[index]
         mainViewController.view = mainView
         completion()
@@ -127,10 +139,12 @@ class PageViewController: UIPageViewController {
     func updateCurrentPage(with weather: Weather, at index: Int) {
         cities[index] = weather
         let currentViewController = pages[index]
-        configureMainViewController(currentViewController, at: index) { [weak self] in
-            guard let self else { return }
-            pages[index] = currentViewController
-            setViewControllers([currentViewController], direction: .forward, animated: false)
+        configureMainViewController(currentViewController, at: index) {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                pages[index] = currentViewController
+                self.setViewControllers([currentViewController], direction: .forward, animated: false)
+            }
         }
     }
     
@@ -149,23 +163,66 @@ class PageViewController: UIPageViewController {
             pages.insert(mainViewController, at: indexToInsert)
             pageControl.numberOfPages = cities.count + 1
             pageControl.currentPage = cities.count - 1
-            setViewControllers([mainViewController], direction: .forward, animated: false)
-            updateDelegate?.updateTitle(with: city)
+            DispatchQueue.main.async {
+                self.setViewControllers([mainViewController], direction: .forward, animated: false)
+                self.updateDelegate?.updateTitle(with: city)
+            }
         }
     }
     
-    func reloadPages(cities: [Weather]) {
+    func restart(cities: [Weather], at index: Int) {
         self.cities = cities
-        DispatchQueue.main.async {
-            // перезагрузить pageViewController
+        for childViewController in children {
+            childViewController.removeFromParent()
+            childViewController.view.removeFromSuperview()
         }
+        pages.removeAll()
+        isLastPageAdded = false
+        pageControl.numberOfPages = cities.count + 1
+        pageControl.currentPage = index
+        setupView(at: index)
+        updateDelegate?.updateCurrentPage(with: cities[index], at: index)
+    }
+    
+    func removeCurrentPage() {
+        
+        let index = pageControl.currentPage
+        let weather = cities[index]
+        let currentViewController = pages[index]
+        
+        guard index >= 0,
+              cities.count > 1,
+              index < cities.count,
+              let currentLocationName = weather.locationName
+        else {
+            return
+        }
+
+        pages.remove(at: index)
+        cities.remove(at: index)
+        pages[index].cities = cities
+        
+        CoreDataService.shared.removeCurrentWeather(locationName: currentLocationName)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            pageControl.numberOfPages = cities.count + 1
+            pageControl.currentPage = index - 1
+            setViewControllers([pages[index-1]], direction: .forward, animated: false)
+            updateDelegate?.updateCurrentPage(with: cities[index-1], at: index-1)
+        }
+    }
+    
+    @objc private func refreshWeatherData() {
+        guard pageControl.currentPage < cities.count else { return }
+        mainView?.tableView.reloadData()
+        updateDelegate?.refreshWeatherData(with: cities[pageControl.currentPage], at: pageControl.currentPage)
     }
 }
 
 extension PageViewController: UIPageViewControllerDataSource {
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         guard let currentIndex = cities.firstIndex(where: { $0 === (viewController as? MainViewController)?.weather }),
-              currentIndex > 0 
+              currentIndex > 0
         else {
             return nil
         }
@@ -176,7 +233,7 @@ extension PageViewController: UIPageViewControllerDataSource {
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
         guard let currentIndex = cities.firstIndex(where: { $0 === (viewController as? MainViewController)?.weather }),
-              currentIndex < cities.count 
+              currentIndex < cities.count
         else {
             return nil
         }
@@ -194,17 +251,21 @@ extension PageViewController: UIPageViewControllerDataSource {
 extension PageViewController: UIPageViewControllerDelegate {
     
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+        
         guard let currentViewController = pageViewController.viewControllers?.first as? MainViewController,
               let weather = currentViewController.weather,
-              let currentIndex = cities.firstIndex(where: { $0 === weather }) else {
+              let currentIndex = cities.firstIndex(where: { $0 === weather })
+        else {
             pageControl.currentPage = pages.count
             isLastPageAdded = true
             updateDelegate?.removeTitle()
             return
         }
-        
-        pageControl.currentPage = currentIndex
-        updateDelegate?.updateCurrentPage(with: weather, at: currentIndex)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            pageControl.currentPage = currentIndex
+            updateDelegate?.updateCurrentPage(with: weather, at: currentIndex)
+        }
     }
 }
 

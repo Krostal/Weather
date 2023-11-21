@@ -13,10 +13,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let appCoordinator = AppCoordinator.shared
         appCoordinator.startApp { [weak self] rootViewController in
-            guard let self else { return }
+            guard let self, let window = window else { return }
             DispatchQueue.main.async {
-                self.window?.rootViewController = rootViewController
-                self.window?.makeKeyAndVisible()
+                window.rootViewController = rootViewController
+                window.makeKeyAndVisible()
             }
         }
     }
