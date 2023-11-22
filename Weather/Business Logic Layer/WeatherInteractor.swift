@@ -472,7 +472,6 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                 
                 let astronomyCoreDataModel = Astronomy(context: self.context)
                 astronomyCoreDataModel.start = astronomy.meta.start
-                astronomyCoreDataModel.timeZone = locationService.placeTimeZone
                 
                 let forecast = astronomy.data
                 for dailyData in forecast {

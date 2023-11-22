@@ -300,14 +300,13 @@ final class CurrentTableViewCell: UITableViewCell {
         }
         if let sunrise = forecast.first?.sunrise,
            let sunset = forecast.first?.sunset {
-            
             switch units.timeFormat {
             case .twelveHour:
-                sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "hh:mm", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
-                sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "hh:mm", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
+                sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "hh:mm", locale: nil, timeZone: TimeZone(identifier: model.weather?.timeZone ?? ""))
+                sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "hh:mm", locale: nil, timeZone: TimeZone(identifier: model.weather?.timeZone ?? ""))
             case .twentyFourHour:
-                sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
-                sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil, timeZone: TimeZone(identifier: model.timeZone ?? ""))
+                sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil, timeZone: TimeZone(identifier: model.weather?.timeZone ?? ""))
+                sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil, timeZone: TimeZone(identifier: model.weather?.timeZone ?? ""))
             }
         }
     }
@@ -355,3 +354,4 @@ extension CurrentTableViewCell: Configurable {
         humidityLabel.text = "\(timePeriod.instantData.relativeHumidity)%"
     }
 }
+
