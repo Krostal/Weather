@@ -56,7 +56,7 @@ extension DatesCollectionViewCell: Configurable {
             return
         }
         let dateKey = dateKeys[index]
-        dateLabel.text = CustomDateFormatter().formattedDateToString(date: dateKey, dateFormat: "dd.MM E", locale: Locale(identifier: "ru_RU"))
+        dateLabel.text = CustomDateFormatter().formattedDateToString(date: dateKey, dateFormat: "dd.MM E", locale: Locale(identifier: "ru_RU"), timeZone: TimeZone(identifier: timePeriod.timeZone ?? ""))
     }
 }
 

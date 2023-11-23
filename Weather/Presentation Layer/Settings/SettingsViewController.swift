@@ -4,11 +4,12 @@ import UIKit
 
 protocol SettingsViewControllerDelegate: AnyObject {
     func updatedSettings()
+    func deleteButtonPressed()
 }
 
 final class SettingsViewController: UIViewController {
     
-    private lazy var settingsView = SettingsView()
+    lazy var settingsView = SettingsView()
     
     weak var delegate: SettingsViewControllerDelegate?
     
@@ -20,6 +21,13 @@ final class SettingsViewController: UIViewController {
 }
 
 extension SettingsViewController: SettingsViewDelegate {
+    
+    func deleteButtonTapped() {
+        delegate?.deleteButtonPressed()
+        
+        self.dismiss(animated: true, completion: nil)
+    }
+    
     func setUnits(temperatureUnit: String, windSpeedUnit: String, timeFormat: String, precipitationUnit: String) {
         
         SettingsManager.shared.settings = Settings(

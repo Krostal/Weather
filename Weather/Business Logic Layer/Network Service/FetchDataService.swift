@@ -105,7 +105,7 @@ final class FetchDataService: Decodable {
             return
         }
         
-        let endDate = CustomDateFormatter().formattedDateToString(date: maxDay, dateFormat: "yyyy-MM-dd", locale: nil)
+        let endDate = CustomDateFormatter().formattedDateToString(date: maxDay, dateFormat: "yyyy-MM-dd", locale: nil, timeZone: nil)
         
         let urlString = API.sunAndMoonURL(latitude: coordinates.latitude, longitude: coordinates.longitude, endDate: endDate)
         

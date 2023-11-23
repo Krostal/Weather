@@ -404,7 +404,7 @@ extension HourlyForecastTableViewCell: Configurable {
             precipitationAmountLabel.text = UnitsFormatter.millimeters.format(timePeriod.next1HoursForecast.precipitationAmount)
         }
         
-        dateLabel.text = CustomDateFormatter().formattedStringToString(date: timePeriod.timeStringFullInUTC, dateFormat: "EEEE, d MMMM yyyy", locale: Locale(identifier: "ru_RU"))
+        dateLabel.text = CustomDateFormatter().formattedStringToString(date: timePeriod.timeStringFullInUTC, dateFormat: "EEEE, d MMMM yyyy", locale: Locale(identifier: "ru_RU"), timeZone: TimeZone(identifier: timePeriod.timeZone ?? ""))
         weatherIcon.image = UIImage(named: timePeriod.next1HoursForecast.symbolCode ?? "xmark.icloud")
         weatherLabel.text = CurrentWeatherDescription(symbolCode: timePeriod.next1HoursForecast.symbolCode ?? "cloud")?.description
         relativeHumidityLabel.text = "\(timePeriod.instantData.relativeHumidity)%"

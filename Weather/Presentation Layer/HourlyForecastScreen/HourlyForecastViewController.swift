@@ -6,12 +6,12 @@ final class HourlyForecastViewController: UIViewController {
     
     private var hourlyForecastView: HourlyForecastView?
     private let headerTitle: String
-    private let weatherModel: Weather
+    private let weather: Weather
     private var selectedHour: Int?
     
-    init(headerTitle: String, weatherModel: Weather, selectedHour: Int?) {
+    init(headerTitle: String, weather: Weather, selectedHour: Int?) {
         self.headerTitle = headerTitle
-        self.weatherModel = weatherModel
+        self.weather = weather
         self.selectedHour = selectedHour
         super.init(nibName: nil, bundle: nil)
     }
@@ -27,7 +27,7 @@ final class HourlyForecastViewController: UIViewController {
     }
     
     private func setupView() {
-        hourlyForecastView = HourlyForecastView(frame: self.view.bounds, weather: weatherModel, headerTitle: headerTitle, selectedHour: selectedHour)
+        hourlyForecastView = HourlyForecastView(frame: self.view.bounds, weather: weather, headerTitle: headerTitle, selectedHour: selectedHour)
         view = hourlyForecastView
         hourlyForecastView?.scrollToRow()
         }

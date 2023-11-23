@@ -7,14 +7,16 @@ struct DailyTimePeriod {
     private let dateFormatter = CustomDateFormatter()
         
     var dailyForecast: [Date: [TimePeriod]]
+    var timeZone: String?
     
     init() {
         self.dailyForecast = [:]
     }
         
-    init?(model: Weather) {
+    init?(weather: Weather) {
         self.dailyForecast = [:]
-        guard let timePeriodSet = model.timePeriod,
+        guard let weatherData = weather.weatherData,
+              let timePeriodSet = weatherData.timePeriod,
               let timePeriod = Array(timePeriodSet) as? [TimePeriod]
         else {
             return nil
@@ -22,6 +24,8 @@ struct DailyTimePeriod {
         
         let filteredTimePeriod = filterAndFormatTimePeriods(timePeriod)
         self.dailyForecast = groupTimePeriodsByDay(filteredTimePeriod)
+        self.timeZone = weather.timeZone
+        
     }
         
     private func filterAndFormatTimePeriods(_ timePeriod: [TimePeriod]) -> [TimePeriod] {
@@ -29,8 +33,8 @@ struct DailyTimePeriod {
         let timePeriodForNextDays = timePeriod.filter {
             if let time = $0.time {
                 if let savedTime = ISO8601DateFormatter().date(from: time) {
-                    let formattedTime = dateFormatter.formattedDateToString(date: savedTime, dateFormat: "yyyy-MM-dd", locale: nil)
-                    return dateFormatter.formattedDateToString(date: Date(), dateFormat: "yyyy-MM-dd", locale: nil) != formattedTime
+                    let formattedTime = dateFormatter.formattedDateToString(date: savedTime, dateFormat: "yyyy-MM-dd", locale: nil, timeZone: TimeZone(identifier: timeZone ?? ""))
+                    return dateFormatter.formattedDateToString(date: Date(), dateFormat: "yyyy-MM-dd", locale: nil, timeZone: TimeZone(identifier: timeZone ?? "")) != formattedTime
                 }
             }
             return true
@@ -38,7 +42,7 @@ struct DailyTimePeriod {
         
         let forecast = timePeriodForNextDays.filter {
             if let time = $0.time,
-               let _ = dateFormatter.fromStringInCurrentTimeZoneToStringInUTC(date: time) {
+               let _ = dateFormatter.fromStringInCurrentTimeZoneToStringInUTC(date: time, timeZone: TimeZone(identifier: timeZone ?? "")) {
                 return true
             }
             return true

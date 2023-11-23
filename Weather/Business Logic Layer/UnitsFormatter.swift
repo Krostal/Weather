@@ -19,7 +19,7 @@ enum UnitsFormatter {
             case .fahrenheit:
                 return "\(Int(round(value * 9/5 + 32)))F"
             case .celsius:
-                return "\(value)°"
+                return "\(Int(round(value)))°"
             case .metersPerSecond:
                 return "\(value) м/с"
             case .milesPerHour:

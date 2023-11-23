@@ -2,7 +2,7 @@
 
 import Foundation
 
-class SettingsManager {
+final class SettingsManager {
     static let shared = SettingsManager()
     
     let userDefaults = UserDefaults.standard

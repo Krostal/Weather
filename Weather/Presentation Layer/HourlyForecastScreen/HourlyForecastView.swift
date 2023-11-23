@@ -108,7 +108,7 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
             tempChartCell.selectionStyle = .none
             tempChartCell.temperatureChartView.weather = weather
             
-            let threeHoursForecast = HourlyTimePeriod.createForEveryThirdIndex(from: weather)
+            let threeHoursForecast = HourlyTimePeriod.createForEveryThirdIndex(weather: weather)
 
             tempChartCell.setupChartData(timePeriod: threeHoursForecast, units: settings)
 
@@ -119,7 +119,7 @@ extension HourlyForecastView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             
-            hourlyTimePeriod = HourlyTimePeriod(model: weather, index: indexPath.row)
+            hourlyTimePeriod = HourlyTimePeriod(weather: weather, index: indexPath.row)
             
             if let timePeriod = hourlyTimePeriod {
                 hourlyForecastCell.configure(with: timePeriod, units: settings, at: indexPath.row)

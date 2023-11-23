@@ -26,19 +26,67 @@ final class CoreDataService {
         persistentContainer.viewContext
     }
     
-    func isWeatherAlreadyExist(updatedAt: String, locationName: String) -> Bool {
+    func getWeatherData(locationName: String) -> Weather? {
         let request: NSFetchRequest<Weather> = Weather.fetchRequest()
-        request.predicate = NSPredicate(format: "location.name == %@", locationName)
+        let predicate = NSPredicate(format: "locationName == %@", locationName)
+        request.predicate = predicate
+        
+        do {
+            let results = try setContext().fetch(request)
+            return results.first
+        } catch {
+            print("Error fetching weather data: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    func getWeather() -> [Weather] {
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        
+        do {
+            let results = try setContext().fetch(request)
+            return results
+        } catch {
+            print("Error fetching weather data: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    func removeCurrentWeather(locationName: String) {
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        let predicate = NSPredicate(format: "locationName == %@", locationName)
+        request.predicate = predicate
+        do {
+            let results = try setContext().fetch(request)
+            if let existingWeather = results.first {
+                setContext().delete(existingWeather)
+                print("Существующая модель Weather для локации \(locationName) удалена")
+                do {
+                    try setContext().save()
+                } catch {
+                    print("Error saving context after deleting Weather model: \(error.localizedDescription)")
+                }
+            }
+        } catch {
+            print("Error checking existing weather data: \(error.localizedDescription)")
+        }
+    }
+
+    
+    func isWeatherDataAlreadyExist(updatedAt: String, locationName: String) -> Bool {
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        request.predicate = NSPredicate(format: "locationName == %@", locationName)
 
         do {
             let result = try setContext().fetch(request)
 
-            if let existingWeather = result.first {
-                if existingWeather.updatedAt == updatedAt {
+            if let existingWeather = result.first,
+               let weatherData = existingWeather.weatherData {
+                if weatherData.updatedAt == updatedAt {
                     return true
                 } else {
-                    setContext().delete(existingWeather)
-                    print("Существующая модель Weather для данной локации \(locationName) удалена")
+                    setContext().delete(weatherData)
+                    print("Существующая модель WeatherData для локации \(locationName) удалена")
                     do {
                         try setContext().save()
                     } catch {
@@ -55,14 +103,15 @@ final class CoreDataService {
     }
     
     func deleteExistingAirQualityModel(locationName: String) {
-        let request: NSFetchRequest<AirQuality> = AirQuality.fetchRequest()
-        request.predicate = NSPredicate(format: "coordinates.city == %@", locationName)
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
+        request.predicate = NSPredicate(format: "locationName == %@", locationName)
 
         do {
             let result = try setContext().fetch(request)
 
-            if let existingAirQualityModel = result.first {
-                setContext().delete(existingAirQualityModel)
+            if let existingWeather = result.first,
+               let airQuality = existingWeather.airQuality {
+                setContext().delete(airQuality)
                 print("Существующая модель AirQuality для данной локации \(locationName) удалена")
                 do {
                     try setContext().save()
@@ -75,24 +124,20 @@ final class CoreDataService {
         }
     }
     
-    
     func isAstronomyDataAlreadyExist(start: String, locationName: String) -> Bool {
-        let request: NSFetchRequest<Astronomy> = Astronomy.fetchRequest()
+        let request: NSFetchRequest<Weather> = Weather.fetchRequest()
         request.predicate = NSPredicate(format: "locationName == %@", locationName)
 
         do {
             let result = try setContext().fetch(request)
             
-            if result.count <= 1 {
-                 return false
-            }
-
-            if let existingAstronomy = result.first,
-               let startDate = existingAstronomy.start {
+            if let existingWeather = result.first,
+               let astronomy = existingWeather.astronomy,
+               let startDate = astronomy.start {
                 if startDate.prefix(10) == start {
                     return true
                 } else {
-                    setContext().delete(existingAstronomy)
+                    setContext().delete(astronomy)
                     print("Существующая модель Astronomy для данной локации \(locationName) удалена")
                     do {
                         try setContext().save()

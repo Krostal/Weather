@@ -15,15 +15,13 @@ final class DailyForecastView: UIView {
     
     weak var delegate: DailyForecastViewDelegate?
     
+    private let weather: Weather
     private let dailyTimePeriod: DailyTimePeriod
     private var dateIndex: Int
     private var selectedDate: Date
-    private let airQuality: AirQuality
-    private let astronomy: Astronomy?
     private var settings = SettingsManager.shared.settings
     
     private var numberOfSections: Int = 0
-    
     var headerTitle: String?
     
     lazy var tableView: UITableView = {
@@ -40,12 +38,11 @@ final class DailyForecastView: UIView {
         return tableView
     }()
     
-    init(frame: CGRect, dailyTimePeriod: DailyTimePeriod, dateIndex: Int, selectedDate: Date, airQuality: AirQuality, astronomy: Astronomy?) {
+    init(frame: CGRect, weather: Weather, dailyTimePeriod: DailyTimePeriod, dateIndex: Int, selectedDate: Date) {
+        self.weather = weather
         self.dailyTimePeriod = dailyTimePeriod
         self.dateIndex = dateIndex
         self.selectedDate = selectedDate
-        self.airQuality = airQuality
-        self.astronomy = astronomy
         super.init(frame: frame)
         setupView()
         addSubviews()
@@ -84,11 +81,11 @@ final class DailyForecastView: UIView {
     }
     
     private func calculateNumberOfSections(){
-        let selectedDay = CustomDateFormatter().formattedDateToString(date: selectedDate, dateFormat: "yyyy-MM-dd", locale: nil)
+        let selectedDay = CustomDateFormatter().formattedDateToString(date: selectedDate, dateFormat: "yyyy-MM-dd", locale: nil, timeZone: TimeZone(identifier: weather.timeZone ?? ""))
         
         var count: Int = 0
         for (date, timePeriods) in dailyTimePeriod.dailyForecast {
-            let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "yyyy-MM-dd", locale: nil)
+            let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "yyyy-MM-dd", locale: nil, timeZone: TimeZone(identifier: weather.timeZone ?? ""))
             if dateString == selectedDay {
                 count += timePeriods.count
             }
@@ -96,9 +93,6 @@ final class DailyForecastView: UIView {
         numberOfSections = count + 3
     }
     
-    private func updateViewWithSelectedDate() {
-        
-    }
 }
 
 extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
@@ -131,7 +125,7 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
             }
             sunAndMoonCell.selectionStyle = .none
             sunAndMoonCell.dateIndex = dateIndex
-            if let astronomyModel = astronomy {
+            if let astronomyModel = weather.astronomy {
                 sunAndMoonCell.astronomy = astronomyModel
                 sunAndMoonCell.configure(with: astronomyModel, units: settings, at: dateIndex)
             }
@@ -141,7 +135,9 @@ extension DailyForecastView: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             airQualityCell.selectionStyle = .none
-            airQualityCell.configure(with: airQuality, units: settings, at: dateIndex)
+            if let airQualityModel = weather.airQuality {
+                airQualityCell.configure(with: airQualityModel, units: settings, at: dateIndex)
+            }
             return airQualityCell
         } else {
             if indexPath.row == 0 {

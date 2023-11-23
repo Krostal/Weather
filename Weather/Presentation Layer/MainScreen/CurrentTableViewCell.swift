@@ -178,7 +178,6 @@ final class CurrentTableViewCell: UITableViewCell {
         sunriseTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         sunriseTimeLabel.font = .systemFont(ofSize: 14, weight: .semibold)
         sunriseTimeLabel.textColor = .white
-        sunriseTimeLabel.text = "05:45"
         return sunriseTimeLabel
     }()
     
@@ -194,7 +193,6 @@ final class CurrentTableViewCell: UITableViewCell {
         sunsetTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         sunsetTimeLabel.font = .systemFont(ofSize: 14, weight: .semibold)
         sunsetTimeLabel.textColor = .white
-        sunsetTimeLabel.text = "17:58"
         return sunsetTimeLabel
     }()
     
@@ -302,14 +300,13 @@ final class CurrentTableViewCell: UITableViewCell {
         }
         if let sunrise = forecast.first?.sunrise,
            let sunset = forecast.first?.sunset {
-            
             switch units.timeFormat {
             case .twelveHour:
-                sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "hh:mm", locale: nil)
-                sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "hh:mm", locale: nil)
+                sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "hh:mm", locale: nil, timeZone: TimeZone(identifier: model.weather?.timeZone ?? ""))
+                sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "hh:mm", locale: nil, timeZone: TimeZone(identifier: model.weather?.timeZone ?? ""))
             case .twentyFourHour:
-                sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil)
-                sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil)
+                sunriseTimeLabel.text = dateFormatter.formattedStringToString(date: sunrise, dateFormat: "HH:mm", locale: nil, timeZone: TimeZone(identifier: model.weather?.timeZone ?? ""))
+                sunsetTimeLabel.text = dateFormatter.formattedStringToString(date: sunset, dateFormat: "HH:mm", locale: nil, timeZone: TimeZone(identifier: model.weather?.timeZone ?? ""))
             }
         }
     }
@@ -336,9 +333,9 @@ extension CurrentTableViewCell: Configurable {
         
         switch units.timeFormat {
         case .twelveHour:
-            currentTimeLabel.text = dateFormatter.formattedCurrentDate(dateFormat: "hh:mm, E d MMMM", locale: Locale(identifier: "ru_RU"), timeZone: nil)
+            currentTimeLabel.text = dateFormatter.formattedCurrentDate(dateFormat: "hh:mm, E d MMMM", locale: Locale(identifier: "ru_RU"), timeZone: TimeZone(identifier: timePeriod.timeZone ?? ""))
         case .twentyFourHour:
-            currentTimeLabel.text = dateFormatter.formattedCurrentDate(dateFormat: "HH:mm, E d MMMM", locale: Locale(identifier: "ru_RU"), timeZone: nil)
+            currentTimeLabel.text = dateFormatter.formattedCurrentDate(dateFormat: "HH:mm, E d MMMM", locale: Locale(identifier: "ru_RU"), timeZone: TimeZone(identifier: timePeriod.timeZone ?? ""))
         }
         
         switch units.precipitationUnit {
@@ -357,3 +354,4 @@ extension CurrentTableViewCell: Configurable {
         humidityLabel.text = "\(timePeriod.instantData.relativeHumidity)%"
     }
 }
+

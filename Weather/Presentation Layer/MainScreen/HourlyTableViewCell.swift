@@ -73,7 +73,7 @@ extension HourlyTableViewCell: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         if let model = weather {
-            hourlyTimePeriod = HourlyTimePeriod(model: model, index: indexPath.item)
+            hourlyTimePeriod = HourlyTimePeriod(weather: model, index: indexPath.item)
             if let timePeriod = hourlyTimePeriod {
                 cell.configure(with: timePeriod, units: settings, at: indexPath.item)
                 

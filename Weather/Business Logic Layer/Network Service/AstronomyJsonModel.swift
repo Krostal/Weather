@@ -6,19 +6,19 @@ struct AstronomyJsonModel: Codable {
 }
 
 struct AstronomyEntry: Codable {
-    let astronomicalDawn: String
-    let astronomicalDusk: String
-    let civilDawn: String
-    let civilDusk: String
-    let moonFraction: Double
+    let astronomicalDawn: String?
+    let astronomicalDusk: String?
+    let civilDawn: String?
+    let civilDusk: String?
+    let moonFraction: Double?
     let moonPhase: MoonPhase
-    let moonrise: String
-    let moonset: String
-    let nauticalDawn: String
-    let nauticalDusk: String
-    let sunrise: String
-    let sunset: String
-    let time: String
+    let moonrise: String?
+    let moonset: String?
+    let nauticalDawn: String?
+    let nauticalDusk: String?
+    let sunrise: String?
+    let sunset: String?
+    let time: String?
 }
 
 struct MoonPhase: Codable {
@@ -27,9 +27,9 @@ struct MoonPhase: Codable {
 }
 
 struct MoonPhaseInfo: Codable {
-    let text: String
-    let time: String
-    let value: Double
+    let text: String?
+    let time: String?
+    let value: Double?
 }
 
 struct AstronomyMeta: Codable {

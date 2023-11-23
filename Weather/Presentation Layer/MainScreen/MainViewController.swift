@@ -2,26 +2,28 @@
 import UIKit
 import CoreData
 
+protocol MainViewControllerDelegate: AnyObject {
+    func showLocationSettings()
+}
+
 final class MainViewController: UIViewController {
     
-    private var mainView: MainView?
+    weak var delegate: MainViewControllerDelegate?
     
-    private var onboardingView: OnboardingView?
+    private let interactor: WeatherInteractorProtocol = WeatherInteractor()
     
-    private let interactor: WeatherInteractorProtocol = WeatherInteractor(fetchDataService: FetchDataService(), coreDataService: CoreDataService.shared, locationService: LocationService())
-    
-    private var weather: Weather?
-    private var astronomy: Astronomy?
+    var weather: Weather?
+    var pageViewController: PageViewController?
+
+    var cities: [Weather] = []
+    var isPageUpdated: Bool = false
+
+    var mainView: MainView?
+    var emptyView: EmptyView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if interactor.isDetermined() {
-            refreshWeatherData()
-        } else {
-            setupView()
-            fetchWeather()
-            fetchAirQuality()
-        }
+        configurePageViewController()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -31,59 +33,106 @@ final class MainViewController: UIViewController {
         navigationItem.backBarButtonItem = backButton
     }
     
-    private func setupView() {
-        
-        interactor.getWeatherFromCoreData(withPredicate: nil) { [weak self] weatherArray in
-            guard let self = self else { return }
-            if let model = weatherArray.last {
-                self.weather = model
-                guard let weatherModel = self.weather else { return }
-                interactor.fetchAstronomyFromNetwork { result in
-                    switch result {
-                    case .success(_ ):
-                        print("Астрономические данные успешно получены")
-                        self.interactor.getAstronomyFromCoreData(withPredicate: nil) { astronomyArray in
-                            if let model = astronomyArray.last {
-                                self.astronomy = model
-                                print ("Астрономическая модель загружена из CoreData")
-                                DispatchQueue.main.async {
-                                    self.createAndShowMainView(withWeather: weatherModel, astronomy: self.astronomy)
-                                }
-                            } else {
-                                print("в CoreData отсутствует модель Astronomy")
-                                DispatchQueue.main.async {
-                                    self.createAndShowMainView(withWeather: weatherModel, astronomy: self.astronomy)
-                                }
-                            }
-                        }
-                    case .failure(let error):
-                        print("Astronomy error \(error.localizedDescription)")
-                        
-                        DispatchQueue.main.async {
-                            self.createAndShowMainView(withWeather: weatherModel, astronomy: self.astronomy)
-                        }
+    private func configurePageViewController() {
+        if interactor.isAuthorizedToUseLocation() {
+            fetchAndShowWeatherForCurrentLocation()
+        } else {
+            fetchAndShowExistingWeatherData()
+        }
+    }
+    
+    private func fetchAndShowWeatherForCurrentLocation() {
+        interactor.fetchWeatherFromNetwork { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(_ ):
+                interactor.getCitiesWithWeatherData { cities in
+                    self.cities = cities
+                    DispatchQueue.main.async {
+                        self.createNewPageViewController()
                     }
                 }
-            } else {
-                self.onboardingView = OnboardingView()
-                self.onboardingView?.delegate = self
-                DispatchQueue.main.async {
-                    self.view = self.onboardingView
-                }
+            case .failure(let error):
+                print("FetchWeather error \(error.localizedDescription)")
             }
         }
     }
     
-    private func createAndShowMainView(withWeather weather: Weather, astronomy: Astronomy?) {
-        mainView = MainView(frame: self.view.bounds, weather: weather, astronomy: astronomy)
-        mainView?.delegate = self
-        mainView?.tableView.refreshControl = UIRefreshControl()
-        mainView?.tableView.refreshControl?.addTarget(self, action: #selector(self.refreshWeatherData), for: .valueChanged)
-        view = self.mainView
-        setupNavigationBar()
+    private func fetchAndShowExistingWeatherData() {
+        interactor.getCitiesWithWeatherData { [weak self] cities in
+            guard let self else { return }
+            self.cities = cities
+            DispatchQueue.main.async {
+                self.createNewPageViewController()
+            }
+        }
     }
     
-    private func setupNavigationBar() {
+    private func fetchWeatherForCurrentPage(with weather: Weather, at index: Int) {
+        guard let pageViewController = pageViewController else { return }
+        if !isPageUpdated {
+            interactor.updateWeatherInCoreData(coordinates: (latitude: weather.latitude, longitude: weather.longitude), locationName: weather.locationName) { [weak self] result in
+                guard let self, !cities.isEmpty else { return }
+                switch result {
+                case .success(let updatedWeather):
+                    cities[index] = updatedWeather
+                    isPageUpdated = true
+                    DispatchQueue.main.async {
+                        pageViewController.pages[index].mainView?.tableView.reloadData()
+                        pageViewController.updateCurrentPage(with: updatedWeather, at: index)
+                    }
+                case .failure(let error):
+                    print("FetchWeather error \(error.localizedDescription)")
+                }
+            }
+        } else {
+            DispatchQueue.main.async {
+                pageViewController.pages[index].mainView?.tableView.reloadData()
+                pageViewController.updateCurrentPage(with: weather, at: index)
+                print("Страница уже была обновлена")
+            }
+        }
+    }
+    
+    private func refreshWeather(with weather: Weather, at index: Int) {
+        guard let pageViewController = pageViewController else { return }
+ 
+        interactor.updateWeatherInCoreData(coordinates: (latitude: weather.latitude, longitude: weather.longitude), locationName: weather.locationName) { [weak self] result in
+            guard let self, !cities.isEmpty, index < cities.count 
+            else {
+                pageViewController.mainView?.tableView.refreshControl?.endRefreshing()
+                return
+            }
+            switch result {
+            case .success(let updatedWeather):
+                cities[index] = updatedWeather
+                isPageUpdated = true
+                DispatchQueue.main.async {
+                    pageViewController.pages[index].mainView?.tableView.reloadData()
+                    pageViewController.updateCurrentPage(with: updatedWeather, at: index)
+                }
+            case .failure(let error):
+                print("FetchWeather error \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func createNewPageViewController() {
+        let newPageViewController = PageViewController(cities: cities)
+        newPageViewController.updateDelegate = self
+        addChild(newPageViewController)
+        didMove(toParent: self)
+        view.addSubview(newPageViewController.view)
+        pageViewController = newPageViewController
+        setupNavigationBar()
+        if !cities.isEmpty {
+            updateTitle(with: cities[0].locationName)
+        } else {
+            navigationItem.title = "Добавьте локацию"
+        }
+    }
+    
+    func setupNavigationBar() {
         
         let settingsBarButton = UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: #selector(showSettings))
         let locationBarButton = UIBarButtonItem(image: UIImage(systemName: "location"), style: .plain, target: self, action: #selector(showLocation))
@@ -94,211 +143,140 @@ final class MainViewController: UIViewController {
         navigationItem.leftBarButtonItem?.tintColor = .black
         navigationItem.rightBarButtonItem?.tintColor = .black
         
-        updateNavigationBarTitle()
     }
     
-    private func updateNavigationBarTitle() {
-        if let weatherModel = self.weather {
-            if let locationName = weatherModel.location?.name {
-                DispatchQueue.main.async {
-                    self.navigationItem.title = locationName
-                }
-            }
-        } else {
-            interactor.getWeatherFromCoreData(withPredicate: nil) { [weak self] weatherArray in
-                guard let self else { return }
-                if let weather = weatherArray.last {
-                    if let locationName = weather.location?.name {
-                        DispatchQueue.main.async {
-                            self.navigationItem.title = locationName
-                        }
-                    }
-                } else {
-                    print ("Ошибка получения модели Weather")
-                }
-            }
+    private func updateTitle(with locationName: String?) {
+        if let location = locationName {
+            navigationItem.title = location
         }
     }
     
-    private func fetchWeather() {
-        guard let mainView else { return }
-        mainView.tableView.refreshControl?.beginRefreshing()
-        interactor.fetchWeatherFromNetwork { [weak self] result in
-            guard let self = self else { return }
-//            fetchAstronomy()
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_ ):
-                    mainView.tableView.refreshControl?.endRefreshing()
-                    self.updateNavigationBarTitle()
-                case .failure(let error):
-                    print("FetchWeather error \(error.localizedDescription)")
-                    mainView.tableView.refreshControl?.endRefreshing()
-                }
-            }
-        }
-    }
-    
-    private func fetchAirQuality() {
-        interactor.fetchAirQualityFromNetwork { result in
-            switch result {
-            case .success(_ ):
-                print("Данные о качестве воздуха успешно получены")
-            case .failure(let error):
-                print("AirQuality error \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    private func fetchAstronomy() {
-        interactor.fetchAstronomyFromNetwork { result in
-            switch result {
-            case .success(_ ):
-                print("Астрономические данные успешно получены")
-            case .failure(let error):
-                print("Astronomy error \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    private func checkLocationPermission() {
-        interactor.checkPermission { [weak self] isAuthorized in
-            guard let self else { return }
-            if isAuthorized {
-                DispatchQueue.main.async {
-                    self.fetchWeather()
-                }
-            } else {
-                self.mainView?.tableView.refreshControl?.endRefreshing()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    self.showLocationServicesAlert(message: "Для использования местоположения необходимо разрешение. Пожалуйста, разрешите в настройках приложения.")
-                }
-            }
-        }
-    }
-    
-    func showLocationServicesAlert(message: String) {
-        let alertController = UIAlertController(
-            title: "Разрешение местоположения",
-            message: message,
-            preferredStyle: .alert
-        )
-
-        let settingsAction = UIAlertAction(
-            title: "Настройки приложения",
-            style: .default
-        ) { _ in
-            if let bundleIdentifier = Bundle.main.bundleIdentifier, let settingsURL = URL(string: UIApplication.openSettingsURLString + bundleIdentifier) {
-                UIApplication.shared.open(settingsURL, options: [:], completionHandler: nil)
-            }
-        }
-
-        let cancelAction = UIAlertAction(
-            title: "Отмена",
-            style: .cancel
-        )
-
-        alertController.addAction(settingsAction)
-        alertController.addAction(cancelAction)
-
-        present(alertController, animated: true, completion: nil)
-    }
-    
-    func showLocationSettingsAlert(message: String) {
-        let alertController = UIAlertController(
-            title: "Настройки геолокации",
-            message: message,
-            preferredStyle: .alert
-        )
-
-        let settingsAction = UIAlertAction(
-            title: "Настройки",
-            style: .default
-        ) { _ in
-            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(settingsURL)
-            }
-        }
-
-        let cancelAction = UIAlertAction(
-            title: "Отмена",
-            style: .cancel
-        )
-
-        alertController.addAction(settingsAction)
-        alertController.addAction(cancelAction)
-
-        present(alertController, animated: true, completion: nil)
-    }
-    
-    @objc private func refreshWeatherData() {
-        checkLocationPermission()
-        fetchAirQuality()
-        interactor.fetchWeatherFromNetwork { [weak self] result in
-            guard let self = self else { return }
-//            fetchAstronomy()
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_ ):
-                    self.mainView?.tableView.reloadData()
-                    self.setupView()
-                    self.updateNavigationBarTitle()
-                case .failure(let error):
-                    print("FetchWeather error \(error.localizedDescription)")
-                }
-            }
-        }
+    private func showSearchBar() {
+        let searchLocationViewController = SearchLocationViewController()
+        searchLocationViewController.delegate = self
+        navigationController?.modalPresentationStyle = .fullScreen
+        navigationController?.modalTransitionStyle = .coverVertical
+        navigationController?.present(searchLocationViewController, animated: true)
     }
     
     @objc private func showSettings(_ sender: UIBarButtonItem) {
         let settingsViewController = SettingsViewController()
         settingsViewController.delegate = self
+        if let cities = pageViewController?.cities {
+            if cities.count < 2 {
+                settingsViewController.settingsView.deleteButton.isHidden = true
+            }
+        }
         navigationController?.modalPresentationStyle = .formSheet
         navigationController?.modalTransitionStyle = .flipHorizontal
         navigationController?.present(settingsViewController, animated: true)
     }
     
     @objc private func showLocation(_ sender: UIBarButtonItem) {
-        let onboardingViewController = OnboardingViewController()
-        navigationController?.modalPresentationStyle = .automatic
-        navigationController?.modalTransitionStyle = .coverVertical
-        navigationController?.present(onboardingViewController, animated: true)
+        delegate?.showLocationSettings()
     }
 }
 
 extension MainViewController: MainViewDelegate {
     func showHourlyForecast(with selectedHour: Int?) {
-        guard let weatherModel = self.weather else { return }
-        let hourlyForecastViewController = HourlyForecastViewController(headerTitle: navigationItem.title ?? "", weatherModel: weatherModel, selectedHour: selectedHour ?? 0)
+        guard let weatherModel = self.weather else {
+            return
+        }
+        let hourlyForecastViewController = HourlyForecastViewController(headerTitle: weatherModel.locationName ?? "", weather: weatherModel, selectedHour: selectedHour ?? 0)
         navigationController?.pushViewController(hourlyForecastViewController, animated: true)
     }
     
-    func showDailyForecast(forDate date: Date, dateIndex: Int, astronomy: Astronomy?) {
-        guard let weather = weather,
-              let dailyTimePeriod = DailyTimePeriod(model: weather)
+    func showDailyForecast(forDate date: Date, dateIndex: Int) {
+        guard let weatherModel = weather,
+              let dailyTimePeriod = DailyTimePeriod(weather: weatherModel)
         else {
             return
         }
         
-        let dailyForecastViewController = DailyForecastViewController(dailyTimePeriod: dailyTimePeriod, astronomy: astronomy, dateIndex: dateIndex, selectedDate: date)
-        let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"))
+        let dailyForecastViewController = DailyForecastViewController(weather: weatherModel, dailyTimePeriod: dailyTimePeriod, dateIndex: dateIndex, selectedDate: date)
+        let dateString = CustomDateFormatter().formattedDateToString(date: date, dateFormat: "dd MMMM, EEEE", locale: Locale(identifier: "ru_RU"), timeZone: TimeZone(identifier: weather?.timeZone ?? ""))
         dailyForecastViewController.navigationItem.title = dateString
         
-        dailyForecastViewController.headerTitle = navigationItem.title
+        dailyForecastViewController.headerTitle = weatherModel.locationName
     
         navigationController?.pushViewController(dailyForecastViewController, animated: true)
     }
 
 }
 
-extension MainViewController: OnboardingViewDelegate {
-    func requestLocationWhenInUseAuthorization() {
-        self.refreshWeatherData()
+extension MainViewController: EmptyViewDelegate {
+    func addLocationAction() {
+        showSearchBar()
     }
 }
 
 extension MainViewController: SettingsViewControllerDelegate {
+    
     func updatedSettings() {
-        self.refreshWeatherData()
+        guard let pageViewController = pageViewController else { return }
+        let index = pageViewController.pageControl.currentPage
+        DispatchQueue.main.async {
+            pageViewController.pages[index].mainView?.tableView.reloadData()
+            if let weather = pageViewController.pages[index].weather {
+                pageViewController.updateCurrentPage(with: weather, at: index)
+            }
+        }
+    }
+    
+    func deleteButtonPressed() {
+        pageViewController?.removeCurrentPage()
+    }
+}
+
+extension MainViewController: SearchLocationViewControllerDelegate {
+    
+    func fetchCoordinates(coordinates: (latitude: Double, longitude: Double)) {
+        interactor.updateCoordinates(with: coordinates)
+        interactor.fetchWeatherFromNetwork { [weak self] result in
+            guard let self,
+                  let pageViewController = pageViewController
+            else {
+                return
+            }
+            switch result {
+            case .success():
+                interactor.getWeatherFromCoreData { weatherArray in
+                    if let weather = weatherArray.first {
+                        if pageViewController.cities.isEmpty {
+                            DispatchQueue.main.async {
+                                self.isPageUpdated = true
+                                pageViewController.restart(cities: [weather], at: 0)
+                            }
+                        } else {
+                            DispatchQueue.main.async {
+                                pageViewController.newCityAdded(city: weather)
+                            }
+                        }
+                    }
+                }
+            case .failure(let error):
+                print("FetchWeather error \(error.localizedDescription)")
+            }
+        }
+    }
+}
+
+extension MainViewController: PageViewControllerUpdateDelegate {
+    
+    func removeTitle() {
+        updateTitle(with: "Добавьте локацию")
+    }
+    
+    func updateTitle(with weather: Weather) {
+        updateTitle(with: weather.locationName)
+    }
+    
+    func updateCurrentPage(with weather: Weather, at index: Int) {
+        updateTitle(with: weather.locationName)
+        fetchWeatherForCurrentPage(with: weather, at: index)
+    }
+    
+    func refreshWeatherData(with weather: Weather, at index: Int) {
+        refreshWeather(with: weather, at: index)
     }
 }

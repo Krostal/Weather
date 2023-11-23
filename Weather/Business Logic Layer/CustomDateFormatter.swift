@@ -13,17 +13,17 @@ struct CustomDateFormatter {
         return formattedDate
     }
     
-    func formattedDateToString(date: Date, dateFormat: String, locale: Locale?) -> String {
+    func formattedDateToString(date: Date, dateFormat: String, locale: Locale?, timeZone: TimeZone?) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = dateFormat
         dateFormatter.locale = locale
-        dateFormatter.timeZone = .current
+        dateFormatter.timeZone = timeZone
         return dateFormatter.string(from: date)
     }
     
-    func fromStringInCurrentTimeZoneToStringInUTC(date: String) -> String? {
+    func fromStringInCurrentTimeZoneToStringInUTC(date: String, timeZone: TimeZone?) -> String? {
         let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.timeZone =  TimeZone.current
+        dateFormatter.timeZone =  timeZone
         
         if let localDate = dateFormatter.date(from: date) {
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
@@ -32,7 +32,7 @@ struct CustomDateFormatter {
         return nil
     }
     
-    func formattedStringToString(date: String, dateFormat: String, locale: Locale?) -> String? {
+    func formattedStringToString(date: String, dateFormat: String, locale: Locale?, timeZone: TimeZone?) -> String? {
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.timeZone =  TimeZone.current
         
@@ -40,7 +40,7 @@ struct CustomDateFormatter {
             let secondDateFormatter = DateFormatter()
             secondDateFormatter.dateFormat = dateFormat
             secondDateFormatter.locale = locale
-            secondDateFormatter.timeZone = .current
+            secondDateFormatter.timeZone = timeZone
             let localDate = secondDateFormatter.string(from: utcDate)
             return localDate
         }

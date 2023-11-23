@@ -1,57 +1,87 @@
 
 
 import CoreLocation
+import MapKit
 
-class LocationService: NSObject {
+final class LocationService: NSObject {
+    
+    static let shared = LocationService()
     
     private let locationManager = CLLocationManager()
+    private var locationUpdateCallback: (() -> Void)?
+    private var locationIsDeterminedCallback: ((Bool) -> Void)?
+    
     private let geocoder = CLGeocoder()
-    private var currentLocation: CLLocation?
+    var currentLocation: CLLocation?
     var isLocationAuthorized: Bool = false
     var isDetermined: Bool = false
-    var currentCoordinates: (latitude: Double, longitude: Double)?    
+    var withCurrentLocation: Bool = true
+    var currentCoordinates: (latitude: Double, longitude: Double)?
+    var placeName: String?
+    var placeTimeZone: String?
     
-    override init() {
+    private override init() {
         super.init()
-        updateLocation()
+        locationManager.delegate = self
+        if withCurrentLocation {
+            locationManager.requestWhenInUseAuthorization()
+            locationManager.startUpdatingLocation()
+        }
     }
     
-    func updateLocation() {
-        locationManager.delegate = self
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
+    func startUpdatingLocation(callback: @escaping () -> Void) {
+        self.locationUpdateCallback = callback
     }
     
     func getLocationName(completion: @escaping (String?) -> Void) {
-        if let location = currentLocation {
-            geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
-                guard let placemark = placemarks?.first
-                else {
-                    return
-                }
-                if let error = error {
-                    print("Geocoding error \(error.localizedDescription)")
-                    completion(nil)
-                    return
-                }
-                
-                let placeName = "\(placemark.locality ?? ""), \(placemark.country ?? "")"
-                completion(placeName)
-            }
+        
+        guard let coordinates = currentCoordinates else {
+            completion(nil)
+            return
         }
+        
+        let location = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
+        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+            guard let placemark = placemarks?.first
+            else {
+                completion(nil)
+                return
+            }
+            if let error = error {
+                print("Geocoding error \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            let placeName = "\(placemark.locality ?? ""), \(placemark.country ?? "")"
+            self.placeName = placeName
+            
+            if let timeZone = placemark.timeZone?.identifier {
+                self.placeTimeZone = timeZone
+            }
+            
+            completion(placeName)
+        }
+    }
+    
+    func checkIsDetermined(completion: @escaping (Bool) -> Void) {
+        self.locationIsDeterminedCallback = completion
+        completion(isDetermined)
     }
 }
 
 extension LocationService: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if !locations.isEmpty, currentLocation == nil {
-            currentLocation = locations.first
+        if !locations.isEmpty {
             locationManager.stopUpdatingLocation()
             
-            if let currentPlace = currentLocation {
-                self.currentCoordinates = (currentPlace.coordinate.latitude, currentPlace.coordinate.longitude)
+            if let currentLocation = locations.first {
+                self.currentLocation = currentLocation
+                self.currentCoordinates = (currentLocation.coordinate.latitude, currentLocation.coordinate.longitude)
             }
+            
+            locationUpdateCallback?()
         }
     }
     
@@ -68,5 +98,8 @@ extension LocationService: CLLocationManagerDelegate {
         @unknown default:
             fatalError("Неизвестный статус разрешения использования местоположения")
         }
+        
+        locationIsDeterminedCallback?(isDetermined)
+        
     }
 }

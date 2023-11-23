@@ -3,7 +3,8 @@
 import UIKit
 
 protocol OnboardingViewDelegate: AnyObject {
-    func requestLocationWhenInUseAuthorization()
+    func locationAllowed()
+    func locationDenied()
 }
 
 final class OnboardingView: UIView {
@@ -54,7 +55,7 @@ final class OnboardingView: UIView {
         return choiceLabel
     }()
     
-    private lazy var agreeButton: UIButton = {
+    lazy var agreeButton: UIButton = {
         let agreeButton = UIButton(type: .system)
         agreeButton.translatesAutoresizingMaskIntoConstraints = false
         agreeButton.setTitle("ИСПОЛЬЗОВАТЬ МЕСТОПОЛОЖЕНИЕ УСТРОЙСТВА", for: .normal)
@@ -134,11 +135,12 @@ final class OnboardingView: UIView {
     }
     
     @objc func agreeButtonTapped() {
-        delegate?.requestLocationWhenInUseAuthorization()
+        delegate?.locationAllowed()
     }
     
     @objc func denyButtonTapped() {
-        
+        delegate?.locationDenied()
+    
     }
     
 }
