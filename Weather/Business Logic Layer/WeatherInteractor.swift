@@ -333,7 +333,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                         for dailyData in forecast {
                             let astronomyForecast = AstronomyForecast(context: self.context)
                             astronomyForecast.time = dailyData.time
-                            astronomyForecast.moonPhase = dailyData.moonPhase.current.value
+                            astronomyForecast.moonPhase = dailyData.moonPhase.current.value ?? Double(defaultValue)
                             astronomyForecast.moonrise = dailyData.moonrise
                             astronomyForecast.moonset = dailyData.moonset
                             astronomyForecast.sunrise = dailyData.sunrise
@@ -477,7 +477,7 @@ final class WeatherInteractor: WeatherInteractorProtocol {
                 for dailyData in forecast {
                     let astronomyForecast = AstronomyForecast(context: self.context)
                     astronomyForecast.time = dailyData.time
-                    astronomyForecast.moonPhase = dailyData.moonPhase.current.value
+                    astronomyForecast.moonPhase = dailyData.moonPhase.current.value ?? Double(defaultValue)
                     astronomyForecast.moonrise = dailyData.moonrise
                     astronomyForecast.moonset = dailyData.moonset
                     astronomyForecast.sunrise = dailyData.sunrise

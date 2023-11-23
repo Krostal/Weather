@@ -261,11 +261,8 @@ extension PageViewController: UIPageViewControllerDelegate {
             updateDelegate?.removeTitle()
             return
         }
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            pageControl.currentPage = currentIndex
-            updateDelegate?.updateCurrentPage(with: weather, at: currentIndex)
-        }
+        pageControl.currentPage = currentIndex
+        updateDelegate?.updateCurrentPage(with: weather, at: currentIndex)
     }
 }
 
